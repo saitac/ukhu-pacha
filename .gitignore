@@ -1,0 +1,14 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# .NET build artifacts
+bin/
+obj/
+
+# IDE-specific ignores
+.vs/
+.idea/
+
+# Mono/CoreCLR crash dumps
+mono_crash.*.json

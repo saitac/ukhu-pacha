@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://dduce4cwts817"]
+
+[ext_resource type="Script" uid="uid://ctjv7ecqc08v" path="res://player/Inca.cs" id="1_uj2a5"]
+[ext_resource type="Texture2D" uid="uid://dang3xic32wtb" path="res://player/sprites/walk-down-inca-01-apoyo.png" id="2_838od"]
+[ext_resource type="Texture2D" uid="uid://bk4da83xqw6go" path="res://player/sprites/walk-up-inca-01-apoyo.png" id="2_k0oro"]
+[ext_resource type="Texture2D" uid="uid://b48lst646ckk6" path="res://player/sprites/walk-up-inca-02-derecha.png" id="3_6pnd3"]
+[ext_resource type="Texture2D" uid="uid://vftl8hinhqxx" path="res://player/sprites/walk-down-inca-02-derecha.png" id="3_h36fx"]
+[ext_resource type="Texture2D" uid="uid://3yd2tgri0wi0" path="res://player/sprites/walk-down-inca-03-apoyo.png" id="4_0ru1k"]
+[ext_resource type="Texture2D" uid="uid://crstfisip1odl" path="res://player/sprites/walk-up-inca-03-apoyo.png" id="4_jc8kt"]
+[ext_resource type="Texture2D" uid="uid://b6roeq1lqxny1" path="res://player/sprites/walk-down-inca-04-izquierda.png" id="5_g6kdm"]
+[ext_resource type="Texture2D" uid="uid://ctwtfhqqdow6" path="res://player/sprites/walk-up-inca-04-izquierda.png" id="5_pnmth"]
+[ext_resource type="Texture2D" uid="uid://nwyx7tgfl3w2" path="res://player/sprites/walk-left-inca-01-apoyo.png" id="6_lvyo3"]
+[ext_resource type="Texture2D" uid="uid://dx1w0avnf8a15" path="res://player/sprites/walk-left-inca-02-derecha.png" id="7_lgce7"]
+[ext_resource type="Texture2D" uid="uid://bgi23rwfnijtp" path="res://player/sprites/walk-left-inca-03-apoyo.png" id="8_fdk0c"]
+[ext_resource type="Texture2D" uid="uid://ypemhqet577l" path="res://player/sprites/walk-left-inca-04-izquierda.png" id="9_p4atc"]
+[ext_resource type="Texture2D" uid="uid://cg1b5wwyo48cw" path="res://player/sprites/walk-right-inca-01-apoyo.png" id="10_t3do2"]
+[ext_resource type="Texture2D" uid="uid://cj12qhbysk3jt" path="res://player/sprites/walk-right-inca-02-derecha.png" id="11_ye0y5"]
+[ext_resource type="Texture2D" uid="uid://b5otimw1v0res" path="res://player/sprites/walk-right-inca-03-apoyo.png" id="12_y1eoe"]
+[ext_resource type="Texture2D" uid="uid://ci2x0513yeurh" path="res://player/sprites/walk-right-inca-04-izquierda.png" id="13_8ybet"]
+[ext_resource type="PackedScene" uid="uid://c2nnbqwxietn2" path="res://antorcha/antorcha.tscn" id="18_ye0y5"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jdori"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_838od")
+}],
+"loop": 1,
+"name": &"idle-down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_lvyo3")
+}],
+"loop": 1,
+"name": &"idle-left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_t3do2")
+}],
+"loop": 1,
+"name": &"idle-right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_k0oro")
+}],
+"loop": 1,
+"name": &"idle-up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_838od")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_h36fx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_0ru1k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_g6kdm")
+}],
+"loop": 1,
+"name": &"walk-down-inca",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_lvyo3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_lgce7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_fdk0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_p4atc")
+}],
+"loop": 1,
+"name": &"walk-left-inca",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_t3do2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ye0y5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_y1eoe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_8ybet")
+}],
+"loop": 1,
+"name": &"walk-right-inca",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_k0oro")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_6pnd3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jc8kt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_pnmth")
+}],
+"loop": 1,
+"name": &"walk-up-inca",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
+size = Vector2(55, 84)
+
+[node name="Inca" type="CharacterBody2D" unique_id=313612664]
+script = ExtResource("1_uj2a5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=842364018]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_jdori")
+animation = &"walk-up-inca"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1876004864]
+position = Vector2(2.5, 0)
+shape = SubResource("RectangleShape2D_hfs8p")
+
+[node name="antorcha" parent="." unique_id=1918987338 instance=ExtResource("18_ye0y5")]

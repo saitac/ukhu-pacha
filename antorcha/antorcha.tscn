@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://c2nnbqwxietn2"]
+
+[ext_resource type="Texture2D" uid="uid://c4bxbxbt6e8j8" path="res://antorcha/sprites/down/antorcha-down-01-llama1.png" id="1_x6hk6"]
+[ext_resource type="Texture2D" uid="uid://b4s3hbxtwgkib" path="res://antorcha/sprites/down/antorcha-down-02-llama2.png" id="2_jhqaa"]
+[ext_resource type="Texture2D" uid="uid://bd14q5f68c4y2" path="res://antorcha/sprites/down/antorcha-down-03-llama3.png" id="3_yyvjg"]
+[ext_resource type="Texture2D" uid="uid://ctku1ek4hi4pc" path="res://antorcha/sprites/up/antorcha-up-01-llama1.png" id="4_4q64l"]
+[ext_resource type="Texture2D" uid="uid://3t6m8gh8tha6" path="res://antorcha/sprites/left/antorcha-left-01-llama1.png" id="4_632vd"]
+[ext_resource type="Texture2D" uid="uid://dhewj8vksptle" path="res://antorcha/sprites/up/antorcha-up-02-llama2.png" id="5_cxmqv"]
+[ext_resource type="Texture2D" uid="uid://cdjhq1dkkl0k7" path="res://antorcha/sprites/left/antorcha-left-02-llama2.png" id="5_jdmet"]
+[ext_resource type="Texture2D" uid="uid://1jg3we83b2nf" path="res://antorcha/sprites/up/antorcha-up-03-llama3.png" id="6_bqngn"]
+[ext_resource type="Texture2D" uid="uid://c1gqjakdw2mvv" path="res://antorcha/sprites/left/antorcha-left-03-llama3.png" id="6_n3ga3"]
+[ext_resource type="Texture2D" uid="uid://c545rubbhbnyk" path="res://antorcha/sprites/right/antorcha-right-01-llama1.png" id="7_1klnj"]
+[ext_resource type="Texture2D" uid="uid://dnv0xftxxc4on" path="res://antorcha/sprites/right/antorcha-right-02-llama2.png" id="8_f8n1w"]
+[ext_resource type="Texture2D" uid="uid://lgysd4ueqda6" path="res://antorcha/sprites/right/antorcha-right-03-llama3.png" id="9_xm6n4"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ekqyl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_x6hk6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_jhqaa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_yyvjg")
+}],
+"loop": 1,
+"name": &"antorcha-down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_632vd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_jdmet")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_n3ga3")
+}],
+"loop": 1,
+"name": &"antorcha-left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_1klnj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_f8n1w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_xm6n4")
+}],
+"loop": 1,
+"name": &"antorcha-right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_4q64l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_cxmqv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_bqngn")
+}],
+"loop": 1,
+"name": &"antorcha-up",
+"speed": 5.0
+}]
+
+[node name="antorcha" type="Node2D" unique_id=1918987338]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=852748141]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_ekqyl")
+animation = &"antorcha-down"
