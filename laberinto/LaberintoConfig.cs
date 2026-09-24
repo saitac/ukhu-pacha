@@ -35,4 +35,12 @@ public static class LaberintoConfig
         public const float DensidadInicialMuro = 0.55f; // 0.45f;
 
     }
+
+    public static class Bloque
+    {
+        public const int TamanoMinimo = 6;
+        public const int TamanoMaximo = TamanoMinimo * 2;
+
+        public const float FactorProporcion = 1.25f;
+    }
 }

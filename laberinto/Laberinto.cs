@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public partial class Laberinto : Node2D
 {
+	RandomNumberGenerator _rng;
 	TileMapLayer _Piso ;
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
@@ -12,6 +13,7 @@ public partial class Laberinto : Node2D
 	
 	public override void _Ready()
 	{
+		_rng = new RandomNumberGenerator();
 		_Piso  = GetNode<TileMapLayer>("Piso");
 		_Muros = GetNode<TileMapLayer>("Muros");
 		_Muros.Modulate = new Color(0.6f, 0.6f, 0.6f);
@@ -25,7 +27,18 @@ public partial class Laberinto : Node2D
 
 		ForzarZonaSpawnComoPiso(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
 
-		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
+		List<Rect2I> bloques = new List<Rect2I>();
+		Particionar(new Rect2I(new Vector2I(0,0), new Vector2I(_mapa.GetLength(1),_mapa.GetLength(0))), bloques);
+
+		int sumArea = 0;
+		foreach(var bloque in bloques)
+		{
+			GD.Print($"Position: {bloque.Position} ; Size: {bloque.Size}");
+			sumArea += bloque.Size.X * bloque.Size.Y;
+		}
+		GD.Print($"N° Bloques: {bloques.Count} ; Area total: {sumArea}");
+
+		/*for(int fila = 0; fila < _mapa.GetLength(0); fila++)
 		{
 			string linea = "";
 			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
@@ -33,7 +46,7 @@ public partial class Laberinto : Node2D
 				linea += _mapa[fila,columna]==LaberintoConfig.Celda.Piso ? "." : "X";	
 			}
 			GD.Print(linea);
-		}
+		}*/
 
 		/*var regiones = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso);
 		foreach(var region in regiones)
@@ -79,13 +92,12 @@ public partial class Laberinto : Node2D
 	{
 		int indice;
 		int sourceId;
-		RandomNumberGenerator rng = new RandomNumberGenerator();
 
 		for(int fila = 0; fila < LaberintoConfig.Grilla.Alto; fila++)
 		{
 			for(int columna = 0; columna < LaberintoConfig.Grilla.Ancho; columna++)
 			{
-				indice = rng.RandiRange(0, LaberintoConfig.Piso.Variantes.Length - 1);
+				indice = _rng.RandiRange(0, LaberintoConfig.Piso.Variantes.Length - 1);
 				sourceId = LaberintoConfig.Piso.Variantes[indice];
 				_Piso .SetCell(new Vector2I(columna, fila),sourceId,new Vector2I(0,0));
 			}
@@ -94,13 +106,11 @@ public partial class Laberinto : Node2D
 
 	private void LlenarMapaInterior()
 	{
-		RandomNumberGenerator rng = new RandomNumberGenerator();
-
 		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
 		{
 			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				_mapa[fila, columna] = rng.Randf() < LaberintoConfig.AutomataCelular.DensidadInicialMuro ? LaberintoConfig.Celda.Muro : LaberintoConfig.Celda.Piso;
+				_mapa[fila, columna] = _rng.Randf() < LaberintoConfig.AutomataCelular.DensidadInicialMuro ? LaberintoConfig.Celda.Muro : LaberintoConfig.Celda.Piso;
 			}
 		}
 	}
@@ -309,5 +319,76 @@ public partial class Laberinto : Node2D
 		}
 	}
 
+	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
+	{
+		// obtengo el tamaño mínimo y máximo que puede tener un bloque en el mapa y 
+		// el factor de proporción que define si un bloque es muy ancho o muy alto
+
+		int min = LaberintoConfig.Bloque.TamanoMinimo;
+		int max = LaberintoConfig.Bloque.TamanoMaximo;
+		float factorProporcion = LaberintoConfig.Bloque.FactorProporcion;
+
+		bool puedeCortarHorizontal = bloque.Size.Y >= max; // alto - válido solo porque TamanoMaximo = 2 * TamanoMinimo
+		bool puedeCortarVertical = bloque.Size.X >= max; // ancho - válido solo porque TamanoMaximo = 2 * TamanoMinimo
+
+
+		// Ya no se puede cortar por que sería menor que el tamaño mínimo
+		if(!puedeCortarHorizontal && !puedeCortarVertical)
+		{
+			resultado.Add(bloque);
+			return;
+		}
+
+		// se elije eje a cortar
+		bool cortarVertical;
+		if (puedeCortarVertical && !puedeCortarHorizontal)
+		{
+			cortarVertical = true;
+		} else if(puedeCortarHorizontal && !puedeCortarVertical)
+		{
+			cortarVertical = false;
+		}else if(bloque.Size.X > bloque.Size.Y * factorProporcion)
+		{
+			// muy ancho
+			cortarVertical = true;
+		} else if(bloque.Size.Y > bloque.Size.X * factorProporcion)
+		{
+			// muy alto
+			cortarVertical = false;
+		} else
+		{
+			cortarVertical = _rng.Randf() < 0.5f;
+		}
+				
+		// Cortar
+		int puntoDeCorte;
+		Rect2I bloqueA;
+		Rect2I bloqueB;
+		if (cortarVertical) // parto el ancho (Size.X)
+		{
+			puntoDeCorte = _rng.RandiRange(min, bloque.Size.X - min);
+
+			bloqueA = new Rect2I(
+				bloque.Position, new Vector2I(puntoDeCorte, bloque.Size.Y)
+				);
+
+			bloqueB = new Rect2I(new Vector2I(bloque.Position.X + puntoDeCorte,
+			bloque.Position.Y), new Vector2I(bloque.Size.X - puntoDeCorte, bloque.Size.Y)); 
+		} else // corte horizontal, parto el alto
+		{
+			puntoDeCorte = _rng.RandiRange(min, bloque.Size.Y - min);
+
+			bloqueA = new Rect2I(
+				bloque.Position, new Vector2I(bloque.Size.X, puntoDeCorte)
+				);
+
+			bloqueB = new Rect2I(new Vector2I(bloque.Position.X,
+			bloque.Position.Y + puntoDeCorte), new Vector2I(bloque.Size.X, bloque.Size.Y - puntoDeCorte)); 
+		}
+
+		// Recursivo, cada mitad se vuelve a partir mientras mida al menos el doble del mínimo
+		Particionar(bloqueA, resultado);
+		Particionar(bloqueB, resultado);
+	}
 }
 
