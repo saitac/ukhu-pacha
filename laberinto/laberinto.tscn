@@ -194,6 +194,7 @@ tile_set = SubResource("TileSet_hfs8p")
 position = Vector2(1920, 1920)
 
 [node name="Camera2D" type="Camera2D" parent="Inca" unique_id=1320824097]
+zoom = Vector2(0.2, 0.2)
 limit_left = 0
 limit_top = 0
 limit_right = 3840

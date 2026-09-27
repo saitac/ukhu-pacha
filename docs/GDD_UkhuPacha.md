@@ -1,5 +1,5 @@
 # Ukhu Pacha
-### Documento de Diseño de Juego (GDD) — Versión 1.1
+### Documento de Diseño de Juego (GDD) — Versión 1.2
 
 ---
 
@@ -30,6 +30,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - **Inicio:** El protagonista escapa de una masacre española, se adentra en una cueva y bloquea la entrada con una piedra sagrada (*wanka*). No hay vuelta atrás.
 - **Contexto mítico:** La cueva es un lugar sagrado ancestral de la propia cosmovisión andina, anterior al esplendor del Imperio Inca pero perteneciente a la misma tradición cultural y religiosa (Viracocha, Inti, el Uku Pacha). No se mezclan culturas externas: todo el simbolismo, arquitectura y entidades del juego pertenecen al mismo universo andino/inca.
 - **Objetivo narrativo:** Encontrar la Ciudad Perdida para salvar a su pueblo.
+- **La cueva protege la Ciudad Perdida:** cada vez que el Inca coloca un disco de Inti en la puerta de piedra, la cueva se reordena y esconde la puerta en otro lugar. No es un enemigo que lo odie, sino un guardián que pone a prueba a quien busca el santuario.
 - **Final:** Al colocar los tres discos sagrados en la puerta de piedra, esta se abre revelando la ciudad santuario al amanecer. El protagonista dejar caer su antorcha ya consumida — el viaje ha terminado.
 
 ---
@@ -43,23 +44,43 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 ### 3.2 El Laberinto Viviente
 - Representado internamente como una **matriz bidimensional** en C# (0 = camino, 1 = muro, 2 = abismo, etc.).
 - Godot renderiza la matriz usando un nodo **TileMap**.
-- **Mutación por ciclos:** cada cierto tiempo (o cierto número de pasos del jugador), el laberinto muta:
+- **Estructura:** el mapa se divide en **salas** (bloques rectangulares de tamaño variable) conectadas por **puertas**. Toda sala debe ser accesible: no pueden existir salas sin acceso.
+- **Mutación en dos niveles**, cada uno con su propio disparador:
+
+  | Disparador | Qué cambia | Sensación buscada |
+  |---|---|---|
+  | **Tiempo** (ciclos periódicos) | La disposición de las **puertas** (se cierran unas, se abren otras); la forma de las salas se mantiene | Inquietud constante: "¿esta puerta estaba aquí?" |
+  | **Colocar un disco de Inti en la puerta final** | La **forma de las salas** (y con ellas las puertas) + **reubicación de la puerta final** + recolocación de tótems de Viracocha y altares de Cóndor | Golpe dramático, un cambio de acto: la cueva reacciona a la reliquia devuelta y se reordena por completo |
+
+  - Con tres discos, la cueva tiene **cuatro "versiones"** de salas por partida: el juego se estructura en actos.
+  - Entre un disco y el siguiente las salas y los tótems no se mueven, así que "volver a recargar" sigue siendo un plan válido aunque las puertas hayan cambiado (ver 3.3).
+- **Secuencia de cada mutación:**
   1. **Advertencia:** temblor de pantalla + sonido grave (aviso al jugador).
-  2. **Cálculo:** el algoritmo selecciona secciones de la matriz para transformar.
+  2. **Cálculo:** el algoritmo transforma puertas (ciclo de tiempo) o salas (disco de Inti).
   3. **Regla de oro:** nunca sellar el único camino disponible hacia el jugador o los objetivos activos, salvo que exista ruta alternativa.
+- **Ancla en un cambio de salas:** la sala donde está el Inca en ese momento **no se modifica** (evita que el jugador quede dentro de un muro). La puerta final sí se va de esa sala.
 - **Semillas aleatorias (seeds):** cada partida genera un mapa distinto; las semillas se pueden compartir entre jugadores.
-- **La puerta final es fija** (no se mueve), pero las rutas hacia ella cambian constantemente.
+- **La puerta final se mueve solo en los cambios de salas** (la cueva protege la Ciudad Perdida y la esconde, ver 2. Narrativa). Entre un disco y el siguiente queda quieta; lo que cambia son las rutas hacia ella (ciclos de puertas).
 
 ### 3.3 La Antorcha (Q'uncha)
 - Temporizador de luz (`float`) que baja con el tiempo.
 - El cono de luz se reduce y parpadea a medida que se agota.
 - En 0%: oscuridad total → alto riesgo de muerte.
-- **Recarga:** en tótems fijos de **Viracocha**, repartidos en el mapa.
+- **Recarga:** en tótems de **Viracocha**, repartidos en el mapa.
+  - Los tótems se mantienen fijos mientras las salas no cambian; **se recolocan cada vez que cambia la forma de las salas** (al colocar un disco de Inti en la puerta final, ver 3.2).
+  - Se colocan según parámetros de distancia al Inca, medida **caminando** (por el recorrido real a través de las puertas, no en línea recta).
+  - La distancia es un **rango** (ni demasiado cerca ni demasiado lejos), no una garantía de llegar a tiempo: si siempre hubiera un tótem justo al alcance, la oscuridad dejaría de ser una amenaza.
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
 
 ### 3.4 Objetivo: Los 3 Discos de Inti
 - Reliquias del Dios Sol, dispersas por el laberinto cambiante.
-- Se transportan **de a uno** (no se pueden cargar los tres a la vez).
+- Se transportan **de a uno** (no se pueden cargar los tres a la vez): cada disco se encuentra, se lleva y se coloca en la puerta final antes de buscar el siguiente.
+- **Ciclo de cada acto:**
+  1. El Inca coloca un disco en la puerta final → temblor: cambia la forma de las salas y **la puerta final se reubica**.
+  2. Explora la cueva nueva buscando el siguiente disco; mientras explora puede descubrir dónde quedó la puerta final.
+  3. Encuentra el disco y lo lleva a la puerta final. Las salas no cambiaron (solo las puertas, por tiempo), así que lo explorado le sirve para regresar.
+- **Explorar tiene recompensa:** quien prestó atención a la ubicación de la puerta final mientras buscaba el disco regresa con más facilidad; quien no, debe buscarla cargando el disco.
+- Al colocar el **tercer** disco, la puerta se abre (ver Final en 2. Narrativa); no hay cambio de salas.
 - Cargar un disco probablemente limita otras acciones (uso de armas, sigilo, etc. — a definir).
 - Cada disco colocado en la puerta **acelera la mutación** de la cueva (más tensión progresiva).
 
@@ -75,7 +96,15 @@ El jugador **no puede matar** a las criaturas mitológicas; solo aturdir, cegar 
 | Champi (escudo) | Defensa | Bloquea ataques frontales, inmoviliza al usarlo |
 
 ### 3.6 Aliados sagrados (ayudas limitadas)
-- **Cóndor:** invocable en altares específicos → vista cenital temporal para "espiar" el laberinto.
+Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene de "estaciones" y mantenga su misterio:
+
+| Recurso | Cómo se recarga |
+|---|---|
+| Luz (antorcha) | Tótems de Viracocha (en un lugar) |
+| Cóndor | Altares (en un lugar) |
+| Puma | Tiempo (cooldown), sin tótem ni altar |
+
+- **Cóndor:** invocable en altares específicos → vista cenital temporal para "espiar" el laberinto. Los altares **se recolocan junto con los tótems** cada vez que cambian las salas. Es especialmente valioso justo después de un cambio de salas, para reorientarse en la cueva nueva.
 - **Puma:** empuje/aturdimiento de emergencia con cooldown largo, para escapar de un acorralamiento.
 
 ---
@@ -188,8 +217,11 @@ public partial class Inca : CharacterBody2D
 ## 10. Preguntas abiertas / por definir
 
 - ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
-- ¿Cuántos altares de Cóndor/Puma habrá por partida y con qué frecuencia se regeneran?
-- ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida?
+- ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
+- ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
+- ¿Las mutaciones ocurren solo fuera de la luz de la antorcha? (Idea: el jugador nunca ve el cambio, solo lo descubre después.)
+- ¿Valores concretos del rango de distancia para colocar tótems de Viracocha?
+- ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
 

@@ -42,5 +42,7 @@ public static class LaberintoConfig
         public const int TamanoMaximo = TamanoMinimo * 2;
 
         public const float FactorProporcion = 1.25f;
+
+        public const int AnchoPuerta = 2;
     }
 }
