@@ -50,57 +50,31 @@ public partial class Laberinto : Node2D
 		_bloques = [];
 		Particionar(new Rect2I(new Vector2I(0,0), new Vector2I(_mapa.GetLength(1),_mapa.GetLength(0))), _bloques);
 
-		//int sumArea = 0;
-		//int totalDisueltos = 0;
 		foreach(var bloque in _bloques)
 		{
-			//GD.Print($"Position: {bloque.Position} ; Size: {bloque.Size}");
-			//sumArea += bloque.Size.X * bloque.Size.Y;
-			//totalDisueltos += DisolverMurosDelgados(bloque);
 			CerrarBloque(bloque);
 		}
-		//GD.Print($"N° Bloques: {_bloques.Count} ; Area total: {sumArea}");
 		
 		ImprimirMapa();
-
-		/*var regiones = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso);
-		foreach(var region in regiones)
-		{
-			GD.Print($"Region de tamaño: {region.Count}");
-		}*/
-		
-		
-		/*var regionesMuro = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Muro);
-		GD.Print($"Regiones Muro: {regionesMuro.Count}");*/
-		/*foreach(var region in regionesMuro)
-		{
-			GD.Print($"Region Muro de tamaño: {region.Count}");
-		}*/
 
 		_puertasPosibles = BuscarPuertas(_bloques);
 		
-		/*foreach(PuertaPosible puerta in _puertasPosibles)
-		{
-			GD.Print(puerta);
-		} */
-
-		//TallarPuerta(_puertasPosibles[13], _puertasPosibles[13].PrimeraValida);
-		//TallarPuerta(_puertasPosibles[18], _puertasPosibles[18].PrimeraValida);
-
-		//GD.Print("//// Despues de tallar ///");
-		//ImprimirMapa();
-
-
 		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-		GD.Print($"bloque index: {bloqueInca}; bloque: {_bloques[bloqueInca]}");
+		GD.Print($"bloque index: {bloqueInca}; bloque: {_bloques[bloqueInca]}");	
 
 		ConectarSalas(bloqueInca);
 		ImprimirMapa();
+
+		// Centro del bloque del inca
+		Vector2I centro = _bloques[bloqueInca].GetCenter();
+		GD.Print($"Valor de mapa en centro: {_mapa[centro.Y, centro.X]}");
+		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
+		_Inca.GlobalPosition =  IndiceMapaAPosicionMundo(centro);
 		
 		GD.Print($"Puertas abiertas: {_puertasAbiertas.Count}");
 		GD.Print($"Regiones de piso: {EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count}");
 
-		ForzarZonaSpawnComoPiso(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+		//ForzarZonaSpawnComoPiso(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
 
 		DibujarMurosInterior();
 
@@ -343,7 +317,17 @@ public partial class Laberinto : Node2D
 		return new Vector2I(columnaMapa, filaMapa);
 	}
 
-	private void ForzarZonaSpawnComoPiso(Vector2I indiceInca)
+	private Vector2 IndiceMapaAPosicionMundo(Vector2I indiceMapa)
+	{
+		// De índice de mapa a celda de TileMapLayer se le agrega (1,1) ya que mapa no considera los límites.
+		Vector2I celdaTile = indiceMapa + Vector2I.One;
+		// centro del tile, sin escala
+		Vector2 posicionLocal = _Piso.MapToLocal(celdaTile);
+		// Aplica escala y posición => píxeles de mundo.
+		return _Piso.ToGlobal(posicionLocal); 
+	}
+
+	/*private void ForzarZonaSpawnComoPiso(Vector2I indiceInca)
 	{
 		for(int vfila = -1; vfila <= 1; vfila++)
 		{
@@ -359,7 +343,7 @@ public partial class Laberinto : Node2D
 				}
 			}
 		}
-	}
+	}*/
 
 	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
 	{
@@ -749,36 +733,7 @@ public partial class Laberinto : Node2D
 
 	}
 
+
 }
 
 
-/*
-
-
-ConectarSalas(bloqueInicio):   // backtracker
-    visitado = bool[_bloques.Count], todo false
-    pila = pila vacía; meter bloqueInicio; visitado[bloqueInicio] = true
-    mientras pila no esté vacía:
-        actual = mirar el tope de la pila              // Peek, sin sacarlo
-        candidatas = lista vacía de índices de puerta
-        para p desde 0 hasta _puertasPosibles.Count - 1:
-            puerta = _puertasPosibles[p]
-            si puerta toca actual (A == actual o B == actual):
-                otro = el índice que NO es actual
-                si no visitado[otro]: agregar p a candidatas
-        si candidatas está vacía:
-            sacar de la pila; continuar                // callejón sin salida
-        p = UNA candidata al azar
-        puerta = _puertasPosibles[p]; otro = el índice que NO es actual
-        inicio = RandiRange(puerta.PrimeraValida, puerta.UltimaValida - AnchoPuerta + 1)
-        TallarPuerta(puerta, inicio)
-        _puertasAbiertas[p] = inicio
-        visitado[otro] = true
-        meter otro en pila
-
-
-
-
-
-
-*/
