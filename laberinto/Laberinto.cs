@@ -13,6 +13,7 @@ public partial class Laberinto : Node2D
 
 	List<Rect2I> _bloques;
 	List<PuertaPosible> _puertasPosibles;
+	private Dictionary<int, int> _puertasAbiertas;
 
 	private enum PuertaOrientacion
 	{
@@ -31,13 +32,14 @@ public partial class Laberinto : Node2D
 	{
 		_rng = new RandomNumberGenerator
 		{
-			Seed = 12345   // TEMPORAL: mapa fijo para comparar
+			//Seed = 12345   // TEMPORAL: mapa fijo para comparar
 		};
 		
 		_Piso  = GetNode<TileMapLayer>("Piso");
 		_Muros = GetNode<TileMapLayer>("Muros");
 		_Muros.Modulate = new Color(0.6f, 0.6f, 0.6f);
 		_Inca = GetNode<CharacterBody2D>("Inca");
+		_puertasAbiertas = new Dictionary<int, int>();
 
 		PintarMuroPerimetral();
 		DibujarPiso();
@@ -58,16 +60,8 @@ public partial class Laberinto : Node2D
 			CerrarBloque(bloque);
 		}
 		//GD.Print($"N° Bloques: {_bloques.Count} ; Area total: {sumArea}");
-
-		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
-		{
-			string linea = "";
-			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
-			{
-				linea += _mapa[fila,columna]==LaberintoConfig.Celda.Piso ? "." : "X";	
-			}
-			GD.Print(linea);
-		}
+		
+		ImprimirMapa();
 
 		/*var regiones = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso);
 		foreach(var region in regiones)
@@ -84,7 +78,27 @@ public partial class Laberinto : Node2D
 		}*/
 
 		_puertasPosibles = BuscarPuertas(_bloques);
-		GD.Print($"Puertas posibles: {_puertasPosibles.Count}");
+		
+		/*foreach(PuertaPosible puerta in _puertasPosibles)
+		{
+			GD.Print(puerta);
+		} */
+
+		//TallarPuerta(_puertasPosibles[13], _puertasPosibles[13].PrimeraValida);
+		//TallarPuerta(_puertasPosibles[18], _puertasPosibles[18].PrimeraValida);
+
+		//GD.Print("//// Despues de tallar ///");
+		//ImprimirMapa();
+
+
+		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+		GD.Print($"bloque index: {bloqueInca}; bloque: {_bloques[bloqueInca]}");
+
+		ConectarSalas(bloqueInca);
+		ImprimirMapa();
+		
+		GD.Print($"Puertas abiertas: {_puertasAbiertas.Count}");
+		GD.Print($"Regiones de piso: {EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count}");
 
 		ForzarZonaSpawnComoPiso(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
 
@@ -525,7 +539,7 @@ public partial class Laberinto : Node2D
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
 
 		// imprimir resultado
-		GD.Print($"H Vecinos: {izquierdo} y {derecho}, filas validas: {primeraValida} - {ultimaValida}, columnas del muro: {ultimaColumnaIzquierdo} - {primeraColumnaDerecho}");
+		//GD.Print($"H Vecinos: {izquierdo} y {derecho}, filas validas: {primeraValida} - {ultimaValida}, columnas del muro: {ultimaColumnaIzquierdo} - {primeraColumnaDerecho}");
 		
 		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, ultimaColumnaIzquierdo);
 
@@ -560,10 +574,211 @@ public partial class Laberinto : Node2D
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
 
 		// imprimir resultado
-		GD.Print($"V Vecinos: {arriba} y {abajo}, columnas validas: {primeraValida} - {ultimaValida}, filas del muro: {ultimaFilaArriba} - {primeraFilaAbajo}");
+		//GD.Print($"V Vecinos: {arriba} y {abajo}, columnas validas: {primeraValida} - {ultimaValida}, filas del muro: {ultimaFilaArriba} - {primeraFilaAbajo}");
 
 		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, ultimaFilaArriba);
 
 	}
 
+	private int IndiceBloqueDe(Vector2I celda)
+	{
+		for(int i = 0; i < _bloques.Count; i++)
+		{
+			Rect2I bloque = _bloques[i]; 
+			if (bloque.Position.X <= celda.X && bloque.End.X - 1 >= celda.X && bloque.Position.Y <= celda.Y && bloque.End.Y - 1 >= celda.Y)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private void TallarPuerta(PuertaPosible puerta, int inicio)
+	{
+		for(int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
+		{
+			int pos = inicio + ancho;
+			for(int linea = puerta.PrimeraLineaMuro; linea <= puerta.PrimeraLineaMuro + 1; linea++)
+			// + 1: el muro entre bloques es doble (cada bloque cierra su propio perímetro)
+			{
+				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
+				{
+					_mapa[pos, linea] = LaberintoConfig.Celda.Piso;
+				} else if (puerta.Orientacion == PuertaOrientacion.Vertical)
+				{
+					_mapa[linea, pos] = LaberintoConfig.Celda.Piso;
+				}
+			} 
+		}
+		
+	}
+
+	private void ImprimirMapa()
+	{
+		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
+		{
+			string linea = "";
+			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
+			{
+				linea += _mapa[fila,columna]==LaberintoConfig.Celda.Piso ? "." : "X";	
+			}
+			GD.Print(linea);
+		}
+	}
+
+	private void ConectarSalas(int bloqueInca)
+	{
+		// backtracker
+
+		// Creo un arreglo de bool del tamaño de la cantidad de bloques y todos inicialmente en false
+		// para marcar los bloque que ya fueron visitados por el algoritmo, adicionalmente creo una pila vacía.
+		bool[] visitado = new bool[_bloques.Count];
+		Stack<int> pila = new();
+
+		// El bloque donde se encuentra el inca es agregado a la pila y se marca como bloque visitado.
+		pila.Push(bloqueInca);
+		visitado[bloqueInca] = true;
+
+		while(pila.Count != 0)
+		{
+			// obtengo el elemento que se encuentra encima de la pila sin eliminarlo.
+			int actual = pila.Peek();
+
+			// busco en la lista de _puertasPosibles, que bloques colindan con el bloque actual para agregarlas
+			// como candidatas
+			List<int> candidatas = [];
+			for(int p = 0; p < _puertasPosibles.Count; p++)
+			{
+				PuertaPosible puerta = _puertasPosibles[p];
+				// valido si actual es vecina de algunos de los dos bloques con puertas vecinas
+				// si no es vecina la salto por que no toca la sala actual
+				if(puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual) { continue; }
+
+				// Obtengo el vecino válido
+				int vecino = (puerta.IndiceBloqueA == actual) ? puerta.IndiceBloqueB : puerta.IndiceBloqueA;
+
+				// Si el vecino no fue visitado, entonces lo agrego como candidato.
+				if (!visitado[vecino])
+				{
+					candidatas.Add(p);
+				}
+			}
+
+			// Callejón sin salida: valido si existe alguna candidata en la lista
+			// Si no hay candidatas, entonces retrocedo por el hilo.
+			if(candidatas.Count == 0)
+			{
+				pila.Pop();
+				continue;
+			}
+
+			// Si existen candidatas, elijo una al azar
+			int posicion = _rng.RandiRange(0, candidatas.Count - 1);
+			int elegida = candidatas[posicion];
+			PuertaPosible puertaElegida = _puertasPosibles[elegida];
+
+			int siguiente = (puertaElegida.IndiceBloqueA == actual) ? puertaElegida.IndiceBloqueB : puertaElegida.IndiceBloqueA;
+
+			// Tallar y registrar
+			int inicio = _rng.RandiRange(puertaElegida.PrimeraValida, puertaElegida.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
+			TallarPuerta(puertaElegida, inicio);
+			// Agreo al diccionario a la clave "elegida", que es el índice en _puertasPosibles, el valor "inicio" donde empieza el hueco.
+			_puertasAbiertas[elegida] = inicio;
+
+			// avanzar
+			visitado[siguiente] = true;
+			pila.Push(siguiente);
+
+		}
+
+		/*
+		
+		┌─────┬─────┬─────┐
+		│  0  │  1  │  2  │
+		├─────┼─────┴─────┤
+		│  3  │     4     │
+		└─────┴───────────┘
+
+		[0]·····(1)·····(2)		[N] = visitada
+ 		:       :       :       (N) = sin visitar
+		(3)·····(    4    )     ◄   = actual (Peek)
+		
+		Las puertas posibles son 0-1, 1-2, 0-3, 1-4, 2-4 y 3-4. El Inca está en la sala 0.
+
+		Paso 1: actual = 0, candidatas: 1, 3 → el azar elige 1
+
+		[0]═════[1]◄····(2)        pila: [0, 1]
+ 		:       :       :         
+		(3)·····(    4    )        Push(1)
+
+		Paso 2: actual = 1, candidatas: 2, 4 → el azar elige 4
+
+		[0]═════[1]·····(2)        pila: [0, 1, 4]
+ 		:       ║       :         
+		(3)·····[    4    ]◄       Push(4)
+
+		Paso 3: actual = 4, candidatas: 2, 3 → el azar elige 2
+
+		[0]═════[1]·····[2]◄       pila: [0, 1, 4, 2]
+		:       ║       ║         
+		(3)·····[    4    ]        Push(2)
+
+		Paso 4: actual = 2, vecinos 1 y 4 ya visitados → callejón sin salida
+
+		[0]═════[1]·····[2]        pila: [0, 1, 4]
+		:       ║       ║         
+		(3)·····[    4    ]◄       Pop() → retrocede por el hilo
+
+		Paso 5: actual = 4 otra vez, candidatas: 3 → 3
+
+		[0]═════[1]·····[2]        pila: [0, 1, 4, 3]
+		:       ║       ║         
+		[3]◄════[    4    ]        Push(3)
+
+		Pasos 6 a 9: todas las salas están visitadas, así que cada vuelta es callejón → Pop, Pop, Pop, Pop
+
+		pila: [0,1,4,3] → [0,1,4] → [0,1] → [0] → [ ]   → termina el while
+		
+		Resultado final
+
+		[0]═════[1]·····[2]
+		:       ║       ║
+		[3]═════[    4    ]
+		
+		*/
+
+	}
+
 }
+
+
+/*
+
+
+ConectarSalas(bloqueInicio):   // backtracker
+    visitado = bool[_bloques.Count], todo false
+    pila = pila vacía; meter bloqueInicio; visitado[bloqueInicio] = true
+    mientras pila no esté vacía:
+        actual = mirar el tope de la pila              // Peek, sin sacarlo
+        candidatas = lista vacía de índices de puerta
+        para p desde 0 hasta _puertasPosibles.Count - 1:
+            puerta = _puertasPosibles[p]
+            si puerta toca actual (A == actual o B == actual):
+                otro = el índice que NO es actual
+                si no visitado[otro]: agregar p a candidatas
+        si candidatas está vacía:
+            sacar de la pila; continuar                // callejón sin salida
+        p = UNA candidata al azar
+        puerta = _puertasPosibles[p]; otro = el índice que NO es actual
+        inicio = RandiRange(puerta.PrimeraValida, puerta.UltimaValida - AnchoPuerta + 1)
+        TallarPuerta(puerta, inicio)
+        _puertasAbiertas[p] = inicio
+        visitado[otro] = true
+        meter otro en pila
+
+
+
+
+
+
+*/
