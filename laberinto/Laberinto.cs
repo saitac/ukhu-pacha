@@ -32,7 +32,7 @@ public partial class Laberinto : Node2D
 	{
 		_rng = new RandomNumberGenerator
 		{
-			//Seed = 12345   // TEMPORAL: mapa fijo para comparar
+			//Seed = 12345   // descomentar para mapa reproducible
 		};
 		
 		_Piso  = GetNode<TileMapLayer>("Piso");
@@ -55,32 +55,26 @@ public partial class Laberinto : Node2D
 			CerrarBloque(bloque);
 		}
 		
-		ImprimirMapa();
-
 		_puertasPosibles = BuscarPuertas(_bloques);
 		
 		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-		GD.Print($"bloque index: {bloqueInca}; bloque: {_bloques[bloqueInca]}");	
 
 		ConectarSalas(bloqueInca);
 		
-		//GD.Print("---------- ANTES DE PUERTAS EXTRA --------");
-		//ImprimirMapa();
-		
 		AbrirPuertasExtra();
-
-		//GD.Print("---------- DESPUES DE PUERTAS EXTRA --------");
-		//ImprimirMapa();
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
-		GD.Print($"Valor de mapa en centro: {_mapa[centro.Y, centro.X]}");
+		
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition =  IndiceMapaAPosicionMundo(centro);
 		
-		GD.Print($"Puertas abiertas: {_puertasAbiertas.Count}");
-		GD.Print($"Bloques: {_bloques.Count}");
-		GD.Print($"Regiones de piso: {EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count}");
+		// Alerta - no debe existir cuartos sin acceso
+		int cantidadRegiones = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count;
+		if(cantidadRegiones != 1)
+		{
+			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");	
+		}
 
 		DibujarMurosInterior();
 		
@@ -403,44 +397,6 @@ public partial class Laberinto : Node2D
 		Particionar(bloqueB, resultado);
 	}
 
-	private bool EsMuroDelgado(int fila, int columna)
-	{
-		int filaVecinoInf = fila + 1;
-		int filaVecinoSup = fila - 1;
-		int columnaVecinoDer = columna + 1;
-		int columnaVecinoIzq = columna - 1;
-
-		// devuelve false si se está analizando una celda piso
-		if(_mapa[fila, columna] == LaberintoConfig.Celda.Piso){ return false;}
-
-		// regresa true si la celda superior y inferior o la celda izquierda y la celda derecha no es muro,
-		// caso contrario, retorna false
-		// El método no revisa límites, solo debe llamarse con celdas interiores de un bloque.
-
-		return (_mapa[filaVecinoSup, columna] == LaberintoConfig.Celda.Piso && _mapa[filaVecinoInf, columna] == LaberintoConfig.Celda.Piso)
-		|| (_mapa[fila, columnaVecinoIzq] == LaberintoConfig.Celda.Piso && _mapa[fila, columnaVecinoDer] == LaberintoConfig.Celda.Piso);		
-	}
-
-	private int DisolverMurosDelgados(Rect2I bloque)
-	{
-		List<Vector2I> aDisolver = new List<Vector2I>();
-
-		for(int fila = bloque.Position.Y + 1; fila < bloque.End.Y - 1; fila++)
-		{
-			for(int columna = bloque.Position.X + 1; columna < bloque.End.X - 1; columna++)
-			{
-				if(EsMuroDelgado(fila, columna)){ aDisolver.Add(new Vector2I(columna, fila)); }
-			}
-		}
-
-		foreach(Vector2I vector in aDisolver)
-		{
-			_mapa[vector.Y, vector.X] = LaberintoConfig.Celda.Piso; 
-		}
-
-		return aDisolver.Count;
-	}
-
 	private void CerrarBloque(Rect2I bloque)
 	{
 		for(int fila = bloque.Position.Y; fila < bloque.End.Y; fila++)
@@ -507,12 +463,8 @@ public partial class Laberinto : Node2D
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
-
-		// imprimir resultado
-		//GD.Print($"H Vecinos: {izquierdo} y {derecho}, filas validas: {primeraValida} - {ultimaValida}, columnas del muro: {ultimaColumnaIzquierdo} - {primeraColumnaDerecho}");
 		
 		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, ultimaColumnaIzquierdo);
-
 	}
 
 	private PuertaPosible? BuscarPuertaVertical(Rect2I arriba, Rect2I abajo, int bloquesIndiceArriba,  int bloquesIndiceAbajo)
@@ -543,11 +495,7 @@ public partial class Laberinto : Node2D
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
 
-		// imprimir resultado
-		//GD.Print($"V Vecinos: {arriba} y {abajo}, columnas validas: {primeraValida} - {ultimaValida}, filas del muro: {ultimaFilaArriba} - {primeraFilaAbajo}");
-
 		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, ultimaFilaArriba);
-
 	}
 
 	private int IndiceBloqueDe(Vector2I celda)
@@ -734,8 +682,7 @@ public partial class Laberinto : Node2D
 		}
 
 		// Definir cuantas puertas adicionales abrir
-		int puertasAdicionales = (int)(sobrantes.Count * LaberintoConfig.PorcentajePuertasExtra);
-		GD.Print($"Puertas adicionales => {puertasAdicionales}");
+		int puertasAdicionales = (int)(sobrantes.Count * LaberintoConfig.Bloque.PorcentajePuertasExtra);
 
 		// Elegir sin repetir y tallar puerta
 		for(int repetir = 0; repetir < puertasAdicionales; repetir++)

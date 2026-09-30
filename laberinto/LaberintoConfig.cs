@@ -1,7 +1,6 @@
 
 public static class LaberintoConfig
 {
-    public const float PorcentajePuertasExtra = 0.2f;
     public static class Piso
     {
         public const int Variante1 = 2;
@@ -32,8 +31,8 @@ public static class LaberintoConfig
 
     public static class AutomataCelular
     {
-        public const int Pasadas = 2; //4;
-        public const float DensidadInicialMuro = 0.55f; // 0.45f;
+        public const int Pasadas = 2;
+        public const float DensidadInicialMuro = 0.55f;
 
     }
 
@@ -45,5 +44,8 @@ public static class LaberintoConfig
         public const float FactorProporcion = 1.25f;
 
         public const int AnchoPuerta = 2;
+
+        public const float PorcentajePuertasExtra = 0.2f;
+
     }
 }
