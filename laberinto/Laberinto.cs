@@ -8,8 +8,15 @@ public partial class Laberinto : Node2D
 	TileMapLayer _Piso ;
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
+
+	private enum Celda
+	{
+		Piso,
+		Muro
+	}
+
 	// _mapa solo ve interior, no muro perimetral que es manejado por PintarMuroPerimetral()
-	int[,] _mapa = new int[LaberintoConfig.Grilla.Alto - 2, LaberintoConfig.Grilla.Ancho - 2];
+	Celda[,] _mapa = new Celda[LaberintoConfig.Grilla.Alto - 2, LaberintoConfig.Grilla.Ancho - 2];
 
 	List<Rect2I> _bloques;
 	List<PuertaPosible> _puertasPosibles;
@@ -70,7 +77,7 @@ public partial class Laberinto : Node2D
 		_Inca.GlobalPosition =  IndiceMapaAPosicionMundo(centro);
 		
 		// Alerta - no debe existir cuartos sin acceso
-		int cantidadRegiones = EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count;
+		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
 		if(cantidadRegiones != 1)
 		{
 			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");	
@@ -124,7 +131,7 @@ public partial class Laberinto : Node2D
 		{
 			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				_mapa[fila, columna] = _rng.Randf() < LaberintoConfig.AutomataCelular.DensidadInicialMuro ? LaberintoConfig.Celda.Muro : LaberintoConfig.Celda.Piso;
+				_mapa[fila, columna] = _rng.Randf() < LaberintoConfig.AutomataCelular.DensidadInicialMuro ? Celda.Muro : Celda.Piso;
 			}
 		}
 	}
@@ -138,7 +145,7 @@ public partial class Laberinto : Node2D
 		{
 			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				if(_mapa[fila, columna] == LaberintoConfig.Celda.Muro)
+				if(_mapa[fila, columna] == Celda.Muro)
 				{
 					muros.Add(new Vector2I(columna + 1, fila + 1));
 				}
@@ -151,21 +158,21 @@ public partial class Laberinto : Node2D
 
 	}
 
-	private int[,] SuavizarMapa()
+	private Celda[,] SuavizarMapa()
 	{
 		int pasadas = LaberintoConfig.AutomataCelular.Pasadas;
 		float vecinosMuro = 0;
 		int pasada = 0;
-		List<int[,]> copiasMapa = new List<int[,]>();
+		List<Celda[,]> copiasMapa = new List<Celda[,]>();
 
 		while (pasada < pasadas)
 		{
 			if ( copiasMapa.Count == 0 )
 			{
-				copiasMapa.Add((int[,])_mapa.Clone());
+				copiasMapa.Add((Celda[,])_mapa.Clone());
 			} else
 			{
-				copiasMapa.Add((int[,])copiasMapa[pasada - 1].Clone());
+				copiasMapa.Add((Celda[,])copiasMapa[pasada - 1].Clone());
 			}
 
 			for(int fila = 0; fila < _mapa.GetLength(0); fila++)
@@ -175,11 +182,11 @@ public partial class Laberinto : Node2D
 					vecinosMuro = ContarVecinosMuro(fila, columna, pasada == 0 ? _mapa : copiasMapa[pasada -1]);
 					if( vecinosMuro >= 0.625f ) // 5/8 Muro
 					{
-						copiasMapa[pasada][fila, columna] = LaberintoConfig.Celda.Muro;
+						copiasMapa[pasada][fila, columna] = Celda.Muro;
 					}
 					if( vecinosMuro <= 0.375f ) // 3/8 Piso
 					{
-						copiasMapa[pasada][fila, columna] = LaberintoConfig.Celda.Piso;
+						copiasMapa[pasada][fila, columna] = Celda.Piso;
 					}
 				}
 			}
@@ -190,7 +197,7 @@ public partial class Laberinto : Node2D
 		return copiasMapa[pasadas - 1];
 	}
 
-	private float ContarVecinosMuro(int fila, int columna, int[,] mapa)
+	private float ContarVecinosMuro(int fila, int columna, Celda[,] mapa)
 	{
 		int vecinosMuro = 0;
 		int vecinosReales = 0;
@@ -207,7 +214,7 @@ public partial class Laberinto : Node2D
 					if(filaVecino >= 0 && columnaVecino >= 0 &&  filaVecino < mapa.GetLength(0) && columnaVecino < mapa.GetLength(1))
 					{
 						vecinosReales++;
-						if(mapa[filaVecino, columnaVecino] == LaberintoConfig.Celda.Muro)
+						if(mapa[filaVecino, columnaVecino] == Celda.Muro)
 						{
 							vecinosMuro++;
 						}
@@ -219,7 +226,7 @@ public partial class Laberinto : Node2D
 		return (float)vecinosMuro / vecinosReales;
 	}
 
-	private List<List<Vector2I>> EncontrarRegiones(int[,] mapa, int tipoCelda)
+	private List<List<Vector2I>> EncontrarRegiones(Celda[,] mapa, Celda tipoCelda)
 	{
 		List<List<Vector2I>> regiones = new List<List<Vector2I>>();
 		bool[,] visitado = new bool[mapa.GetLength(0),mapa.GetLength(1)];
@@ -239,7 +246,7 @@ public partial class Laberinto : Node2D
 		
 	}
 
-	private List<Vector2I> FloodFill(int fila, int columna, int[,] mapa, bool[,] visitado, int tipoCelda)
+	private List<Vector2I> FloodFill(int fila, int columna, Celda[,] mapa, bool[,] visitado, Celda tipoCelda)
 	{
 		List<Vector2I> region = new List<Vector2I>();
 		Queue<Vector2I> cola = new Queue<Vector2I>();
@@ -406,7 +413,7 @@ public partial class Laberinto : Node2D
 				bool esBorde =  fila == bloque.Position.Y || fila == bloque.End.Y - 1 
 				|| columna == bloque.Position.X || columna == bloque.End.X - 1;
 
-				_mapa[fila, columna] = esBorde ? LaberintoConfig.Celda.Muro : LaberintoConfig.Celda.Piso;
+				_mapa[fila, columna] = esBorde ? Celda.Muro : Celda.Piso;
 
 			}
 		}
@@ -521,10 +528,10 @@ public partial class Laberinto : Node2D
 			{
 				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
 				{
-					_mapa[pos, linea] = LaberintoConfig.Celda.Piso;
+					_mapa[pos, linea] = Celda.Piso;
 				} else if (puerta.Orientacion == PuertaOrientacion.Vertical)
 				{
-					_mapa[linea, pos] = LaberintoConfig.Celda.Piso;
+					_mapa[linea, pos] = Celda.Piso;
 				}
 			} 
 		}
@@ -538,7 +545,7 @@ public partial class Laberinto : Node2D
 			string linea = "";
 			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				linea += _mapa[fila,columna]==LaberintoConfig.Celda.Piso ? "." : "X";	
+				linea += _mapa[fila,columna] == Celda.Piso ? "." : "X";	
 			}
 			GD.Print(linea);
 		}

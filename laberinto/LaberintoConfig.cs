@@ -23,12 +23,6 @@ public static class LaberintoConfig
         public const int Alto = 40;
     }
 
-    public static class Celda
-    {
-        public const int Piso = 0;
-        public const int Muro = 1;
-    }
-
     public static class AutomataCelular
     {
         public const int Pasadas = 2;
