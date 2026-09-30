@@ -1,6 +1,7 @@
 
 public static class LaberintoConfig
 {
+    public const float PorcentajePuertasExtra = 0.2f;
     public static class Piso
     {
         public const int Variante1 = 2;

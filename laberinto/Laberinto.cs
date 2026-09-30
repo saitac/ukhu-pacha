@@ -63,7 +63,14 @@ public partial class Laberinto : Node2D
 		GD.Print($"bloque index: {bloqueInca}; bloque: {_bloques[bloqueInca]}");	
 
 		ConectarSalas(bloqueInca);
-		ImprimirMapa();
+		
+		//GD.Print("---------- ANTES DE PUERTAS EXTRA --------");
+		//ImprimirMapa();
+		
+		AbrirPuertasExtra();
+
+		//GD.Print("---------- DESPUES DE PUERTAS EXTRA --------");
+		//ImprimirMapa();
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
@@ -72,13 +79,10 @@ public partial class Laberinto : Node2D
 		_Inca.GlobalPosition =  IndiceMapaAPosicionMundo(centro);
 		
 		GD.Print($"Puertas abiertas: {_puertasAbiertas.Count}");
+		GD.Print($"Bloques: {_bloques.Count}");
 		GD.Print($"Regiones de piso: {EncontrarRegiones(_mapa, LaberintoConfig.Celda.Piso).Count}");
 
-		//ForzarZonaSpawnComoPiso(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-
 		DibujarMurosInterior();
-
-		
 		
 	}
 
@@ -326,24 +330,6 @@ public partial class Laberinto : Node2D
 		// Aplica escala y posición => píxeles de mundo.
 		return _Piso.ToGlobal(posicionLocal); 
 	}
-
-	/*private void ForzarZonaSpawnComoPiso(Vector2I indiceInca)
-	{
-		for(int vfila = -1; vfila <= 1; vfila++)
-		{
-			for(int vcolumna = -1; vcolumna <= 1; vcolumna++)
-			{
-				int filaObjetivo = indiceInca.Y + vfila;
-				int columnaObjetivo = indiceInca.X + vcolumna;
-
-				if(filaObjetivo >= 0 && filaObjetivo < _mapa.GetLength(0)
-				&& columnaObjetivo >= 0 && columnaObjetivo < _mapa.GetLength(1))
-				{
-					_mapa[filaObjetivo, columnaObjetivo] = LaberintoConfig.Celda.Piso;
-				}
-			}
-		}
-	}*/
 
 	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
 	{
@@ -732,6 +718,48 @@ public partial class Laberinto : Node2D
 		*/
 
 	}
+
+	private void AbrirPuertasExtra()
+	{
+		// Identificar las sobrantes (índices de puertas que no están abiertas)
+
+		List<int> sobrantes = [];
+		
+		for(int p = 0; p < _puertasPosibles.Count; p++)
+		{
+			if (!_puertasAbiertas.ContainsKey(p))
+			{
+				sobrantes.Add(p);
+			}
+		}
+
+		// Definir cuantas puertas adicionales abrir
+		int puertasAdicionales = (int)(sobrantes.Count * LaberintoConfig.PorcentajePuertasExtra);
+		GD.Print($"Puertas adicionales => {puertasAdicionales}");
+
+		// Elegir sin repetir y tallar puerta
+		for(int repetir = 0; repetir < puertasAdicionales; repetir++)
+		{
+			// Selecciono un sobrante tomando aleatoriamente su posición
+			int posicion = _rng.RandiRange(0, sobrantes.Count - 1);
+
+			// Obtengo el índice la puerta en _puertasPosibles
+			int indicePuerta = sobrantes[posicion];
+
+			// Elimino de la lista el sobrante de la puerta a trabajar
+			sobrantes.RemoveAt(posicion);
+			
+			// Selecciono la puerta a trabajar
+			PuertaPosible puerta = _puertasPosibles[indicePuerta];
+
+			// Tallo la puerta y la asigno al arreglo de _puertasAbiertas
+
+			int inicio = _rng.RandiRange(puerta.PrimeraValida, puerta.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
+			TallarPuerta(puerta, inicio);
+			_puertasAbiertas[indicePuerta] = inicio;
+		}
+	}
+
 
 
 }
