@@ -55,9 +55,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_838od")
-}, {
-"duration": 1.0,
 "texture": ExtResource("3_h36fx")
 }, {
 "duration": 1.0,
@@ -65,15 +62,15 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("5_g6kdm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_838od")
 }],
 "loop": 1,
 "name": &"walk-down-inca",
-"speed": 5.0
+"speed": 8.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": ExtResource("6_lvyo3")
-}, {
 "duration": 1.0,
 "texture": ExtResource("7_lgce7")
 }, {
@@ -82,15 +79,15 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("9_p4atc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_lvyo3")
 }],
 "loop": 1,
 "name": &"walk-left-inca",
-"speed": 5.0
+"speed": 8.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": ExtResource("10_t3do2")
-}, {
 "duration": 1.0,
 "texture": ExtResource("11_ye0y5")
 }, {
@@ -99,15 +96,15 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("13_8ybet")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_t3do2")
 }],
 "loop": 1,
 "name": &"walk-right-inca",
-"speed": 5.0
+"speed": 8.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_k0oro")
-}, {
 "duration": 1.0,
 "texture": ExtResource("3_6pnd3")
 }, {
@@ -116,10 +113,13 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("5_pnmth")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_k0oro")
 }],
 "loop": 1,
 "name": &"walk-up-inca",
-"speed": 5.0
+"speed": 8.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
@@ -131,7 +131,7 @@ script = ExtResource("1_uj2a5")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=842364018]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_jdori")
-animation = &"walk-up-inca"
+animation = &"idle-down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1876004864]
 position = Vector2(2.5, 0)
