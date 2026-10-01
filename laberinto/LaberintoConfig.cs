@@ -23,13 +23,6 @@ public static class LaberintoConfig
         public const int Alto = 40;
     }
 
-    public static class AutomataCelular
-    {
-        public const int Pasadas = 2;
-        public const float DensidadInicialMuro = 0.55f;
-
-    }
-
     public static class Bloque
     {
         public const int TamanoMinimo = 6;
@@ -40,6 +33,16 @@ public static class LaberintoConfig
         public const int AnchoPuerta = 2;
 
         public const float PorcentajePuertasExtra = 0.2f;
+
+    }
+
+    public static class Pilares
+    {
+        public static readonly bool Activo = true;
+        public const int DistanciaMinimaPiso = 2; // Celdas de piso libres entre un pilar y cualquier muro u otro pilar
+        public const int Separacion = DistanciaMinimaPiso + 1; // Paso entre filas de pilares: el piso libre + la celda del siguiente pilar
+        
+        public const float ProbabilidadPorFila = 0.7f;
 
     }
 }
