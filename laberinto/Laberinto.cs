@@ -51,9 +51,6 @@ public partial class Laberinto : Node2D
 		PintarMuroPerimetral();
 		DibujarPiso();
 
-		LlenarMapaInterior();
-		_mapa = SuavizarMapa();
-
 		_bloques = [];
 		Particionar(new Rect2I(new Vector2I(0,0), new Vector2I(_mapa.GetLength(1),_mapa.GetLength(0))), _bloques);
 
@@ -69,6 +66,8 @@ public partial class Laberinto : Node2D
 		ConectarSalas(bloqueInca);
 		
 		AbrirPuertasExtra();
+		
+		ColocarPilares(bloqueInca);
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
@@ -125,17 +124,6 @@ public partial class Laberinto : Node2D
 		}
 	}
 
-	private void LlenarMapaInterior()
-	{
-		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
-		{
-			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
-			{
-				_mapa[fila, columna] = _rng.Randf() < LaberintoConfig.AutomataCelular.DensidadInicialMuro ? Celda.Muro : Celda.Piso;
-			}
-		}
-	}
-
 	private void DibujarMurosInterior()
 	{
 		Godot.Collections.Array<Vector2I> muros = new Godot.Collections.Array<Vector2I>();
@@ -156,74 +144,6 @@ public partial class Laberinto : Node2D
 		_Muros.SetCellsTerrainConnect(muros, LaberintoConfig.Muro.TerrainSet,
         LaberintoConfig.Muro.Terrain, true);
 
-	}
-
-	private Celda[,] SuavizarMapa()
-	{
-		int pasadas = LaberintoConfig.AutomataCelular.Pasadas;
-		float vecinosMuro = 0;
-		int pasada = 0;
-		List<Celda[,]> copiasMapa = new List<Celda[,]>();
-
-		while (pasada < pasadas)
-		{
-			if ( copiasMapa.Count == 0 )
-			{
-				copiasMapa.Add((Celda[,])_mapa.Clone());
-			} else
-			{
-				copiasMapa.Add((Celda[,])copiasMapa[pasada - 1].Clone());
-			}
-
-			for(int fila = 0; fila < _mapa.GetLength(0); fila++)
-			{
-				for(int columna = 0; columna < _mapa.GetLength(1); columna++)
-				{
-					vecinosMuro = ContarVecinosMuro(fila, columna, pasada == 0 ? _mapa : copiasMapa[pasada -1]);
-					if( vecinosMuro >= 0.625f ) // 5/8 Muro
-					{
-						copiasMapa[pasada][fila, columna] = Celda.Muro;
-					}
-					if( vecinosMuro <= 0.375f ) // 3/8 Piso
-					{
-						copiasMapa[pasada][fila, columna] = Celda.Piso;
-					}
-				}
-			}
-
-			pasada++;
-		}
-
-		return copiasMapa[pasadas - 1];
-	}
-
-	private float ContarVecinosMuro(int fila, int columna, Celda[,] mapa)
-	{
-		int vecinosMuro = 0;
-		int vecinosReales = 0;
-
-		for(int vfila = -1; vfila <= 1; vfila++)
-		{
-			for(int vcolumna = -1; vcolumna <= 1; vcolumna++)
-			{
-				if( vfila != 0 || vcolumna != 0)
-				{
-					int filaVecino = fila + vfila;
-					int columnaVecino = columna + vcolumna;
-
-					if(filaVecino >= 0 && columnaVecino >= 0 &&  filaVecino < mapa.GetLength(0) && columnaVecino < mapa.GetLength(1))
-					{
-						vecinosReales++;
-						if(mapa[filaVecino, columnaVecino] == Celda.Muro)
-						{
-							vecinosMuro++;
-						}
-					}
-				}
-			}
-		}
-
-		return (float)vecinosMuro / vecinosReales;
 	}
 
 	private List<List<Vector2I>> EncontrarRegiones(Celda[,] mapa, Celda tipoCelda)
@@ -714,6 +634,48 @@ public partial class Laberinto : Node2D
 		}
 	}
 
+	private void ColocarPilaresEnBloque(Rect2I bloque)
+	{
+		const int espesorMuro = 1; // CerrarBloque pone 1 celda de borde
+
+		// Obtengo la zona donde podría colocar pilares, la zona debe ser más pequeña que la original en espesor del muro
+		// más un margen mínimo dado
+		Rect2I zona = bloque.Grow(-(espesorMuro + LaberintoConfig.Pilares.DistanciaMinimaPiso));
+
+		// Si zona no tiene área entonces no hace nada
+		if (!zona.HasArea())
+		{
+			return;
+		}
+
+		for(int fila = zona.Position.Y; fila < zona.End.Y; fila += LaberintoConfig.Pilares.Separacion)
+		{
+			if(_rng.Randf() < LaberintoConfig.Pilares.ProbabilidadPorFila)
+			{
+				int columna = _rng.RandiRange(zona.Position.X, zona.End.X-1);
+				_mapa[fila, columna] = Celda.Muro;
+			}
+		}
+
+	}
+
+	private void ColocarPilares(int bloqueInca)
+	{
+		if (!LaberintoConfig.Pilares.Activo)
+		{
+			return;
+		}
+
+		for(int indice = 0; indice < _bloques.Count; indice++)
+		{
+			if(indice == bloqueInca)
+			{
+				continue;
+			}
+
+			ColocarPilaresEnBloque(_bloques[indice]);
+		}
+	}
 
 
 }
