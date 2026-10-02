@@ -41,6 +41,8 @@ public partial class Laberinto : Node2D
 		{
 			//Seed = 12345   // descomentar para mapa reproducible
 		};
+
+		GD.Print($"Semilla: {_rng.Seed}");
 		
 		_Piso  = GetNode<TileMapLayer>("Piso");
 		_Muros = GetNode<TileMapLayer>("Muros");
