@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://iu3x4ksf455r" path="res://laberinto/sprites/muro-esquina.png" id="10_mmumd"]
 [ext_resource type="Texture2D" uid="uid://dukl1036pqa75" path="res://laberinto/sprites/muro-punta.png" id="11_yhjxc"]
 [ext_resource type="Texture2D" uid="uid://b7nl5wqtnof8a" path="res://laberinto/sprites/muro-recta.png" id="12_glftc"]
+[ext_resource type="Script" uid="uid://b830e3cefsh6j" path="res://laberinto/CamaraInca.cs" id="13_j7smx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7fdqi"]
 texture = ExtResource("2_j7smx")
@@ -193,9 +194,9 @@ tile_set = SubResource("TileSet_hfs8p")
 [node name="Inca" parent="." unique_id=313612664 instance=ExtResource("4_f4ou2")]
 position = Vector2(1920, 1920)
 
-[node name="Camera2D" type="Camera2D" parent="Inca" unique_id=1320824097]
-zoom = Vector2(0.2, 0.2)
+[node name="CamaraInca" type="Camera2D" parent="Inca" unique_id=1320824097]
 limit_left = 0
 limit_top = 0
 limit_right = 3840
 limit_bottom = 3840
+script = ExtResource("13_j7smx")
