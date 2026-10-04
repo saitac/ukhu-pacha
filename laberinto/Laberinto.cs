@@ -775,6 +775,9 @@ public partial class Laberinto : Node2D
 
 	private void MutarPuertas()
 	{
+		HashSet<int> abiertasEnCiclo = [];
+		HashSet<int> cerradasEnCiclo = [];
+
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
 		GD.Print($"--- Ciclo: {intercambios} intercambios, {_puertasAbiertas.Count} puertas abiertas");
@@ -783,17 +786,18 @@ public partial class Laberinto : Node2D
 		{
 			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
 			// valido si el índice de cada _puertaPosible en _puertasPosibles es key en _puertasAbiertas
-			// Si no es una key, entonces la agrego a puertasCerradas.
-			List<int> puertasCerradas = []; 
+			// Si no es una key, entonces la agrego a puertasCerradas, siempre y cuando no haya sido una puerta
+			// recientemente cerrada en el ciclo de mutación.
+			List<int> puertasCerradas = [];
 			for(int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
 			{
-				if (!_puertasAbiertas.ContainsKey(ppIndex))
+				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.Contains(ppIndex))
 				{
 					puertasCerradas.Add(ppIndex);
 				}
 			}
 
-			// Si ya no quedan puertas cerradas, me salto los ciclos.
+			// Si ya no quedan puertas cerradas, corto los intercambios restantes del ciclo actual.
 			if(puertasCerradas.Count == 0)
 			{
 				break;
@@ -809,13 +813,13 @@ public partial class Laberinto : Node2D
 			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
 			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
 			_puertasAbiertas[indiceAbrir] = inicio;
+			abiertasEnCiclo.Add(indiceAbrir);
 
-
-			// Busco puertas abiertas (excluyendo la nueva -- indiceAbrir [puertaAabrir]) candidatas a cerrar.
+			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación) candidatas a cerrar.
 			List<int> candidatasCerrar = [];
 			foreach(int key in _puertasAbiertas.Keys)
 			{
-				if(key == indiceAbrir)
+				if (abiertasEnCiclo.Contains(key))
 				{
 					continue;
 				}
@@ -832,22 +836,20 @@ public partial class Laberinto : Node2D
 			if(candidatasCerrar.Count != 0)
 			{
 				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count-1)];
-				
+
 				GD.Print($"Puerta cerrada: {indiceCerrar}");
 
-				PuertaPosible puertaCerrar  = _puertasPosibles[indiceCerrar];
-				PintarPuerta(puertaCerrar , _puertasAbiertas[indiceCerrar], Celda.Muro);
+				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
+				PintarPuerta(puertaCerrar, _puertasAbiertas[indiceCerrar], Celda.Muro);
 				_puertasAbiertas.Remove(indiceCerrar);
+				cerradasEnCiclo.Add(indiceCerrar);
 			}
 			else
 			{
 				GD.Print("Sin candidatos a cerrar");
 			}
-
 		}
 	}
-
-
 }
 
 
