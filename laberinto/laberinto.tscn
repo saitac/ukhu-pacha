@@ -200,3 +200,6 @@ limit_top = 0
 limit_right = 3840
 limit_bottom = 3840
 script = ExtResource("13_j7smx")
+
+[node name="TimerMutacion" type="Timer" parent="." unique_id=511173597]
+one_shot = true

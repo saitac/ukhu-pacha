@@ -45,4 +45,11 @@ public static class LaberintoConfig
         public const float ProbabilidadPorFila = 0.7f;
 
     }
+
+    public static class Mutacion
+    {
+        public const float IntervaloMinSeg = 2.0f;
+        public const float IntervaloMaxSeg = 4.0f;
+        public const float PorcentajeCambio = 0.10f;
+    }
 }

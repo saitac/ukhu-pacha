@@ -9,6 +9,8 @@ public partial class Laberinto : Node2D
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
 
+	Timer _TimerMutacion;
+
 	private enum Celda
 	{
 		Piso,
@@ -85,6 +87,10 @@ public partial class Laberinto : Node2D
 		}
 
 		DibujarMurosInterior();
+
+		_TimerMutacion = GetNode<Timer>("TimerMutacion");
+		_TimerMutacion.Timeout += OnCicloPuertas;
+		ProgramarSiguienteCiclo();
 		
 	}
 
@@ -440,7 +446,7 @@ public partial class Laberinto : Node2D
 		return -1;
 	}
 
-	private void TallarPuerta(PuertaPosible puerta, int inicio)
+	private void PintarPuerta(PuertaPosible puerta, int inicio, Celda valor)
 	{
 		for(int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
 		{
@@ -450,10 +456,10 @@ public partial class Laberinto : Node2D
 			{
 				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
 				{
-					_mapa[pos, linea] = Celda.Piso;
+					_mapa[pos, linea] = valor;
 				} else if (puerta.Orientacion == PuertaOrientacion.Vertical)
 				{
-					_mapa[linea, pos] = Celda.Piso;
+					_mapa[linea, pos] = valor;
 				}
 			} 
 		}
@@ -528,7 +534,7 @@ public partial class Laberinto : Node2D
 
 			// Tallar y registrar
 			int inicio = _rng.RandiRange(puertaElegida.PrimeraValida, puertaElegida.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			TallarPuerta(puertaElegida, inicio);
+			PintarPuerta(puertaElegida, inicio, Celda.Piso);
 			// Agreo al diccionario a la clave "elegida", que es el índice en _puertasPosibles, el valor "inicio" donde empieza el hueco.
 			_puertasAbiertas[elegida] = inicio;
 
@@ -631,7 +637,7 @@ public partial class Laberinto : Node2D
 			// Tallo la puerta y la asigno al arreglo de _puertasAbiertas
 
 			int inicio = _rng.RandiRange(puerta.PrimeraValida, puerta.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			TallarPuerta(puerta, inicio);
+			PintarPuerta(puerta, inicio, Celda.Piso);
 			_puertasAbiertas[indicePuerta] = inicio;
 		}
 	}
@@ -676,6 +682,168 @@ public partial class Laberinto : Node2D
 			}
 
 			ColocarPilaresEnBloque(_bloques[indice]);
+		}
+	}
+
+	private void ProgramarSiguienteCiclo()
+	{
+		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.IntervaloMinSeg, LaberintoConfig.Mutacion.IntervaloMaxSeg);
+		_TimerMutacion.Start();
+	}
+
+	private void OnCicloPuertas()
+	{
+		//GD.Print($"Mutación tras: {_TimerMutacion.WaitTime:F1} segundos");
+		MutarPuertas();
+
+		if (!SalasConectadas(-1))
+		{
+			GD.PushError("Salas no conectadas");
+		}
+		
+		ProgramarSiguienteCiclo();
+	}
+
+	private bool SalasConectadas(int puertaIgnorada)
+	{
+		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
+		bool[] visitado = new bool[_bloques.Count];
+		
+		// Creo la pila que me permitirá realizar el DFS en la lógica 
+		Stack<int> pila = new();
+
+		// Empiezo con el bloque 0, para ello lo agrego a la pila y la marco como visitada
+		pila.Push(0);
+		visitado[0] = true;
+
+		while(pila.Count != 0)
+		{
+			// Obtengo el índice del bloque actual que se encuentra encima de la pila sin eliminarlo 
+			int actual = pila.Peek();
+
+			// Recorro las puertas posibles para encontrar sus vecinos con puertas abiertas
+			List<int> candidatas = [];
+			for(int pp = 0; pp < _puertasPosibles.Count; pp++)
+			{
+				PuertaPosible puerta = _puertasPosibles[pp];
+
+				// Valido si la puerta pp toca a actual
+				if(puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual)
+				{
+					continue;
+				}
+
+				// valido si la puerta pp esta abierta y no es la ignorada
+				if (!_puertasAbiertas.ContainsKey(pp) || pp == puertaIgnorada)
+				{
+					continue;
+				}
+
+				// Obtengo al vecino valido
+				int vecino = puerta.IndiceBloqueA == actual ? puerta.IndiceBloqueB : puerta.IndiceBloqueA;
+
+				//  Si vecino no fue visitado, lo agrego como candidato
+				if (!visitado[vecino])
+				{
+					candidatas.Add(vecino);
+				}
+			}
+
+			// Callejón sin salida: si no hay candidatas, retrocedo por el hilo
+			if(candidatas.Count == 0)
+			{
+				pila.Pop();
+				continue;
+			}
+
+			// Si existen candidatas, elijo la primera
+			visitado[candidatas[0]] = true;
+			pila.Push(candidatas[0]);
+		}
+
+		// valido si se pudo acceder a todos los bloques, es decir si están todos conectados
+		foreach(bool v in visitado)
+		{
+			if (!v)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void MutarPuertas()
+	{
+		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
+
+		GD.Print($"--- Ciclo: {intercambios} intercambios, {_puertasAbiertas.Count} puertas abiertas");
+
+		for(int intercambio = 0; intercambio < intercambios; intercambio++)
+		{
+			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
+			// valido si el índice de cada _puertaPosible en _puertasPosibles es key en _puertasAbiertas
+			// Si no es una key, entonces la agrego a puertasCerradas.
+			List<int> puertasCerradas = []; 
+			for(int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
+			{
+				if (!_puertasAbiertas.ContainsKey(ppIndex))
+				{
+					puertasCerradas.Add(ppIndex);
+				}
+			}
+
+			// Si ya no quedan puertas cerradas, me salto los ciclos.
+			if(puertasCerradas.Count == 0)
+			{
+				break;
+			}
+
+			// Selecciono al azar una de las puertas cerradas para abrirla.
+			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count-1)];
+			PuertaPosible puertaAbrir = _puertasPosibles[indiceAbrir];
+
+			GD.Print($"Puerta abierta: {indiceAbrir}");
+
+			// Tallar (abrir) puerta y registrarla como abierta
+			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
+			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
+			_puertasAbiertas[indiceAbrir] = inicio;
+
+
+			// Busco puertas abiertas (excluyendo la nueva -- indiceAbrir [puertaAabrir]) candidatas a cerrar.
+			List<int> candidatasCerrar = [];
+			foreach(int key in _puertasAbiertas.Keys)
+			{
+				if(key == indiceAbrir)
+				{
+					continue;
+				}
+
+				if (!SalasConectadas(key))
+				{
+					continue;
+				}
+
+				candidatasCerrar.Add(key);
+			}
+
+			// Si hay candidatas a cerrar, selecciono una al azar y la cierro.
+			if(candidatasCerrar.Count != 0)
+			{
+				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count-1)];
+				
+				GD.Print($"Puerta cerrada: {indiceCerrar}");
+
+				PuertaPosible puertaCerrar  = _puertasPosibles[indiceCerrar];
+				PintarPuerta(puertaCerrar , _puertasAbiertas[indiceCerrar], Celda.Muro);
+				_puertasAbiertas.Remove(indiceCerrar);
+			}
+			else
+			{
+				GD.Print("Sin candidatos a cerrar");
+			}
+
 		}
 	}
 
