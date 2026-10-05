@@ -782,8 +782,6 @@ public partial class Laberinto : Node2D
 
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
-		GD.Print($"--- Ciclo: {intercambios} intercambios, {_puertasAbiertas.Count} puertas abiertas");
-
 		for(int intercambio = 0; intercambio < intercambios; intercambio++)
 		{
 			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
@@ -809,8 +807,6 @@ public partial class Laberinto : Node2D
 			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count-1)];
 			PuertaPosible puertaAbrir = _puertasPosibles[indiceAbrir];
 
-			GD.Print($"Puerta abierta: {indiceAbrir}");
-
 			// Tallar (abrir) puerta y registrarla como abierta
 			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
 			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
@@ -829,7 +825,6 @@ public partial class Laberinto : Node2D
 
 				if(IncaEnPuerta(key, celdaInca))
 				{
-					GD.Print($"El inca esta en: {key}");
 					continue;
 				}
 
@@ -846,16 +841,10 @@ public partial class Laberinto : Node2D
 			{
 				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count-1)];
 
-				GD.Print($"Puerta cerrada: {indiceCerrar}");
-
 				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
 				PintarPuerta(puertaCerrar, _puertasAbiertas[indiceCerrar], Celda.Muro);
 				_puertasAbiertas.Remove(indiceCerrar);
 				cerradasEnCiclo.Add(indiceCerrar);
-			}
-			else
-			{
-				GD.Print("Sin candidatos a cerrar");
 			}
 		}
 	}

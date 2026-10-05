@@ -50,8 +50,8 @@ public static class LaberintoConfig
 
     public static class Mutacion
     {
-        public const float IntervaloMinSeg = 2.0f;
-        public const float IntervaloMaxSeg = 4.0f;
+        public const float IntervaloMinSeg = 45.0f;
+        public const float IntervaloMaxSeg = 75.0f;
         public const float PorcentajeCambio = 0.10f;
         public const int MargenPuertaInca = 1;
     }
