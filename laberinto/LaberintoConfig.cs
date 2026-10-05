@@ -15,6 +15,8 @@ public static class LaberintoConfig
     {
         public const int TerrainSet = 0;
         public const int Terrain = 0;
+        public const int GrosorBorde = 1; // si lo subes, revisa TamanoMinimo.
+        public const int GrosorMuroCompartido = GrosorBorde * 2;
     }
 
     public static class Grilla
@@ -44,5 +46,13 @@ public static class LaberintoConfig
         
         public const float ProbabilidadPorFila = 0.7f;
 
+    }
+
+    public static class Mutacion
+    {
+        public const float IntervaloMinSeg = 45.0f;
+        public const float IntervaloMaxSeg = 75.0f;
+        public const float PorcentajeCambio = 0.10f;
+        public const int MargenPuertaInca = 1;
     }
 }

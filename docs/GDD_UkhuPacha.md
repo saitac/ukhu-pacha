@@ -58,6 +58,17 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   1. **Advertencia:** temblor de pantalla + sonido grave (aviso al jugador).
   2. **Cálculo:** el algoritmo transforma puertas (ciclo de tiempo) o salas (disco de Inti).
   3. **Regla de oro:** nunca sellar el único camino disponible hacia el jugador o los objetivos activos, salvo que exista ruta alternativa.
+- **Ciclo de puertas (decisiones Fase 3):**
+  - **Frecuencia:** intervalo con variación aleatoria (orientativo: 45–75 s), configurable en `LaberintoConfig`. Nunca fijo, para que el jugador no pueda "contar" el ciclo.
+  - **Cambio parcial:** en cada ciclo se cierran algunas puertas abiertas y se abren otras; el mapa sigue siendo reconocible, pero "algo cambió".
+  - **Intercambios por ciclo:** K = máx(1, redondear(puertas abiertas × `PorcentajeCambio`)), orientativo 10–15 % (≈3 intercambios en un mapa de 40×40). Cada intercambio = abrir una puerta cerrada + cerrar otra abierta, así que la cantidad de puertas abiertas se mantiene estable. Valor a ajustar con playtesting; en Fase 6 podría subir con cada disco.
+  - **Algoritmo (abrir primero, cerrar después):** abrir una puerta cerrada siempre forma un ciclo, lo que garantiza que exista al menos otra puerta cerrable sin aislar salas. Se cierra una puerta al azar de entre las candidatas que mantienen todo conectado (verificación sobre el grafo de salas, no sobre las celdas); si no hay candidatas, ese intercambio no ocurre.
+  - **Regla de oro (versión estricta):** después de cada ciclo **todas las salas siguen conectadas**, no solo la del jugador y sus objetivos.
+  - **Puerta ocupada:** nunca se cierra una puerta sobre la que está parado el Inca.
+  - **Feedback:** temblor de cámara + polvo/tierra que se levanta en las puertas que cambian. Sonido grave en Fase 9.
+  - **Aviso gradual (sin reloj en pantalla):** unos segundos antes de cada ciclo cae polvo fino del techo y empieza un temblor leve que crece hasta la mutación. El jugador sabe que *falta poco*, nunca cuánto exactamente. Se descartó un contador visible porque convierte el terror en gestión de tiempo y rompe la inmersión.
+  - *Ideas para Fase 9:* indicador diegético andino (p. ej. chakana que se ilumina por fases) y aviso más temprano/evidente como opción de dificultad o accesibilidad.
+  - *Pendiente:* aceleración del ciclo por disco (Fase 6) y mutación solo fuera de la luz de la antorcha (Fase 4).
 - **Ancla en un cambio de salas:** la sala donde está el Inca en ese momento **no se modifica** (evita que el jugador quede dentro de un muro). La puerta final sí se va de esa sala.
 - **Semillas aleatorias (seeds):** cada partida genera un mapa distinto; las semillas se pueden compartir entre jugadores.
 - **La puerta final se mueve solo en los cambios de salas** (la cueva protege la Ciudad Perdida y la esconde, ver 2. Narrativa). Entre un disco y el siguiente queda quieta; lo que cambia son las rutas hacia ella (ciclos de puertas).

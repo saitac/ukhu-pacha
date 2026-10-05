@@ -9,6 +9,8 @@ public partial class Laberinto : Node2D
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
 
+	Timer _TimerMutacion;
+
 	private enum Celda
 	{
 		Piso,
@@ -30,8 +32,9 @@ public partial class Laberinto : Node2D
 
 	// Posible puerta entre dos bloques vecinos (todavía no tallada).
 	// PrimeraValida..UltimaValida: filas (Horizontal) o columnas (Vertical) donde puede ir la puerta.
-	// PrimeraLineaMuro: columna (Horizontal) o fila (Vertical) del muro. La segunda línea es PrimeraLineaMuro + 1,
-	// porque CerrarBloque pinta el borde completo de cada bloque y el muro compartido queda de 2 celdas de grosor.
+	// PrimeraLineaMuro: primera columna (Horizontal) o fila (Vertical) del muro compartido.
+	// El muro ocupa GrosorMuroCompartido líneas desde ahí (PrimeraLineaMuro .. PrimeraLineaMuro + GrosorMuroCompartido - 1),
+	// porque CerrarBloque pinta un borde de GrosorBorde en cada bloque y los dos bordes quedan pegados.
 	private record struct PuertaPosible(int IndiceBloqueA, int IndiceBloqueB, PuertaOrientacion Orientacion, 
 	int PrimeraValida, int UltimaValida, int PrimeraLineaMuro);
 	
@@ -85,6 +88,10 @@ public partial class Laberinto : Node2D
 		}
 
 		DibujarMurosInterior();
+
+		_TimerMutacion = GetNode<Timer>("TimerMutacion");
+		_TimerMutacion.Timeout += OnCicloPuertas;
+		ProgramarSiguienteCiclo();
 		
 	}
 
@@ -332,11 +339,9 @@ public partial class Laberinto : Node2D
 		{
 			for(int columna = bloque.Position.X; columna < bloque.End.X; columna++)
 			{
-				bool esBorde =  fila == bloque.Position.Y || fila == bloque.End.Y - 1 
-				|| columna == bloque.Position.X || columna == bloque.End.X - 1;
-
+				bool esBorde = fila < bloque.Position.Y + LaberintoConfig.Muro.GrosorBorde || fila >= bloque.End.Y - LaberintoConfig.Muro.GrosorBorde
+				|| columna < bloque.Position.X + LaberintoConfig.Muro.GrosorBorde || columna >= bloque.End.X - LaberintoConfig.Muro.GrosorBorde;
 				_mapa[fila, columna] = esBorde ? Celda.Muro : Celda.Piso;
-
 			}
 		}
 	}
@@ -386,14 +391,16 @@ public partial class Laberinto : Node2D
 		int finComun = Math.Min(ultimaFilaIzquierdo, ultimaFilaDerecho);
 
 		// Filas válidas para una puerta
-		int primeraValida = inicioComun + 1;
-		int ultimaValida = finComun - 1;
+		int primeraValida = inicioComun + LaberintoConfig.Muro.GrosorBorde;
+		int ultimaValida = finComun - LaberintoConfig.Muro.GrosorBorde;
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
+
+		int primeraColumnaMuro = izquierdo.End.X - LaberintoConfig.Muro.GrosorBorde;
 		
-		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, ultimaColumnaIzquierdo);
+		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, primeraColumnaMuro);
 	}
 
 	private PuertaPosible? BuscarPuertaVertical(Rect2I arriba, Rect2I abajo, int bloquesIndiceArriba,  int bloquesIndiceAbajo)
@@ -417,14 +424,16 @@ public partial class Laberinto : Node2D
 		int finComun = Math.Min(ultimaColumnaArriba, ultimaColumnaAbajo);
 
 		// Columnas válidas para una puerta
-		int primeraValida = inicioComun + 1;
-		int ultimaValida = finComun - 1;
+		int primeraValida = inicioComun + LaberintoConfig.Muro.GrosorBorde;
+		int ultimaValida = finComun - LaberintoConfig.Muro.GrosorBorde;
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
 
-		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, ultimaFilaArriba);
+		int primeraFilaMuro = arriba.End.Y - LaberintoConfig.Muro.GrosorBorde;
+
+		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, primeraFilaMuro);
 	}
 
 	private int IndiceBloqueDe(Vector2I celda)
@@ -440,20 +449,20 @@ public partial class Laberinto : Node2D
 		return -1;
 	}
 
-	private void TallarPuerta(PuertaPosible puerta, int inicio)
+	private void PintarPuerta(PuertaPosible puerta, int inicio, Celda valor)
 	{
 		for(int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
 		{
 			int pos = inicio + ancho;
-			for(int linea = puerta.PrimeraLineaMuro; linea <= puerta.PrimeraLineaMuro + 1; linea++)
-			// + 1: el muro entre bloques es doble (cada bloque cierra su propio perímetro)
+
+			for(int linea = puerta.PrimeraLineaMuro; linea < puerta.PrimeraLineaMuro + LaberintoConfig.Muro.GrosorMuroCompartido; linea++)
 			{
 				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
 				{
-					_mapa[pos, linea] = Celda.Piso;
+					_mapa[pos, linea] = valor;
 				} else if (puerta.Orientacion == PuertaOrientacion.Vertical)
 				{
-					_mapa[linea, pos] = Celda.Piso;
+					_mapa[linea, pos] = valor;
 				}
 			} 
 		}
@@ -528,7 +537,7 @@ public partial class Laberinto : Node2D
 
 			// Tallar y registrar
 			int inicio = _rng.RandiRange(puertaElegida.PrimeraValida, puertaElegida.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			TallarPuerta(puertaElegida, inicio);
+			PintarPuerta(puertaElegida, inicio, Celda.Piso);
 			// Agreo al diccionario a la clave "elegida", que es el índice en _puertasPosibles, el valor "inicio" donde empieza el hueco.
 			_puertasAbiertas[elegida] = inicio;
 
@@ -631,18 +640,16 @@ public partial class Laberinto : Node2D
 			// Tallo la puerta y la asigno al arreglo de _puertasAbiertas
 
 			int inicio = _rng.RandiRange(puerta.PrimeraValida, puerta.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			TallarPuerta(puerta, inicio);
+			PintarPuerta(puerta, inicio, Celda.Piso);
 			_puertasAbiertas[indicePuerta] = inicio;
 		}
 	}
 
 	private void ColocarPilaresEnBloque(Rect2I bloque)
 	{
-		const int espesorMuro = 1; // CerrarBloque pone 1 celda de borde
-
 		// Obtengo la zona donde podría colocar pilares, la zona debe ser más pequeña que la original en espesor del muro
 		// más un margen mínimo dado
-		Rect2I zona = bloque.Grow(-(espesorMuro + LaberintoConfig.Pilares.DistanciaMinimaPiso));
+		Rect2I zona = bloque.Grow(-(LaberintoConfig.Muro.GrosorBorde + LaberintoConfig.Pilares.DistanciaMinimaPiso));
 
 		// Si zona no tiene área entonces no hace nada
 		if (!zona.HasArea())
@@ -679,7 +686,185 @@ public partial class Laberinto : Node2D
 		}
 	}
 
+	private void ProgramarSiguienteCiclo()
+	{
+		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.IntervaloMinSeg, LaberintoConfig.Mutacion.IntervaloMaxSeg);
+		_TimerMutacion.Start();
+	}
 
+	private void OnCicloPuertas()
+	{
+		MutarPuertas();
+		RedibujarMuros();
+		if (!SalasConectadas(-1))
+		{
+			GD.PushError("Salas no conectadas");
+		}
+		
+		ProgramarSiguienteCiclo();
+	}
+
+	private bool SalasConectadas(int puertaIgnorada)
+	{
+		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
+		bool[] visitado = new bool[_bloques.Count];
+		
+		// Creo la pila que me permitirá realizar el DFS en la lógica 
+		Stack<int> pila = new();
+
+		// Empiezo con el bloque 0, para ello lo agrego a la pila y la marco como visitada
+		pila.Push(0);
+		visitado[0] = true;
+
+		while(pila.Count != 0)
+		{
+			// Obtengo el índice del bloque actual que se encuentra encima de la pila sin eliminarlo 
+			int actual = pila.Peek();
+
+			// Recorro las puertas posibles para encontrar sus vecinos con puertas abiertas
+			List<int> candidatas = [];
+			for(int pp = 0; pp < _puertasPosibles.Count; pp++)
+			{
+				PuertaPosible puerta = _puertasPosibles[pp];
+
+				// Valido si la puerta pp toca a actual
+				if(puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual)
+				{
+					continue;
+				}
+
+				// valido si la puerta pp esta abierta y no es la ignorada
+				if (!_puertasAbiertas.ContainsKey(pp) || pp == puertaIgnorada)
+				{
+					continue;
+				}
+
+				// Obtengo al vecino valido
+				int vecino = puerta.IndiceBloqueA == actual ? puerta.IndiceBloqueB : puerta.IndiceBloqueA;
+
+				//  Si vecino no fue visitado, lo agrego como candidato
+				if (!visitado[vecino])
+				{
+					candidatas.Add(vecino);
+				}
+			}
+
+			// Callejón sin salida: si no hay candidatas, retrocedo por el hilo
+			if(candidatas.Count == 0)
+			{
+				pila.Pop();
+				continue;
+			}
+
+			// Si existen candidatas, elijo la primera
+			visitado[candidatas[0]] = true;
+			pila.Push(candidatas[0]);
+		}
+
+		// valido si se pudo acceder a todos los bloques, es decir si están todos conectados
+		foreach(bool v in visitado)
+		{
+			if (!v)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void MutarPuertas()
+	{
+		HashSet<int> abiertasEnCiclo = [];
+		HashSet<int> cerradasEnCiclo = [];
+
+		Vector2I celdaInca = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+
+		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
+
+		for(int intercambio = 0; intercambio < intercambios; intercambio++)
+		{
+			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
+			// valido si el índice de cada _puertaPosible en _puertasPosibles es key en _puertasAbiertas
+			// Si no es una key, entonces la agrego a puertasCerradas, siempre y cuando no haya sido una puerta
+			// recientemente cerrada en el ciclo de mutación.
+			List<int> puertasCerradas = [];
+			for(int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
+			{
+				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.Contains(ppIndex))
+				{
+					puertasCerradas.Add(ppIndex);
+				}
+			}
+
+			// Si ya no quedan puertas cerradas, corto los intercambios restantes del ciclo actual.
+			if(puertasCerradas.Count == 0)
+			{
+				break;
+			}
+
+			// Selecciono al azar una de las puertas cerradas para abrirla.
+			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count-1)];
+			PuertaPosible puertaAbrir = _puertasPosibles[indiceAbrir];
+
+			// Tallar (abrir) puerta y registrarla como abierta
+			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
+			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
+			_puertasAbiertas[indiceAbrir] = inicio;
+			abiertasEnCiclo.Add(indiceAbrir);
+
+			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
+			// candidatas a cerrar.
+			List<int> candidatasCerrar = [];
+			foreach(int key in _puertasAbiertas.Keys)
+			{
+				if(abiertasEnCiclo.Contains(key))
+				{
+					continue;
+				}
+
+				if(IncaEnPuerta(key, celdaInca))
+				{
+					continue;
+				}
+
+				if(!SalasConectadas(key))
+				{
+					continue;
+				}
+
+				candidatasCerrar.Add(key);
+			}
+
+			// Si hay candidatas a cerrar, selecciono una al azar y la cierro.
+			if(candidatasCerrar.Count != 0)
+			{
+				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count-1)];
+
+				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
+				PintarPuerta(puertaCerrar, _puertasAbiertas[indiceCerrar], Celda.Muro);
+				_puertasAbiertas.Remove(indiceCerrar);
+				cerradasEnCiclo.Add(indiceCerrar);
+			}
+		}
+	}
+
+	private void RedibujarMuros()
+	{
+		_Muros.Clear();
+		PintarMuroPerimetral();
+		DibujarMurosInterior();
+	}
+
+	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
+	{
+		PuertaPosible puerta = _puertasPosibles[indicePuerta];
+		int inicio = _puertasAbiertas[indicePuerta];
+		
+		Rect2I areaPuerta = puerta.Orientacion == PuertaOrientacion.Horizontal ? 
+		new Rect2I(puerta.PrimeraLineaMuro, inicio, LaberintoConfig.Muro.GrosorMuroCompartido, LaberintoConfig.Bloque.AnchoPuerta) :
+		new Rect2I(inicio, puerta.PrimeraLineaMuro, LaberintoConfig.Bloque.AnchoPuerta, LaberintoConfig.Muro.GrosorMuroCompartido);
+
+		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
+	}
 }
-
-
