@@ -15,6 +15,8 @@ public static class LaberintoConfig
     {
         public const int TerrainSet = 0;
         public const int Terrain = 0;
+        public const int GrosorBorde = 1; // si lo subes, revisa TamanoMinimo.
+        public const int GrosorMuroCompartido = GrosorBorde * 2;
     }
 
     public static class Grilla

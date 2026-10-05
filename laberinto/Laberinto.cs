@@ -32,8 +32,9 @@ public partial class Laberinto : Node2D
 
 	// Posible puerta entre dos bloques vecinos (todavía no tallada).
 	// PrimeraValida..UltimaValida: filas (Horizontal) o columnas (Vertical) donde puede ir la puerta.
-	// PrimeraLineaMuro: columna (Horizontal) o fila (Vertical) del muro. La segunda línea es PrimeraLineaMuro + 1,
-	// porque CerrarBloque pinta el borde completo de cada bloque y el muro compartido queda de 2 celdas de grosor.
+	// PrimeraLineaMuro: primera columna (Horizontal) o fila (Vertical) del muro compartido.
+	// El muro ocupa GrosorMuroCompartido líneas desde ahí (PrimeraLineaMuro .. PrimeraLineaMuro + GrosorMuroCompartido - 1),
+	// porque CerrarBloque pinta un borde de GrosorBorde en cada bloque y los dos bordes quedan pegados.
 	private record struct PuertaPosible(int IndiceBloqueA, int IndiceBloqueB, PuertaOrientacion Orientacion, 
 	int PrimeraValida, int UltimaValida, int PrimeraLineaMuro);
 	
@@ -338,11 +339,9 @@ public partial class Laberinto : Node2D
 		{
 			for(int columna = bloque.Position.X; columna < bloque.End.X; columna++)
 			{
-				bool esBorde =  fila == bloque.Position.Y || fila == bloque.End.Y - 1 
-				|| columna == bloque.Position.X || columna == bloque.End.X - 1;
-
+				bool esBorde = fila < bloque.Position.Y + LaberintoConfig.Muro.GrosorBorde || fila >= bloque.End.Y - LaberintoConfig.Muro.GrosorBorde
+				|| columna < bloque.Position.X + LaberintoConfig.Muro.GrosorBorde || columna >= bloque.End.X - LaberintoConfig.Muro.GrosorBorde;
 				_mapa[fila, columna] = esBorde ? Celda.Muro : Celda.Piso;
-
 			}
 		}
 	}
@@ -392,14 +391,16 @@ public partial class Laberinto : Node2D
 		int finComun = Math.Min(ultimaFilaIzquierdo, ultimaFilaDerecho);
 
 		// Filas válidas para una puerta
-		int primeraValida = inicioComun + 1;
-		int ultimaValida = finComun - 1;
+		int primeraValida = inicioComun + LaberintoConfig.Muro.GrosorBorde;
+		int ultimaValida = finComun - LaberintoConfig.Muro.GrosorBorde;
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
+
+		int primeraColumnaMuro = izquierdo.End.X - LaberintoConfig.Muro.GrosorBorde;
 		
-		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, ultimaColumnaIzquierdo);
+		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, primeraColumnaMuro);
 	}
 
 	private PuertaPosible? BuscarPuertaVertical(Rect2I arriba, Rect2I abajo, int bloquesIndiceArriba,  int bloquesIndiceAbajo)
@@ -423,14 +424,16 @@ public partial class Laberinto : Node2D
 		int finComun = Math.Min(ultimaColumnaArriba, ultimaColumnaAbajo);
 
 		// Columnas válidas para una puerta
-		int primeraValida = inicioComun + 1;
-		int ultimaValida = finComun - 1;
+		int primeraValida = inicioComun + LaberintoConfig.Muro.GrosorBorde;
+		int ultimaValida = finComun - LaberintoConfig.Muro.GrosorBorde;
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
 		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
 
-		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, ultimaFilaArriba);
+		int primeraFilaMuro = arriba.End.Y - LaberintoConfig.Muro.GrosorBorde;
+
+		return new PuertaPosible(bloquesIndiceArriba, bloquesIndiceAbajo, PuertaOrientacion.Vertical, primeraValida, ultimaValida, primeraFilaMuro);
 	}
 
 	private int IndiceBloqueDe(Vector2I celda)
@@ -451,8 +454,8 @@ public partial class Laberinto : Node2D
 		for(int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
 		{
 			int pos = inicio + ancho;
-			for(int linea = puerta.PrimeraLineaMuro; linea <= puerta.PrimeraLineaMuro + 1; linea++)
-			// + 1: el muro entre bloques es doble (cada bloque cierra su propio perímetro)
+
+			for(int linea = puerta.PrimeraLineaMuro; linea < puerta.PrimeraLineaMuro + LaberintoConfig.Muro.GrosorMuroCompartido; linea++)
 			{
 				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
 				{
@@ -644,11 +647,9 @@ public partial class Laberinto : Node2D
 
 	private void ColocarPilaresEnBloque(Rect2I bloque)
 	{
-		const int espesorMuro = 1; // CerrarBloque pone 1 celda de borde
-
 		// Obtengo la zona donde podría colocar pilares, la zona debe ser más pequeña que la original en espesor del muro
 		// más un margen mínimo dado
-		Rect2I zona = bloque.Grow(-(espesorMuro + LaberintoConfig.Pilares.DistanciaMinimaPiso));
+		Rect2I zona = bloque.Grow(-(LaberintoConfig.Muro.GrosorBorde + LaberintoConfig.Pilares.DistanciaMinimaPiso));
 
 		// Si zona no tiene área entonces no hace nada
 		if (!zona.HasArea())
