@@ -694,9 +694,8 @@ public partial class Laberinto : Node2D
 
 	private void OnCicloPuertas()
 	{
-		//GD.Print($"Mutación tras: {_TimerMutacion.WaitTime:F1} segundos");
 		MutarPuertas();
-
+		RedibujarMuros();
 		if (!SalasConectadas(-1))
 		{
 			GD.PushError("Salas no conectadas");
@@ -779,6 +778,8 @@ public partial class Laberinto : Node2D
 		HashSet<int> abiertasEnCiclo = [];
 		HashSet<int> cerradasEnCiclo = [];
 
+		Vector2I celdaInca = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
 		GD.Print($"--- Ciclo: {intercambios} intercambios, {_puertasAbiertas.Count} puertas abiertas");
@@ -816,16 +817,23 @@ public partial class Laberinto : Node2D
 			_puertasAbiertas[indiceAbrir] = inicio;
 			abiertasEnCiclo.Add(indiceAbrir);
 
-			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación) candidatas a cerrar.
+			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
+			// candidatas a cerrar.
 			List<int> candidatasCerrar = [];
 			foreach(int key in _puertasAbiertas.Keys)
 			{
-				if (abiertasEnCiclo.Contains(key))
+				if(abiertasEnCiclo.Contains(key))
 				{
 					continue;
 				}
 
-				if (!SalasConectadas(key))
+				if(IncaEnPuerta(key, celdaInca))
+				{
+					GD.Print($"El inca esta en: {key}");
+					continue;
+				}
+
+				if(!SalasConectadas(key))
 				{
 					continue;
 				}
@@ -851,6 +859,23 @@ public partial class Laberinto : Node2D
 			}
 		}
 	}
+
+	private void RedibujarMuros()
+	{
+		_Muros.Clear();
+		PintarMuroPerimetral();
+		DibujarMurosInterior();
+	}
+
+	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
+	{
+		PuertaPosible puerta = _puertasPosibles[indicePuerta];
+		int inicio = _puertasAbiertas[indicePuerta];
+		
+		Rect2I areaPuerta = puerta.Orientacion == PuertaOrientacion.Horizontal ? 
+		new Rect2I(puerta.PrimeraLineaMuro, inicio, LaberintoConfig.Muro.GrosorMuroCompartido, LaberintoConfig.Bloque.AnchoPuerta) :
+		new Rect2I(inicio, puerta.PrimeraLineaMuro, LaberintoConfig.Bloque.AnchoPuerta, LaberintoConfig.Muro.GrosorMuroCompartido);
+
+		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
+	}
 }
-
-
