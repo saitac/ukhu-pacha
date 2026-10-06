@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public partial class Laberinto : Node2D
 {
@@ -694,12 +695,28 @@ public partial class Laberinto : Node2D
 
 	private void OnCicloPuertas()
 	{
+		Stopwatch cronometro = Stopwatch.StartNew();
+		Stopwatch cronometroTotal = Stopwatch.StartNew();
+
 		MutarPuertas();
+
+		GD.Print($"MutarPuertas: {cronometro.Elapsed.TotalMilliseconds:F2} ms"); 
+		
+		cronometro.Restart();
+
 		RedibujarMuros();
+
+		GD.Print($"RedibujarMuros: {cronometro.Elapsed.TotalMilliseconds:F2} ms"); 
+		cronometro.Restart();
+
 		if (!SalasConectadas(-1))
 		{
 			GD.PushError("Salas no conectadas");
 		}
+
+		GD.Print($"SalasConectadas: {cronometro.Elapsed.TotalMilliseconds:F2} ms");
+
+		GD.Print($"Tiempo Total: {cronometroTotal.Elapsed.TotalMilliseconds:F2} ms");
 		
 		ProgramarSiguienteCiclo();
 	}
@@ -854,6 +871,7 @@ public partial class Laberinto : Node2D
 		_Muros.Clear();
 		PintarMuroPerimetral();
 		DibujarMurosInterior();
+		//_Muros.UpdateInternals();
 	}
 
 	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
