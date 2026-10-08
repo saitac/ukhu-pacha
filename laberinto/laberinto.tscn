@@ -205,6 +205,7 @@ tile_set = SubResource("TileSet_hfs8p")
 [node name="Muros" type="TileMapLayer" parent="." unique_id=829144962]
 scale = Vector2(3, 3)
 tile_set = SubResource("TileSet_hfs8p")
+physics_quadrant_size = 4
 
 [node name="Inca" parent="." unique_id=313612664 instance=ExtResource("4_f4ou2")]
 position = Vector2(1920, 1920)
