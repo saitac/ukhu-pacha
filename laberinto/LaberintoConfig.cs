@@ -50,9 +50,10 @@ public static class LaberintoConfig
 
     public static class Mutacion
     {
-        public const float IntervaloMinSeg = 2.0f; // 45
-        public const float IntervaloMaxSeg = 5.0f; // 75
+        public const float IntervaloMinSeg = 45.0f;
+        public const float IntervaloMaxSeg = 75.0f;
         public const float PorcentajeCambio = 0.10f;
         public const int MargenPuertaInca = 1;
+        public const int MargenRedibujado = 1; // Recalcula los vecinos del tramo, cuyos tiles apuntan a celdas que cambiaron; con 0 quedan conexiones viejas (mantener siempre en 1)
     }
 }
