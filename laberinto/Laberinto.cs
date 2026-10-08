@@ -691,11 +691,13 @@ public partial class Laberinto : Node2D
 		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.IntervaloMinSeg, LaberintoConfig.Mutacion.IntervaloMaxSeg);
 		_TimerMutacion.Start();
 	}
-
 	private void OnCicloPuertas()
 	{
-		MutarPuertas();
-		RedibujarMuros();
+		(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
+		HashSet<int> puertas = [..abiertas, ..cerradas];
+
+		RedibujarPuertas(puertas);
+
 		if (!SalasConectadas(-1))
 		{
 			GD.PushError("Salas no conectadas");
@@ -703,7 +705,6 @@ public partial class Laberinto : Node2D
 		
 		ProgramarSiguienteCiclo();
 	}
-
 	private bool SalasConectadas(int puertaIgnorada)
 	{
 		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
@@ -773,7 +774,7 @@ public partial class Laberinto : Node2D
 		return true;
 	}
 
-	private void MutarPuertas()
+	private (HashSet<int> Abiertas, HashSet<int> Cerradas) MutarPuertas()
 	{
 		HashSet<int> abiertasEnCiclo = [];
 		HashSet<int> cerradasEnCiclo = [];
@@ -847,24 +848,56 @@ public partial class Laberinto : Node2D
 				cerradasEnCiclo.Add(indiceCerrar);
 			}
 		}
-	}
 
-	private void RedibujarMuros()
-	{
-		_Muros.Clear();
-		PintarMuroPerimetral();
-		DibujarMurosInterior();
+		return (abiertasEnCiclo, cerradasEnCiclo);
 	}
-
 	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
 	{
 		PuertaPosible puerta = _puertasPosibles[indicePuerta];
 		int inicio = _puertasAbiertas[indicePuerta];
-		
-		Rect2I areaPuerta = puerta.Orientacion == PuertaOrientacion.Horizontal ? 
-		new Rect2I(puerta.PrimeraLineaMuro, inicio, LaberintoConfig.Muro.GrosorMuroCompartido, LaberintoConfig.Bloque.AnchoPuerta) :
-		new Rect2I(inicio, puerta.PrimeraLineaMuro, LaberintoConfig.Bloque.AnchoPuerta, LaberintoConfig.Muro.GrosorMuroCompartido);
+		Rect2I areaPuerta = AreaEnTramo(puerta, inicio, LaberintoConfig.Bloque.AnchoPuerta);
 
 		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
+	}
+
+	private void RedibujarPuertas(HashSet<int> puertas)
+	{
+		// Repinta el tramo más un margen leyendo _mapa: una puerta cerrada ya no guarda su inicio.
+		Godot.Collections.Array<Vector2I> celdasMuro = [];
+		Rect2I limitesMapa = new(Vector2I.Zero, _mapa.GetLength(1), _mapa.GetLength(0));
+
+		// Recorro cada índice de puerta que debo redibujar
+		foreach(int indice in puertas)
+		{
+			PuertaPosible puerta = _puertasPosibles[indice];
+			int largoTramo = (puerta.UltimaValida - puerta.PrimeraValida) + 1;
+			Rect2I tramo = AreaEnTramo(puerta, puerta.PrimeraValida, largoTramo);
+			Rect2I tramoAmpliado = tramo.Grow(LaberintoConfig.Mutacion.MargenRedibujado);
+			Rect2I areaARedibujar = tramoAmpliado.Intersection(limitesMapa);
+
+			for(int fila = areaARedibujar.Position.Y; fila < areaARedibujar.End.Y; fila++)
+			{
+				for(int columna = areaARedibujar.Position.X; columna < areaARedibujar.End.X; columna++)
+				{
+					Vector2I celda = new(columna + 1, fila + 1);
+					_Muros.EraseCell(celda);
+
+					if(_mapa[fila, columna] == Celda.Muro)
+					{
+						celdasMuro.Add(celda);
+					}
+				}
+			}
+		}
+
+		// Renderizo las celdas muro en el juego
+		_Muros.SetCellsTerrainConnect(celdasMuro, LaberintoConfig.Muro.TerrainSet, LaberintoConfig.Muro.Terrain, true);
+	}
+
+	private Rect2I AreaEnTramo(PuertaPosible puerta, int desde, int largo)
+	{
+		return puerta.Orientacion == PuertaOrientacion.Horizontal ?
+		new Rect2I(puerta.PrimeraLineaMuro, desde, LaberintoConfig.Muro.GrosorMuroCompartido, largo) :
+		new Rect2I(desde, puerta.PrimeraLineaMuro, largo, LaberintoConfig.Muro.GrosorMuroCompartido);
 	}
 }

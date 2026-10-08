@@ -54,5 +54,6 @@ public static class LaberintoConfig
         public const float IntervaloMaxSeg = 75.0f;
         public const float PorcentajeCambio = 0.10f;
         public const int MargenPuertaInca = 1;
+        public const int MargenRedibujado = 1; // Recalcula los vecinos del tramo, cuyos tiles apuntan a celdas que cambiaron; con 0 quedan conexiones viejas (mantener siempre en 1)
     }
 }
