@@ -5,11 +5,11 @@ using System.Collections.Generic;
 public partial class Laberinto : Node2D
 {
 	RandomNumberGenerator _rng;
-	TileMapLayer _Piso ;
+	TileMapLayer _Piso;
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
-
 	Timer _TimerMutacion;
+	CamaraInca _CamaraInca;
 
 	private enum Celda
 	{
@@ -35,9 +35,25 @@ public partial class Laberinto : Node2D
 	// PrimeraLineaMuro: primera columna (Horizontal) o fila (Vertical) del muro compartido.
 	// El muro ocupa GrosorMuroCompartido líneas desde ahí (PrimeraLineaMuro .. PrimeraLineaMuro + GrosorMuroCompartido - 1),
 	// porque CerrarBloque pinta un borde de GrosorBorde en cada bloque y los dos bordes quedan pegados.
-	private record struct PuertaPosible(int IndiceBloqueA, int IndiceBloqueB, PuertaOrientacion Orientacion, 
+	private record struct PuertaPosible(int IndiceBloqueA, int IndiceBloqueB, PuertaOrientacion Orientacion,
 	int PrimeraValida, int UltimaValida, int PrimeraLineaMuro);
-	
+
+	private enum EstadoCiclo
+	{
+		Calma,
+		Aviso
+	}
+
+	private EstadoCiclo _estadoCiclo;
+
+	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
+	[Signal]
+	public delegate void AvisoIniciadoEventHandler(float duracion);
+
+	// Declaro evento que indica que la mutación ya ocurrió
+	[Signal]
+	public delegate void MutacionOcurridaEventHandler();
+
 	public override void _Ready()
 	{
 		_rng = new RandomNumberGenerator
@@ -46,45 +62,49 @@ public partial class Laberinto : Node2D
 		};
 
 		GD.Print($"Semilla: {_rng.Seed}");
-		
-		_Piso  = GetNode<TileMapLayer>("Piso");
+
+		_Piso = GetNode<TileMapLayer>("Piso");
 		_Muros = GetNode<TileMapLayer>("Muros");
 		_Muros.Modulate = new Color(0.6f, 0.6f, 0.6f);
 		_Inca = GetNode<CharacterBody2D>("Inca");
-		_puertasAbiertas = new Dictionary<int, int>();
+		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
+		_puertasAbiertas = [];
+
+		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
+		MutacionOcurrida += _CamaraInca.OnMutacionOcurrida;
 
 		PintarMuroPerimetral();
 		DibujarPiso();
 
 		_bloques = [];
-		Particionar(new Rect2I(new Vector2I(0,0), new Vector2I(_mapa.GetLength(1),_mapa.GetLength(0))), _bloques);
+		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), _bloques);
 
-		foreach(var bloque in _bloques)
+		foreach (var bloque in _bloques)
 		{
 			CerrarBloque(bloque);
 		}
-		
+
 		_puertasPosibles = BuscarPuertas(_bloques);
-		
+
 		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
 
 		ConectarSalas(bloqueInca);
-		
+
 		AbrirPuertasExtra();
-		
+
 		ColocarPilares(bloqueInca);
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
-		
+
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
-		_Inca.GlobalPosition =  IndiceMapaAPosicionMundo(centro);
-		
+		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
 		// Alerta - no debe existir cuartos sin acceso
 		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
-		if(cantidadRegiones != 1)
+		if (cantidadRegiones != 1)
 		{
-			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");	
+			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");
 		}
 
 		DibujarMurosInterior();
@@ -92,7 +112,7 @@ public partial class Laberinto : Node2D
 		_TimerMutacion = GetNode<Timer>("TimerMutacion");
 		_TimerMutacion.Timeout += OnCicloPuertas;
 		ProgramarSiguienteCiclo();
-		
+
 	}
 
 	private void PintarMuroPerimetral()
@@ -100,20 +120,20 @@ public partial class Laberinto : Node2D
 		Godot.Collections.Array<Vector2I> perimetro = new Godot.Collections.Array<Vector2I>();
 
 		// fila superior e inferior
-		for(int columna=0; columna <= LaberintoConfig.Grilla.Ancho - 1; columna++)
+		for (int columna = 0; columna <= LaberintoConfig.Grilla.Ancho - 1; columna++)
 		{
 			perimetro.Add(new Vector2I(columna, 0));
-			perimetro.Add(new Vector2I(columna, LaberintoConfig.Grilla.Alto -1));
+			perimetro.Add(new Vector2I(columna, LaberintoConfig.Grilla.Alto - 1));
 		}
 
 		// columna izquierda y derecha
-		for(int fila=1; fila < LaberintoConfig.Grilla.Alto - 1; fila++)
+		for (int fila = 1; fila < LaberintoConfig.Grilla.Alto - 1; fila++)
 		{
 			perimetro.Add(new Vector2I(0, fila));
 			perimetro.Add(new Vector2I(LaberintoConfig.Grilla.Ancho - 1, fila));
 		}
 
-		_Muros.SetCellsTerrainConnect(perimetro, LaberintoConfig.Muro.TerrainSet, 
+		_Muros.SetCellsTerrainConnect(perimetro, LaberintoConfig.Muro.TerrainSet,
 		LaberintoConfig.Muro.Terrain, true);
 	}
 
@@ -122,13 +142,13 @@ public partial class Laberinto : Node2D
 		int indice;
 		int sourceId;
 
-		for(int fila = 0; fila < LaberintoConfig.Grilla.Alto; fila++)
+		for (int fila = 0; fila < LaberintoConfig.Grilla.Alto; fila++)
 		{
-			for(int columna = 0; columna < LaberintoConfig.Grilla.Ancho; columna++)
+			for (int columna = 0; columna < LaberintoConfig.Grilla.Ancho; columna++)
 			{
 				indice = _rng.RandiRange(0, LaberintoConfig.Piso.Variantes.Length - 1);
 				sourceId = LaberintoConfig.Piso.Variantes[indice];
-				_Piso .SetCell(new Vector2I(columna, fila),sourceId,new Vector2I(0,0));
+				_Piso.SetCell(new Vector2I(columna, fila), sourceId, new Vector2I(0, 0));
 			}
 		}
 	}
@@ -138,11 +158,11 @@ public partial class Laberinto : Node2D
 		Godot.Collections.Array<Vector2I> muros = new Godot.Collections.Array<Vector2I>();
 
 		// Del _mapa, tomo las coordenadas de los muros
-		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
+		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
 		{
-			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
+			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				if(_mapa[fila, columna] == Celda.Muro)
+				if (_mapa[fila, columna] == Celda.Muro)
 				{
 					muros.Add(new Vector2I(columna + 1, fila + 1));
 				}
@@ -151,20 +171,20 @@ public partial class Laberinto : Node2D
 
 		// Renderizo los muros en el juego
 		_Muros.SetCellsTerrainConnect(muros, LaberintoConfig.Muro.TerrainSet,
-        LaberintoConfig.Muro.Terrain, true);
+		LaberintoConfig.Muro.Terrain, true);
 
 	}
 
 	private List<List<Vector2I>> EncontrarRegiones(Celda[,] mapa, Celda tipoCelda)
 	{
 		List<List<Vector2I>> regiones = new List<List<Vector2I>>();
-		bool[,] visitado = new bool[mapa.GetLength(0),mapa.GetLength(1)];
+		bool[,] visitado = new bool[mapa.GetLength(0), mapa.GetLength(1)];
 
-		for(int fila = 0; fila < mapa.GetLength(0); fila++)
+		for (int fila = 0; fila < mapa.GetLength(0); fila++)
 		{
-			for(int columna = 0; columna < mapa.GetLength(1); columna++)
+			for (int columna = 0; columna < mapa.GetLength(1); columna++)
 			{
-				if(mapa[fila, columna] == tipoCelda && !visitado[fila, columna])
+				if (mapa[fila, columna] == tipoCelda && !visitado[fila, columna])
 				{
 					regiones.Add(FloodFill(fila, columna, mapa, visitado, tipoCelda));
 				}
@@ -172,14 +192,14 @@ public partial class Laberinto : Node2D
 		}
 
 		return regiones;
-		
+
 	}
 
 	private List<Vector2I> FloodFill(int fila, int columna, Celda[,] mapa, bool[,] visitado, Celda tipoCelda)
 	{
 		List<Vector2I> region = new List<Vector2I>();
 		Queue<Vector2I> cola = new Queue<Vector2I>();
-			
+
 		// marco la posición de la matriz como visitado
 		visitado[fila, columna] = true;
 
@@ -189,16 +209,17 @@ public partial class Laberinto : Node2D
 		// agrego la posición a la region
 		region.Add(new Vector2I(columna, fila));
 
-		while(cola.Count > 0) {
+		while (cola.Count > 0)
+		{
 			// recorro la cola mientras tenga algún elemento
 			Vector2I vectorActual = cola.Dequeue();
-			
+
 			// valido cada uno de los vecinos: arriba, abajo, derecha, izquierda
-			for(int mvto=1; mvto<5; mvto++)
+			for (int mvto = 1; mvto < 5; mvto++)
 			{
-				int filaVecino=0;
-				int columnaVecino=0;
-				
+				int filaVecino = 0;
+				int columnaVecino = 0;
+
 				switch (mvto)
 				{
 					case 1: // arriba
@@ -218,9 +239,9 @@ public partial class Laberinto : Node2D
 						columnaVecino = vectorActual.X - 1;
 						break;
 				}
-				
-				if(filaVecino >= 0 && filaVecino < mapa.GetLength(0) && 
-				columnaVecino >= 0 && columnaVecino < mapa.GetLength(1) 
+
+				if (filaVecino >= 0 && filaVecino < mapa.GetLength(0) &&
+				columnaVecino >= 0 && columnaVecino < mapa.GetLength(1)
 				&& mapa[filaVecino, columnaVecino] == tipoCelda
 				&& !visitado[filaVecino, columnaVecino])
 				{
@@ -234,7 +255,7 @@ public partial class Laberinto : Node2D
 					region.Add(new Vector2I(columnaVecino, filaVecino));
 				}
 			}
-		
+
 		}
 
 		return region;
@@ -258,7 +279,7 @@ public partial class Laberinto : Node2D
 		// centro del tile, sin escala
 		Vector2 posicionLocal = _Piso.MapToLocal(celdaTile);
 		// Aplica escala y posición => píxeles de mundo.
-		return _Piso.ToGlobal(posicionLocal); 
+		return _Piso.ToGlobal(posicionLocal);
 	}
 
 	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
@@ -275,7 +296,7 @@ public partial class Laberinto : Node2D
 
 
 		// Ya no se puede cortar por que sería menor que el tamaño mínimo
-		if(!puedeCortarHorizontal && !puedeCortarVertical)
+		if (!puedeCortarHorizontal && !puedeCortarVertical)
 		{
 			resultado.Add(bloque);
 			return;
@@ -286,22 +307,26 @@ public partial class Laberinto : Node2D
 		if (puedeCortarVertical && !puedeCortarHorizontal)
 		{
 			cortarVertical = true;
-		} else if(puedeCortarHorizontal && !puedeCortarVertical)
+		}
+		else if (puedeCortarHorizontal && !puedeCortarVertical)
 		{
 			cortarVertical = false;
-		}else if(bloque.Size.X > bloque.Size.Y * factorProporcion)
+		}
+		else if (bloque.Size.X > bloque.Size.Y * factorProporcion)
 		{
 			// muy ancho
 			cortarVertical = true;
-		} else if(bloque.Size.Y > bloque.Size.X * factorProporcion)
+		}
+		else if (bloque.Size.Y > bloque.Size.X * factorProporcion)
 		{
 			// muy alto
 			cortarVertical = false;
-		} else
+		}
+		else
 		{
 			cortarVertical = _rng.Randf() < 0.5f;
 		}
-				
+
 		// Cortar
 		int puntoDeCorte;
 		Rect2I bloqueA;
@@ -315,8 +340,9 @@ public partial class Laberinto : Node2D
 				);
 
 			bloqueB = new Rect2I(new Vector2I(bloque.Position.X + puntoDeCorte,
-			bloque.Position.Y), new Vector2I(bloque.Size.X - puntoDeCorte, bloque.Size.Y)); 
-		} else // corte horizontal, parto el alto
+			bloque.Position.Y), new Vector2I(bloque.Size.X - puntoDeCorte, bloque.Size.Y));
+		}
+		else // corte horizontal, parto el alto
 		{
 			puntoDeCorte = _rng.RandiRange(min, bloque.Size.Y - min);
 
@@ -325,7 +351,7 @@ public partial class Laberinto : Node2D
 				);
 
 			bloqueB = new Rect2I(new Vector2I(bloque.Position.X,
-			bloque.Position.Y + puntoDeCorte), new Vector2I(bloque.Size.X, bloque.Size.Y - puntoDeCorte)); 
+			bloque.Position.Y + puntoDeCorte), new Vector2I(bloque.Size.X, bloque.Size.Y - puntoDeCorte));
 		}
 
 		// Recursivo, cada mitad se vuelve a partir mientras mida al menos el doble del mínimo
@@ -335,9 +361,9 @@ public partial class Laberinto : Node2D
 
 	private void CerrarBloque(Rect2I bloque)
 	{
-		for(int fila = bloque.Position.Y; fila < bloque.End.Y; fila++)
+		for (int fila = bloque.Position.Y; fila < bloque.End.Y; fila++)
 		{
-			for(int columna = bloque.Position.X; columna < bloque.End.X; columna++)
+			for (int columna = bloque.Position.X; columna < bloque.End.X; columna++)
 			{
 				bool esBorde = fila < bloque.Position.Y + LaberintoConfig.Muro.GrosorBorde || fila >= bloque.End.Y - LaberintoConfig.Muro.GrosorBorde
 				|| columna < bloque.Position.X + LaberintoConfig.Muro.GrosorBorde || columna >= bloque.End.X - LaberintoConfig.Muro.GrosorBorde;
@@ -350,19 +376,19 @@ public partial class Laberinto : Node2D
 	{
 		List<PuertaPosible> puertasPosibles = [];
 
-		for(int bloqueAindex = 0; bloqueAindex < bloques.Count; bloqueAindex++)
+		for (int bloqueAindex = 0; bloqueAindex < bloques.Count; bloqueAindex++)
 		{
-			for(int bloqueBindex = 0; bloqueBindex < bloques.Count; bloqueBindex++)
+			for (int bloqueBindex = 0; bloqueBindex < bloques.Count; bloqueBindex++)
 			{
-				if(bloqueAindex == bloqueBindex) { continue; }
+				if (bloqueAindex == bloqueBindex) { continue; }
 				PuertaPosible? resultado;
-				
+
 				resultado = BuscarPuertaHorizontal(bloques[bloqueAindex], bloques[bloqueBindex], bloqueAindex, bloqueBindex);
-				if(resultado is PuertaPosible puertaH) {puertasPosibles.Add(puertaH);}
+				if (resultado is PuertaPosible puertaH) { puertasPosibles.Add(puertaH); }
 
 				resultado = BuscarPuertaVertical(bloques[bloqueAindex], bloques[bloqueBindex], bloqueAindex, bloqueBindex);
-				if(resultado is PuertaPosible puertaV) {puertasPosibles.Add(puertaV);}
-				
+				if (resultado is PuertaPosible puertaV) { puertasPosibles.Add(puertaV); }
+
 			}
 		}
 
@@ -371,7 +397,7 @@ public partial class Laberinto : Node2D
 	}
 
 
-	private PuertaPosible? BuscarPuertaHorizontal(Rect2I izquierdo, Rect2I derecho, int bloquesIndiceIzquierdo,  int bloquesIndiceDerecho)
+	private PuertaPosible? BuscarPuertaHorizontal(Rect2I izquierdo, Rect2I derecho, int bloquesIndiceIzquierdo, int bloquesIndiceDerecho)
 	{
 
 		int ultimaColumnaIzquierdo = izquierdo.End.X - 1;
@@ -385,7 +411,7 @@ public partial class Laberinto : Node2D
 
 		// Se tocan?
 
-		if(ultimaColumnaIzquierdo + 1 != primeraColumnaDerecho) { return null; } 
+		if (ultimaColumnaIzquierdo + 1 != primeraColumnaDerecho) { return null; }
 		// Filas en comun
 		int inicioComun = Math.Max(primeraFilaIzquierdo, primeraFilaDerecho);
 		int finComun = Math.Min(ultimaFilaIzquierdo, ultimaFilaDerecho);
@@ -396,14 +422,14 @@ public partial class Laberinto : Node2D
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
-		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
+		if (cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta) { return null; }
 
 		int primeraColumnaMuro = izquierdo.End.X - LaberintoConfig.Muro.GrosorBorde;
-		
+
 		return new PuertaPosible(bloquesIndiceIzquierdo, bloquesIndiceDerecho, PuertaOrientacion.Horizontal, primeraValida, ultimaValida, primeraColumnaMuro);
 	}
 
-	private PuertaPosible? BuscarPuertaVertical(Rect2I arriba, Rect2I abajo, int bloquesIndiceArriba,  int bloquesIndiceAbajo)
+	private PuertaPosible? BuscarPuertaVertical(Rect2I arriba, Rect2I abajo, int bloquesIndiceArriba, int bloquesIndiceAbajo)
 	{
 
 		int ultimaFilaArriba = arriba.End.Y - 1;
@@ -417,7 +443,7 @@ public partial class Laberinto : Node2D
 
 		// Se tocan?
 
-		if(ultimaFilaArriba + 1 != primeraFilaAbajo) { return null; }
+		if (ultimaFilaArriba + 1 != primeraFilaAbajo) { return null; }
 
 		// Columnas en comun
 		int inicioComun = Math.Max(primeraColumnaArriba, primeraColumnaAbajo);
@@ -429,7 +455,7 @@ public partial class Laberinto : Node2D
 
 		// ¿Cabe la puerta?
 		int cantidadValidas = ultimaValida - primeraValida + 1;
-		if(cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta){ return null; }
+		if (cantidadValidas < LaberintoConfig.Bloque.AnchoPuerta) { return null; }
 
 		int primeraFilaMuro = arriba.End.Y - LaberintoConfig.Muro.GrosorBorde;
 
@@ -438,9 +464,9 @@ public partial class Laberinto : Node2D
 
 	private int IndiceBloqueDe(Vector2I celda)
 	{
-		for(int i = 0; i < _bloques.Count; i++)
+		for (int i = 0; i < _bloques.Count; i++)
 		{
-			Rect2I bloque = _bloques[i]; 
+			Rect2I bloque = _bloques[i];
 			if (bloque.Position.X <= celda.X && bloque.End.X - 1 >= celda.X && bloque.Position.Y <= celda.Y && bloque.End.Y - 1 >= celda.Y)
 			{
 				return i;
@@ -451,32 +477,33 @@ public partial class Laberinto : Node2D
 
 	private void PintarPuerta(PuertaPosible puerta, int inicio, Celda valor)
 	{
-		for(int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
+		for (int ancho = 0; ancho < LaberintoConfig.Bloque.AnchoPuerta; ancho++)
 		{
 			int pos = inicio + ancho;
 
-			for(int linea = puerta.PrimeraLineaMuro; linea < puerta.PrimeraLineaMuro + LaberintoConfig.Muro.GrosorMuroCompartido; linea++)
+			for (int linea = puerta.PrimeraLineaMuro; linea < puerta.PrimeraLineaMuro + LaberintoConfig.Muro.GrosorMuroCompartido; linea++)
 			{
-				if(puerta.Orientacion == PuertaOrientacion.Horizontal)
+				if (puerta.Orientacion == PuertaOrientacion.Horizontal)
 				{
 					_mapa[pos, linea] = valor;
-				} else if (puerta.Orientacion == PuertaOrientacion.Vertical)
+				}
+				else if (puerta.Orientacion == PuertaOrientacion.Vertical)
 				{
 					_mapa[linea, pos] = valor;
 				}
-			} 
+			}
 		}
-		
+
 	}
 
 	private void ImprimirMapa()
 	{
-		for(int fila = 0; fila < _mapa.GetLength(0); fila++)
+		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
 		{
 			string linea = "";
-			for(int columna = 0; columna < _mapa.GetLength(1); columna++)
+			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				linea += _mapa[fila,columna] == Celda.Piso ? "." : "X";	
+				linea += _mapa[fila, columna] == Celda.Piso ? "." : "X";
 			}
 			GD.Print(linea);
 		}
@@ -495,7 +522,7 @@ public partial class Laberinto : Node2D
 		pila.Push(bloqueInca);
 		visitado[bloqueInca] = true;
 
-		while(pila.Count != 0)
+		while (pila.Count != 0)
 		{
 			// obtengo el elemento que se encuentra encima de la pila sin eliminarlo.
 			int actual = pila.Peek();
@@ -503,12 +530,12 @@ public partial class Laberinto : Node2D
 			// busco en la lista de _puertasPosibles, que bloques colindan con el bloque actual para agregarlas
 			// como candidatas
 			List<int> candidatas = [];
-			for(int p = 0; p < _puertasPosibles.Count; p++)
+			for (int p = 0; p < _puertasPosibles.Count; p++)
 			{
 				PuertaPosible puerta = _puertasPosibles[p];
 				// valido si actual es vecina de algunos de los dos bloques con puertas vecinas
 				// si no es vecina la salto por que no toca la sala actual
-				if(puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual) { continue; }
+				if (puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual) { continue; }
 
 				// Obtengo el vecino válido
 				int vecino = (puerta.IndiceBloqueA == actual) ? puerta.IndiceBloqueB : puerta.IndiceBloqueA;
@@ -522,7 +549,7 @@ public partial class Laberinto : Node2D
 
 			// Callejón sin salida: valido si existe alguna candidata en la lista
 			// Si no hay candidatas, entonces retrocedo por el hilo.
-			if(candidatas.Count == 0)
+			if (candidatas.Count == 0)
 			{
 				pila.Pop();
 				continue;
@@ -610,8 +637,8 @@ public partial class Laberinto : Node2D
 		// Identificar las sobrantes (índices de puertas que no están abiertas)
 
 		List<int> sobrantes = [];
-		
-		for(int p = 0; p < _puertasPosibles.Count; p++)
+
+		for (int p = 0; p < _puertasPosibles.Count; p++)
 		{
 			if (!_puertasAbiertas.ContainsKey(p))
 			{
@@ -623,7 +650,7 @@ public partial class Laberinto : Node2D
 		int puertasAdicionales = (int)(sobrantes.Count * LaberintoConfig.Bloque.PorcentajePuertasExtra);
 
 		// Elegir sin repetir y tallar puerta
-		for(int repetir = 0; repetir < puertasAdicionales; repetir++)
+		for (int repetir = 0; repetir < puertasAdicionales; repetir++)
 		{
 			// Selecciono un sobrante tomando aleatoriamente su posición
 			int posicion = _rng.RandiRange(0, sobrantes.Count - 1);
@@ -633,7 +660,7 @@ public partial class Laberinto : Node2D
 
 			// Elimino de la lista el sobrante de la puerta a trabajar
 			sobrantes.RemoveAt(posicion);
-			
+
 			// Selecciono la puerta a trabajar
 			PuertaPosible puerta = _puertasPosibles[indicePuerta];
 
@@ -657,11 +684,11 @@ public partial class Laberinto : Node2D
 			return;
 		}
 
-		for(int fila = zona.Position.Y; fila < zona.End.Y; fila += LaberintoConfig.Pilares.Separacion)
+		for (int fila = zona.Position.Y; fila < zona.End.Y; fila += LaberintoConfig.Pilares.Separacion)
 		{
-			if(_rng.Randf() < LaberintoConfig.Pilares.ProbabilidadPorFila)
+			if (_rng.Randf() < LaberintoConfig.Pilares.ProbabilidadPorFila)
 			{
-				int columna = _rng.RandiRange(zona.Position.X, zona.End.X-1);
+				int columna = _rng.RandiRange(zona.Position.X, zona.End.X - 1);
 				_mapa[fila, columna] = Celda.Muro;
 			}
 		}
@@ -675,9 +702,9 @@ public partial class Laberinto : Node2D
 			return;
 		}
 
-		for(int indice = 0; indice < _bloques.Count; indice++)
+		for (int indice = 0; indice < _bloques.Count; indice++)
 		{
-			if(indice == bloqueInca)
+			if (indice == bloqueInca)
 			{
 				continue;
 			}
@@ -685,31 +712,45 @@ public partial class Laberinto : Node2D
 			ColocarPilaresEnBloque(_bloques[indice]);
 		}
 	}
-
 	private void ProgramarSiguienteCiclo()
 	{
-		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.IntervaloMinSeg, LaberintoConfig.Mutacion.IntervaloMaxSeg);
+		_estadoCiclo = EstadoCiclo.Calma;
+		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.CalmaMinSeg, LaberintoConfig.Mutacion.CalmaMaxSeg);
 		_TimerMutacion.Start();
 	}
 	private void OnCicloPuertas()
 	{
-		(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
-		HashSet<int> puertas = [..abiertas, ..cerradas];
-
-		RedibujarPuertas(puertas);
-
-		if (!SalasConectadas(-1))
+		if (_estadoCiclo == EstadoCiclo.Calma)
 		{
-			GD.PushError("Salas no conectadas");
+			_estadoCiclo = EstadoCiclo.Aviso;
+			_TimerMutacion.WaitTime = LaberintoConfig.Mutacion.DuracionAviso;
+			_TimerMutacion.Start();
+			EmitSignal(SignalName.AvisoIniciado, _TimerMutacion.WaitTime);
+			return;
 		}
-		
-		ProgramarSiguienteCiclo();
+
+		if (_estadoCiclo == EstadoCiclo.Aviso)
+		{
+			(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
+			HashSet<int> puertas = [.. abiertas, .. cerradas];
+
+			RedibujarPuertas(puertas);
+
+			if (!SalasConectadas(-1))
+			{
+				GD.PushError("Salas no conectadas");
+			}
+
+			EmitSignal(SignalName.MutacionOcurrida);
+
+			ProgramarSiguienteCiclo();
+		}
 	}
 	private bool SalasConectadas(int puertaIgnorada)
 	{
 		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
 		bool[] visitado = new bool[_bloques.Count];
-		
+
 		// Creo la pila que me permitirá realizar el DFS en la lógica 
 		Stack<int> pila = new();
 
@@ -717,19 +758,19 @@ public partial class Laberinto : Node2D
 		pila.Push(0);
 		visitado[0] = true;
 
-		while(pila.Count != 0)
+		while (pila.Count != 0)
 		{
 			// Obtengo el índice del bloque actual que se encuentra encima de la pila sin eliminarlo 
 			int actual = pila.Peek();
 
 			// Recorro las puertas posibles para encontrar sus vecinos con puertas abiertas
 			List<int> candidatas = [];
-			for(int pp = 0; pp < _puertasPosibles.Count; pp++)
+			for (int pp = 0; pp < _puertasPosibles.Count; pp++)
 			{
 				PuertaPosible puerta = _puertasPosibles[pp];
 
 				// Valido si la puerta pp toca a actual
-				if(puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual)
+				if (puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual)
 				{
 					continue;
 				}
@@ -751,7 +792,7 @@ public partial class Laberinto : Node2D
 			}
 
 			// Callejón sin salida: si no hay candidatas, retrocedo por el hilo
-			if(candidatas.Count == 0)
+			if (candidatas.Count == 0)
 			{
 				pila.Pop();
 				continue;
@@ -763,7 +804,7 @@ public partial class Laberinto : Node2D
 		}
 
 		// valido si se pudo acceder a todos los bloques, es decir si están todos conectados
-		foreach(bool v in visitado)
+		foreach (bool v in visitado)
 		{
 			if (!v)
 			{
@@ -783,14 +824,14 @@ public partial class Laberinto : Node2D
 
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
-		for(int intercambio = 0; intercambio < intercambios; intercambio++)
+		for (int intercambio = 0; intercambio < intercambios; intercambio++)
 		{
 			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
 			// valido si el índice de cada _puertaPosible en _puertasPosibles es key en _puertasAbiertas
 			// Si no es una key, entonces la agrego a puertasCerradas, siempre y cuando no haya sido una puerta
 			// recientemente cerrada en el ciclo de mutación.
 			List<int> puertasCerradas = [];
-			for(int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
+			for (int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
 			{
 				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.Contains(ppIndex))
 				{
@@ -799,13 +840,13 @@ public partial class Laberinto : Node2D
 			}
 
 			// Si ya no quedan puertas cerradas, corto los intercambios restantes del ciclo actual.
-			if(puertasCerradas.Count == 0)
+			if (puertasCerradas.Count == 0)
 			{
 				break;
 			}
 
 			// Selecciono al azar una de las puertas cerradas para abrirla.
-			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count-1)];
+			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count - 1)];
 			PuertaPosible puertaAbrir = _puertasPosibles[indiceAbrir];
 
 			// Tallar (abrir) puerta y registrarla como abierta
@@ -817,19 +858,19 @@ public partial class Laberinto : Node2D
 			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
 			// candidatas a cerrar.
 			List<int> candidatasCerrar = [];
-			foreach(int key in _puertasAbiertas.Keys)
+			foreach (int key in _puertasAbiertas.Keys)
 			{
-				if(abiertasEnCiclo.Contains(key))
+				if (abiertasEnCiclo.Contains(key))
 				{
 					continue;
 				}
 
-				if(IncaEnPuerta(key, celdaInca))
+				if (IncaEnPuerta(key, celdaInca))
 				{
 					continue;
 				}
 
-				if(!SalasConectadas(key))
+				if (!SalasConectadas(key))
 				{
 					continue;
 				}
@@ -838,9 +879,9 @@ public partial class Laberinto : Node2D
 			}
 
 			// Si hay candidatas a cerrar, selecciono una al azar y la cierro.
-			if(candidatasCerrar.Count != 0)
+			if (candidatasCerrar.Count != 0)
 			{
-				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count-1)];
+				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count - 1)];
 
 				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
 				PintarPuerta(puertaCerrar, _puertasAbiertas[indiceCerrar], Celda.Muro);
@@ -867,7 +908,7 @@ public partial class Laberinto : Node2D
 		Rect2I limitesMapa = new(Vector2I.Zero, _mapa.GetLength(1), _mapa.GetLength(0));
 
 		// Recorro cada índice de puerta que debo redibujar
-		foreach(int indice in puertas)
+		foreach (int indice in puertas)
 		{
 			PuertaPosible puerta = _puertasPosibles[indice];
 			int largoTramo = (puerta.UltimaValida - puerta.PrimeraValida) + 1;
@@ -875,14 +916,14 @@ public partial class Laberinto : Node2D
 			Rect2I tramoAmpliado = tramo.Grow(LaberintoConfig.Mutacion.MargenRedibujado);
 			Rect2I areaARedibujar = tramoAmpliado.Intersection(limitesMapa);
 
-			for(int fila = areaARedibujar.Position.Y; fila < areaARedibujar.End.Y; fila++)
+			for (int fila = areaARedibujar.Position.Y; fila < areaARedibujar.End.Y; fila++)
 			{
-				for(int columna = areaARedibujar.Position.X; columna < areaARedibujar.End.X; columna++)
+				for (int columna = areaARedibujar.Position.X; columna < areaARedibujar.End.X; columna++)
 				{
 					Vector2I celda = new(columna + 1, fila + 1);
 					_Muros.EraseCell(celda);
 
-					if(_mapa[fila, columna] == Celda.Muro)
+					if (_mapa[fila, columna] == Celda.Muro)
 					{
 						celdasMuro.Add(celda);
 					}
