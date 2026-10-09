@@ -22,5 +22,13 @@ public partial class CamaraInca : Camera2D
     }
 
   }
+  public void OnAvisoIniciado(float duracion)
+  {
+    GD.Print($"OnAvisoIniciado => {duracion}");
+  }
+	public void OnMutacionOcurrida()
+  {
+    GD.Print("OnMutacionOcurrida");
+  }
 
 }

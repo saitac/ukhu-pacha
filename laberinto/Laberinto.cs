@@ -8,8 +8,8 @@ public partial class Laberinto : Node2D
 	TileMapLayer _Piso ;
 	TileMapLayer _Muros;
 	CharacterBody2D _Inca;
-
 	Timer _TimerMutacion;
+	CamaraInca _CamaraInca;
 
 	private enum Celda
 	{
@@ -45,7 +45,15 @@ public partial class Laberinto : Node2D
 	}
 
 	private EstadoCiclo _estadoCiclo;
+
+	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
+	[Signal]
+	public delegate void AvisoIniciadoEventHandler(float duracion);
 	
+	// Declaro evento que indica que la mutación ya ocurrió
+	[Signal]
+	public delegate void MutacionOcurridaEventHandler();
+		
 	public override void _Ready()
 	{
 		_rng = new RandomNumberGenerator
@@ -59,7 +67,11 @@ public partial class Laberinto : Node2D
 		_Muros = GetNode<TileMapLayer>("Muros");
 		_Muros.Modulate = new Color(0.6f, 0.6f, 0.6f);
 		_Inca = GetNode<CharacterBody2D>("Inca");
-		_puertasAbiertas = new Dictionary<int, int>();
+		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
+		_puertasAbiertas = [];
+
+		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
+		MutacionOcurrida += _CamaraInca.OnMutacionOcurrida;
 
 		PintarMuroPerimetral();
 		DibujarPiso();
@@ -706,6 +718,7 @@ public partial class Laberinto : Node2D
 			_estadoCiclo = EstadoCiclo.Aviso;
 			_TimerMutacion.WaitTime = LaberintoConfig.Mutacion.DuracionAviso;
 			_TimerMutacion.Start();
+			EmitSignal(SignalName.AvisoIniciado, _TimerMutacion.WaitTime);
 			return;
 		}
 
@@ -720,6 +733,8 @@ public partial class Laberinto : Node2D
 			{
 				GD.PushError("Salas no conectadas");
 			}
+
+			EmitSignal(SignalName.MutacionOcurrida);
 
 			ProgramarSiguienteCiclo();
 		}
