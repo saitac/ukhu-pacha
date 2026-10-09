@@ -37,6 +37,14 @@ public partial class Laberinto : Node2D
 	// porque CerrarBloque pinta un borde de GrosorBorde en cada bloque y los dos bordes quedan pegados.
 	private record struct PuertaPosible(int IndiceBloqueA, int IndiceBloqueB, PuertaOrientacion Orientacion, 
 	int PrimeraValida, int UltimaValida, int PrimeraLineaMuro);
+
+	private enum EstadoCiclo
+	{
+		Calma,
+		Aviso
+	}
+
+	private EstadoCiclo _estadoCiclo;
 	
 	public override void _Ready()
 	{
@@ -685,25 +693,36 @@ public partial class Laberinto : Node2D
 			ColocarPilaresEnBloque(_bloques[indice]);
 		}
 	}
-
 	private void ProgramarSiguienteCiclo()
 	{
-		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.IntervaloMinSeg, LaberintoConfig.Mutacion.IntervaloMaxSeg);
+		_estadoCiclo = EstadoCiclo.Calma;
+		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.CalmaMinSeg, LaberintoConfig.Mutacion.CalmaMaxSeg);
 		_TimerMutacion.Start();
 	}
 	private void OnCicloPuertas()
 	{
-		(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
-		HashSet<int> puertas = [..abiertas, ..cerradas];
-
-		RedibujarPuertas(puertas);
-
-		if (!SalasConectadas(-1))
+		if (_estadoCiclo == EstadoCiclo.Calma)
 		{
-			GD.PushError("Salas no conectadas");
+			_estadoCiclo = EstadoCiclo.Aviso;
+			_TimerMutacion.WaitTime = LaberintoConfig.Mutacion.DuracionAviso;
+			_TimerMutacion.Start();
+			return;
 		}
-		
-		ProgramarSiguienteCiclo();
+
+		if (_estadoCiclo == EstadoCiclo.Aviso)
+		{
+			(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
+			HashSet<int> puertas = [..abiertas, ..cerradas];
+
+			RedibujarPuertas(puertas);
+
+			if (!SalasConectadas(-1))
+			{
+				GD.PushError("Salas no conectadas");
+			}
+
+			ProgramarSiguienteCiclo();
+		}
 	}
 	private bool SalasConectadas(int puertaIgnorada)
 	{
