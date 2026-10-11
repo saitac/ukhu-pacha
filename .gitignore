@@ -12,3 +12,6 @@ obj/
 
 # Mono/CoreCLR crash dumps
 mono_crash.*.json
+
+# Escenas de prueba locales
+/pruebas/
