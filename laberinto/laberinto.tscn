@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://dukl1036pqa75" path="res://laberinto/sprites/muro-punta.png" id="11_yhjxc"]
 [ext_resource type="Texture2D" uid="uid://b7nl5wqtnof8a" path="res://laberinto/sprites/muro-recta.png" id="12_glftc"]
 [ext_resource type="Script" uid="uid://b830e3cefsh6j" path="res://laberinto/CamaraInca.cs" id="13_j7smx"]
+[ext_resource type="Script" uid="uid://cij1erbyrbeqh" path="res://laberinto/PolvoTecho.cs" id="14_wsvcv"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7fdqi"]
 texture = ExtResource("2_j7smx")
@@ -195,6 +196,14 @@ sources/8 = SubResource("TileSetAtlasSource_24ehs")
 sources/9 = SubResource("TileSetAtlasSource_xtfm4")
 sources/10 = SubResource("TileSetAtlasSource_m5etf")
 
+[sub_resource type="Curve" id="Curve_wsvcv"]
+_data = [Vector2(0, 1), 0.0, -0.5, 0, 0, Vector2(1, 0.5), -0.5, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_wsvcv"]
+offsets = PackedFloat32Array(0, 0.24401198, 1)
+colors = PackedColorArray(0.003921569, 0.003921569, 0.003921569, 0, 1, 1, 1, 0.8, 0.003921569, 0.003921569, 0.003921569, 0)
+
 [node name="Laberinto" type="Node2D" unique_id=322285212]
 script = ExtResource("1_8w83w")
 
@@ -216,6 +225,25 @@ limit_top = 0
 limit_right = 3840
 limit_bottom = 3840
 script = ExtResource("13_j7smx")
+
+[node name="PolvoTecho" type="CPUParticles2D" parent="Inca/CamaraInca" unique_id=27394043]
+emitting = false
+amount = 600
+lifetime = 2.0
+randomness = 0.5
+lifetime_randomness = 0.4
+emission_shape = 3
+emission_rect_extents = Vector2(608, 356)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 8.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_wsvcv")
+color = Color(0.8509804, 0.7254902, 0.5411765, 1)
+color_ramp = SubResource("Gradient_wsvcv")
+script = ExtResource("14_wsvcv")
 
 [node name="TimerMutacion" type="Timer" parent="." unique_id=511173597]
 one_shot = true
