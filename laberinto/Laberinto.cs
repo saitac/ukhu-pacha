@@ -736,8 +736,8 @@ public partial class Laberinto : Node2D
 
 		if (_estadoCiclo == EstadoCiclo.Aviso)
 		{
-			(HashSet<int> abiertas, HashSet<int> cerradas) = MutarPuertas();
-			HashSet<int> puertas = [.. abiertas, .. cerradas];
+			(Dictionary<int, int> abiertas, Dictionary<int, int> cerradas) = MutarPuertas();
+			HashSet<int> puertas = [.. abiertas.Keys, .. cerradas.Keys];
 
 			RedibujarPuertas(puertas);
 
@@ -820,10 +820,10 @@ public partial class Laberinto : Node2D
 		return true;
 	}
 
-	private (HashSet<int> Abiertas, HashSet<int> Cerradas) MutarPuertas()
+	private (Dictionary<int, int> Abiertas, Dictionary<int, int> Cerradas) MutarPuertas()
 	{
-		HashSet<int> abiertasEnCiclo = [];
-		HashSet<int> cerradasEnCiclo = [];
+		Dictionary<int, int> abiertasEnCiclo = [];
+		Dictionary<int, int> cerradasEnCiclo = [];
 
 		Vector2I celdaInca = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
 
@@ -838,7 +838,7 @@ public partial class Laberinto : Node2D
 			List<int> puertasCerradas = [];
 			for (int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
 			{
-				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.Contains(ppIndex))
+				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.ContainsKey(ppIndex))
 				{
 					puertasCerradas.Add(ppIndex);
 				}
@@ -858,14 +858,14 @@ public partial class Laberinto : Node2D
 			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
 			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
 			_puertasAbiertas[indiceAbrir] = inicio;
-			abiertasEnCiclo.Add(indiceAbrir);
+			abiertasEnCiclo[indiceAbrir] = inicio;
 
 			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
 			// candidatas a cerrar.
 			List<int> candidatasCerrar = [];
 			foreach (int key in _puertasAbiertas.Keys)
 			{
-				if (abiertasEnCiclo.Contains(key))
+				if (abiertasEnCiclo.ContainsKey(key))
 				{
 					continue;
 				}
@@ -889,9 +889,10 @@ public partial class Laberinto : Node2D
 				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count - 1)];
 
 				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
-				PintarPuerta(puertaCerrar, _puertasAbiertas[indiceCerrar], Celda.Muro);
+				int inicioCerrar = _puertasAbiertas[indiceCerrar];
+				PintarPuerta(puertaCerrar, inicioCerrar, Celda.Muro);
 				_puertasAbiertas.Remove(indiceCerrar);
-				cerradasEnCiclo.Add(indiceCerrar);
+				cerradasEnCiclo[indiceCerrar] = inicioCerrar;
 			}
 		}
 
