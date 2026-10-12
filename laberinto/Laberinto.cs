@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class Laberinto : Node2D
 {
@@ -54,6 +55,9 @@ public partial class Laberinto : Node2D
 	// Declaro evento que indica que la mutación ya ocurrió
 	[Signal]
 	public delegate void MutacionOcurridaEventHandler();
+
+	[Signal]
+	public delegate void PuertasCambiadasEventHandler(Godot.Collections.Array<Rect2> areasPuertas);
 
 	public override void _Ready()
 	{
@@ -737,9 +741,9 @@ public partial class Laberinto : Node2D
 		if (_estadoCiclo == EstadoCiclo.Aviso)
 		{
 			(Dictionary<int, int> abiertas, Dictionary<int, int> cerradas) = MutarPuertas();
-			HashSet<int> puertas = [.. abiertas.Keys, .. cerradas.Keys];
+			Dictionary<int, int> puertasCambiadas = abiertas.Concat(cerradas).ToDictionary();
 
-			RedibujarPuertas(puertas);
+			RedibujarPuertas(puertasCambiadas.Keys);
 
 			if (!SalasConectadas(-1))
 			{
@@ -747,6 +751,7 @@ public partial class Laberinto : Node2D
 			}
 
 			EmitSignal(SignalName.MutacionOcurrida);
+			EmitSignal(SignalName.PuertasCambiadas, AreasPuertas(puertasCambiadas));
 
 			ProgramarSiguienteCiclo();
 		}
@@ -907,7 +912,7 @@ public partial class Laberinto : Node2D
 		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
 	}
 
-	private void RedibujarPuertas(HashSet<int> puertas)
+	private void RedibujarPuertas(IEnumerable<int> puertas)
 	{
 		// Repinta el tramo más un margen leyendo _mapa: una puerta cerrada ya no guarda su inicio.
 		Godot.Collections.Array<Vector2I> celdasMuro = [];
@@ -946,5 +951,31 @@ public partial class Laberinto : Node2D
 		return puerta.Orientacion == PuertaOrientacion.Horizontal ?
 		new Rect2I(puerta.PrimeraLineaMuro, desde, LaberintoConfig.Muro.GrosorMuroCompartido, largo) :
 		new Rect2I(desde, puerta.PrimeraLineaMuro, largo, LaberintoConfig.Muro.GrosorMuroCompartido);
+	}
+
+	private Godot.Collections.Array<Rect2> AreasPuertas(Dictionary<int, int> puertas)
+	{
+		Godot.Collections.Array<Rect2> areasPuertas = [];
+
+		// Calculo el tamaño de un tile en el mundo
+		Vector2 tamanoTileMundo = _Piso.TileSet.TileSize * _Piso.Scale;
+
+		// Calculo el área de las puertas
+		foreach ((int indice, int inicio) in puertas)
+		{
+			PuertaPosible puerta = _puertasPosibles[indice];
+			// Me devuelve un rectángulo exacto del hueco (puerta), en celdas, de _mapa
+			Rect2I areaPuertaMapa = AreaEnTramo(puerta, inicio, LaberintoConfig.Bloque.AnchoPuerta);
+			// Le paso la esquina superior izquierda del rectángulo - Position - y me devuelve el centro de esa celda en el Mundo
+			Vector2 centro = IndiceMapaAPosicionMundo(areaPuertaMapa.Position);
+			// Calculo el punto superior izquierdo restando la mitad del tamaño del tile, dado que el centro cae en la mitad de un tile
+			Vector2 esquinaPx = centro - (tamanoTileMundo / 2);
+			// Calculo el tamaño de la puerta
+			Vector2 tamanoPx = areaPuertaMapa.Size * tamanoTileMundo;
+			// Agrego el área de la puerta a la colección
+			areasPuertas.Add(new Rect2(esquinaPx, tamanoPx));
+		}
+
+		return areasPuertas;
 	}
 }
