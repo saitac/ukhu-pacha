@@ -10,6 +10,9 @@ public partial class PolvoPuertas : Node2D
 		foreach (Rect2 areaPuerta in areasPuertas)
 		{
 			CpuParticles2D nube = (CpuParticles2D)EscenaNube.Instantiate();
+			nube.EmissionShape = CpuParticles2D.EmissionShapeEnum.Rectangle;
+			nube.Position = areaPuerta.GetCenter();
+			nube.EmissionRectExtents = areaPuerta.Size / 2;
 			nube.Emitting = true;
 			nube.Finished += nube.QueueFree;
 			AddChild(nube);
