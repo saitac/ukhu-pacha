@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cyn8pbx4u3kmg"]
+
+[node name="NubePolvo" type="CPUParticles2D" unique_id=1893180377]
+emitting = false
+one_shot = true
+explosiveness = 0.9

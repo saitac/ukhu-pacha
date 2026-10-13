@@ -12,6 +12,7 @@ public partial class Laberinto : Node2D
 	Timer _TimerMutacion;
 	CamaraInca _CamaraInca;
 	PolvoTecho _PolvoTecho;
+	PolvoPuertas _PolvoPuertas;
 
 	private enum Celda
 	{
@@ -74,6 +75,7 @@ public partial class Laberinto : Node2D
 		_Inca = GetNode<CharacterBody2D>("Inca");
 		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
 		_PolvoTecho = GetNode<PolvoTecho>("Inca/CamaraInca/PolvoTecho");
+		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
 		_puertasAbiertas = [];
 
 		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
@@ -81,6 +83,8 @@ public partial class Laberinto : Node2D
 
 		AvisoIniciado += _PolvoTecho.OnAvisoIniciado;
 		MutacionOcurrida += _PolvoTecho.OnMutacionOcurrida;
+
+		PuertasCambiadas += _PolvoPuertas.OnPuertasCambiadas;
 
 		PintarMuroPerimetral();
 		DibujarPiso();
