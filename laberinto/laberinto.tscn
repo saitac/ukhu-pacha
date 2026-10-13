@@ -14,6 +14,8 @@
 [ext_resource type="Texture2D" uid="uid://b7nl5wqtnof8a" path="res://laberinto/sprites/muro-recta.png" id="12_glftc"]
 [ext_resource type="Script" uid="uid://b830e3cefsh6j" path="res://laberinto/CamaraInca.cs" id="13_j7smx"]
 [ext_resource type="Script" uid="uid://cij1erbyrbeqh" path="res://laberinto/PolvoTecho.cs" id="14_wsvcv"]
+[ext_resource type="Script" uid="uid://cxg3kx6tiagou" path="res://laberinto/PolvoPuertas.cs" id="15_kwhve"]
+[ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7fdqi"]
 texture = ExtResource("2_j7smx")
@@ -247,3 +249,7 @@ script = ExtResource("14_wsvcv")
 
 [node name="TimerMutacion" type="Timer" parent="." unique_id=511173597]
 one_shot = true
+
+[node name="PolvoPuertas" type="Node2D" parent="." unique_id=1457463925]
+script = ExtResource("15_kwhve")
+EscenaNube = ExtResource("16_mmumd")
