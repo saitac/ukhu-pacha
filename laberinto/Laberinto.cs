@@ -297,7 +297,7 @@ public partial class Laberinto : Node2D
 
 	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
 	{
-		// obtengo el tamaño mínimo y máximo que puede tener un bloque en el mapa y 
+		// obtengo el tamaño mínimo y máximo que puede tener un bloque en el mapa y
 		// el factor de proporción que define si un bloque es muy ancho o muy alto
 
 		int min = LaberintoConfig.Bloque.TamanoMinimo;
@@ -588,7 +588,7 @@ public partial class Laberinto : Node2D
 		}
 
 		/*
-		
+
 		┌─────┬─────┬─────┐
 		│  0  │  1  │  2  │
 		├─────┼─────┴─────┤
@@ -598,49 +598,49 @@ public partial class Laberinto : Node2D
 		[0]·····(1)·····(2)		[N] = visitada
  		:       :       :       (N) = sin visitar
 		(3)·····(    4    )     ◄   = actual (Peek)
-		
+
 		Las puertas posibles son 0-1, 1-2, 0-3, 1-4, 2-4 y 3-4. El Inca está en la sala 0.
 
 		Paso 1: actual = 0, candidatas: 1, 3 → el azar elige 1
 
 		[0]═════[1]◄····(2)        pila: [0, 1]
- 		:       :       :         
+ 		:       :       :
 		(3)·····(    4    )        Push(1)
 
 		Paso 2: actual = 1, candidatas: 2, 4 → el azar elige 4
 
 		[0]═════[1]·····(2)        pila: [0, 1, 4]
- 		:       ║       :         
+ 		:       ║       :
 		(3)·····[    4    ]◄       Push(4)
 
 		Paso 3: actual = 4, candidatas: 2, 3 → el azar elige 2
 
 		[0]═════[1]·····[2]◄       pila: [0, 1, 4, 2]
-		:       ║       ║         
+		:       ║       ║
 		(3)·····[    4    ]        Push(2)
 
 		Paso 4: actual = 2, vecinos 1 y 4 ya visitados → callejón sin salida
 
 		[0]═════[1]·····[2]        pila: [0, 1, 4]
-		:       ║       ║         
+		:       ║       ║
 		(3)·····[    4    ]◄       Pop() → retrocede por el hilo
 
 		Paso 5: actual = 4 otra vez, candidatas: 3 → 3
 
 		[0]═════[1]·····[2]        pila: [0, 1, 4, 3]
-		:       ║       ║         
+		:       ║       ║
 		[3]◄════[    4    ]        Push(3)
 
 		Pasos 6 a 9: todas las salas están visitadas, así que cada vuelta es callejón → Pop, Pop, Pop, Pop
 
 		pila: [0,1,4,3] → [0,1,4] → [0,1] → [0] → [ ]   → termina el while
-		
+
 		Resultado final
 
 		[0]═════[1]·····[2]
 		:       ║       ║
 		[3]═════[    4    ]
-		
+
 		*/
 
 	}
@@ -658,6 +658,16 @@ public partial class Laberinto : Node2D
 		}
 
 		return puertasCerradas;
+	}
+
+	private int AbrirPuerta(int indice)
+	{
+		PuertaPosible puerta = _puertasPosibles[indice];
+		int inicio = _rng.RandiRange(puerta.PrimeraValida, puerta.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
+		PintarPuerta(puerta, inicio, Celda.Piso);
+		_puertasAbiertas[indice] = inicio;
+
+		return inicio;
 	}
 
 	private void AbrirPuertasExtra()
@@ -680,14 +690,8 @@ public partial class Laberinto : Node2D
 			// Elimino de la lista el sobrante de la puerta a trabajar
 			sobrantes.RemoveAt(posicion);
 
-			// Selecciono la puerta a trabajar
-			PuertaPosible puerta = _puertasPosibles[indicePuerta];
-
-			// Tallo la puerta y la asigno al arreglo de _puertasAbiertas
-
-			int inicio = _rng.RandiRange(puerta.PrimeraValida, puerta.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			PintarPuerta(puerta, inicio, Celda.Piso);
-			_puertasAbiertas[indicePuerta] = inicio;
+			// Abro la puerta
+			AbrirPuerta(indicePuerta);
 		}
 	}
 
@@ -771,7 +775,7 @@ public partial class Laberinto : Node2D
 		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
 		bool[] visitado = new bool[_bloques.Count];
 
-		// Creo la pila que me permitirá realizar el DFS en la lógica 
+		// Creo la pila que me permitirá realizar el DFS en la lógica
 		Stack<int> pila = new();
 
 		// Empiezo con el bloque 0, para ello lo agrego a la pila y la marco como visitada
@@ -780,7 +784,7 @@ public partial class Laberinto : Node2D
 
 		while (pila.Count != 0)
 		{
-			// Obtengo el índice del bloque actual que se encuentra encima de la pila sin eliminarlo 
+			// Obtengo el índice del bloque actual que se encuentra encima de la pila sin eliminarlo
 			int actual = pila.Peek();
 
 			// Recorro las puertas posibles para encontrar sus vecinos con puertas abiertas
@@ -858,13 +862,7 @@ public partial class Laberinto : Node2D
 
 			// Selecciono al azar una de las puertas cerradas para abrirla.
 			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count - 1)];
-			PuertaPosible puertaAbrir = _puertasPosibles[indiceAbrir];
-
-			// Tallar (abrir) puerta y registrarla como abierta
-			int inicio = _rng.RandiRange(puertaAbrir.PrimeraValida, puertaAbrir.UltimaValida - LaberintoConfig.Bloque.AnchoPuerta + 1);
-			PintarPuerta(puertaAbrir, inicio, Celda.Piso);
-			_puertasAbiertas[indiceAbrir] = inicio;
-			abiertasEnCiclo[indiceAbrir] = inicio;
+			abiertasEnCiclo[indiceAbrir] = AbrirPuerta(indiceAbrir);
 
 			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
 			// candidatas a cerrar.
