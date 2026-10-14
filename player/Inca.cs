@@ -6,12 +6,17 @@ public partial class Inca : CharacterBody2D
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
 	private AnimatedSprite2D _antorchaSprite;
+	private Combustible _combustible;
+	private Antorcha _antorcha;
 	private string _incaUltimaDireccion = "down";
 
     public override void _Ready()
     {
         _incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_antorchaSprite = GetNode<AnimatedSprite2D>("antorcha/AnimatedSprite2D");
+		_combustible = GetNode<Combustible>("Combustible");
+		_antorcha = GetNode<Antorcha>("antorcha");
+		_combustible.NivelCambiado += _antorcha.AjustarLlama;
     }
 
     public override void _PhysicsProcess(double delta)
