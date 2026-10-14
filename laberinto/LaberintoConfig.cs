@@ -43,7 +43,7 @@ public static class LaberintoConfig
         public static readonly bool Activo = true;
         public const int DistanciaMinimaPiso = 2; // Celdas de piso libres entre un pilar y cualquier muro u otro pilar
         public const int Separacion = DistanciaMinimaPiso + 1; // Paso entre filas de pilares: el piso libre + la celda del siguiente pilar
-        
+
         public const float ProbabilidadPorFila = 0.7f;
 
     }
