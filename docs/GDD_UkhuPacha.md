@@ -38,7 +38,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 ## 3. Mecánicas Principales
 
 ### 3.1 Movimiento
-- Basado en cuadrícula (**grid-based**), personaje visible de cuerpo completo.
+- Movimiento **libre** (no por casillas) sobre un laberinto basado en cuadrícula (**grid-based**), personaje visible de cuerpo completo.
 - Vista cenital para dar lectura espacial clara del laberinto y sus cambios.
 
 ### 3.2 El Laberinto Viviente
@@ -197,10 +197,10 @@ public partial class Inca : CharacterBody2D
 
 ## 8. Roadmap sugerido de desarrollo
 
-- [ ] **Fase 0:** Completar tutoriales oficiales "Getting Started" de Godot (2D y 3D) — *en curso*
-- [ ] **Fase 1:** Movimiento del personaje por cuadrícula + colisiones básicas
-- [ ] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
-- [ ] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
+- [x] **Fase 0:** Completar tutoriales oficiales "Getting Started" de Godot (2D)
+- [x] **Fase 1:** Movimiento libre del personaje + colisiones básicas
+- [x] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
+- [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
 - [ ] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
 - [ ] **Fase 5:** Primer enemigo funcional (IA básica de persecución/patrulla)
 - [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final
