@@ -68,7 +68,8 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - **Feedback:** temblor de cámara + polvo/tierra que se levanta en las puertas que cambian. Sonido grave en Fase 9.
   - **Aviso gradual (sin reloj en pantalla):** unos segundos antes de cada ciclo cae polvo fino del techo y empieza un temblor leve que crece hasta la mutación. El jugador sabe que *falta poco*, nunca cuánto exactamente. Se descartó un contador visible porque convierte el terror en gestión de tiempo y rompe la inmersión.
   - *Ideas para Fase 9:* indicador diegético andino (p. ej. chakana que se ilumina por fases) y aviso más temprano/evidente como opción de dificultad o accesibilidad.
-  - *Pendiente:* aceleración del ciclo por disco (Fase 6) y mutación solo fuera de la luz de la antorcha (Fase 4).
+  - **Mutación también dentro de la luz:** el ciclo de puertas no depende de la antorcha; una puerta puede cambiar a la vista del jugador. Verla cerrarse (con temblor y polvo) refuerza que la cueva está viva y reacciona frente a él. Se descartó mutar solo fuera de la luz (decisión Fase 4).
+  - *Pendiente:* aceleración del ciclo por disco (Fase 6).
 - **Ancla en un cambio de salas:** la sala donde está el Inca en ese momento **no se modifica** (evita que el jugador quede dentro de un muro). La puerta final sí se va de esa sala.
 - **Semillas aleatorias (seeds):** cada partida genera un mapa distinto; las semillas se pueden compartir entre jugadores.
 - **La puerta final se mueve solo en los cambios de salas** (la cueva protege la Ciudad Perdida y la esconde, ver 2. Narrativa). Entre un disco y el siguiente queda quieta; lo que cambia son las rutas hacia ella (ciclos de puertas).
@@ -230,7 +231,6 @@ public partial class Inca : CharacterBody2D
 - ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
 - ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
 - ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
-- ¿Las mutaciones ocurren solo fuera de la luz de la antorcha? (Idea: el jugador nunca ve el cambio, solo lo descubre después.)
 - ¿Valores concretos del rango de distancia para colocar tótems de Viracocha?
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
