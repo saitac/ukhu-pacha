@@ -645,19 +645,25 @@ public partial class Laberinto : Node2D
 
 	}
 
-	private void AbrirPuertasExtra()
+	private List<int> ListarPuertasCerradas()
 	{
-		// Identificar las sobrantes (índices de puertas que no están abiertas)
-
-		List<int> sobrantes = [];
+		List<int> puertasCerradas = [];
 
 		for (int p = 0; p < _puertasPosibles.Count; p++)
 		{
 			if (!_puertasAbiertas.ContainsKey(p))
 			{
-				sobrantes.Add(p);
+				puertasCerradas.Add(p);
 			}
 		}
+
+		return puertasCerradas;
+	}
+
+	private void AbrirPuertasExtra()
+	{
+		// Identificar las sobrantes (índices de puertas que no están abiertas)
+		List<int> sobrantes = ListarPuertasCerradas();
 
 		// Definir cuantas puertas adicionales abrir
 		int puertasAdicionales = (int)(sobrantes.Count * LaberintoConfig.Bloque.PorcentajePuertasExtra);
@@ -840,18 +846,9 @@ public partial class Laberinto : Node2D
 
 		for (int intercambio = 0; intercambio < intercambios; intercambio++)
 		{
-			// Busco en puertasPosibles aquellas puertas que no están abiertas (_puertasAbiertas), para ello
-			// valido si el índice de cada _puertaPosible en _puertasPosibles es key en _puertasAbiertas
-			// Si no es una key, entonces la agrego a puertasCerradas, siempre y cuando no haya sido una puerta
-			// recientemente cerrada en el ciclo de mutación.
-			List<int> puertasCerradas = [];
-			for (int ppIndex = 0; ppIndex < _puertasPosibles.Count; ppIndex++)
-			{
-				if (!_puertasAbiertas.ContainsKey(ppIndex) && !cerradasEnCiclo.ContainsKey(ppIndex))
-				{
-					puertasCerradas.Add(ppIndex);
-				}
-			}
+			// Puertas cerradas, excluyendo las cerradas en este ciclo
+			List<int> puertasCerradas = ListarPuertasCerradas();
+			puertasCerradas.RemoveAll(id => cerradasEnCiclo.ContainsKey(id));
 
 			// Si ya no quedan puertas cerradas, corto los intercambios restantes del ciclo actual.
 			if (puertasCerradas.Count == 0)
