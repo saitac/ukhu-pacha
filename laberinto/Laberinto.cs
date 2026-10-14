@@ -906,6 +906,13 @@ public partial class Laberinto : Node2D
 				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count - 1)];
 				cerradasEnCiclo[indiceCerrar] = CerrarPuerta(indiceCerrar);
 			}
+			else
+			{
+				// Sin candidatas: deshago la apertura para que el intercambio no ocurra
+				// y la cantidad de puertas abiertas se mantenga estable.
+				CerrarPuerta(indiceAbrir);
+				abiertasEnCiclo.Remove(indiceAbrir);
+			}
 		}
 
 		return (abiertasEnCiclo, cerradasEnCiclo);
