@@ -670,6 +670,16 @@ public partial class Laberinto : Node2D
 		return inicio;
 	}
 
+	private int CerrarPuerta(int indice)
+	{
+		PuertaPosible puerta = _puertasPosibles[indice];
+		int inicio = _puertasAbiertas[indice];
+		PintarPuerta(puerta, inicio, Celda.Muro);
+		_puertasAbiertas.Remove(indice);
+
+		return inicio;
+	}
+
 	private void AbrirPuertasExtra()
 	{
 		// Identificar las sobrantes (índices de puertas que no están abiertas)
@@ -735,12 +745,14 @@ public partial class Laberinto : Node2D
 			ColocarPilaresEnBloque(_bloques[indice]);
 		}
 	}
+
 	private void ProgramarSiguienteCiclo()
 	{
 		_estadoCiclo = EstadoCiclo.Calma;
 		_TimerMutacion.WaitTime = _rng.RandfRange(LaberintoConfig.Mutacion.CalmaMinSeg, LaberintoConfig.Mutacion.CalmaMaxSeg);
 		_TimerMutacion.Start();
 	}
+
 	private void OnCicloPuertas()
 	{
 		if (_estadoCiclo == EstadoCiclo.Calma)
@@ -770,6 +782,7 @@ public partial class Laberinto : Node2D
 			ProgramarSiguienteCiclo();
 		}
 	}
+
 	private bool SalasConectadas(int puertaIgnorada)
 	{
 		// Creo un arreglo de visitados para marcar los bloques que ya fueron visitados por la función
@@ -891,17 +904,13 @@ public partial class Laberinto : Node2D
 			if (candidatasCerrar.Count != 0)
 			{
 				int indiceCerrar = candidatasCerrar[_rng.RandiRange(0, candidatasCerrar.Count - 1)];
-
-				PuertaPosible puertaCerrar = _puertasPosibles[indiceCerrar];
-				int inicioCerrar = _puertasAbiertas[indiceCerrar];
-				PintarPuerta(puertaCerrar, inicioCerrar, Celda.Muro);
-				_puertasAbiertas.Remove(indiceCerrar);
-				cerradasEnCiclo[indiceCerrar] = inicioCerrar;
+				cerradasEnCiclo[indiceCerrar] = CerrarPuerta(indiceCerrar);
 			}
 		}
 
 		return (abiertasEnCiclo, cerradasEnCiclo);
 	}
+
 	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
 	{
 		PuertaPosible puerta = _puertasPosibles[indicePuerta];
