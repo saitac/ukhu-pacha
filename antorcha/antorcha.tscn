@@ -72,9 +72,27 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="Gradient" id="Gradient_632vd"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_hfs8p"]
+gradient = SubResource("Gradient_632vd")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [node name="antorcha" type="Node2D" unique_id=1918987338]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=852748141]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_ekqyl")
 animation = &"antorcha-down"
+
+[node name="PointLight2D" type="PointLight2D" parent="AnimatedSprite2D" unique_id=1080011927]
+color = Color(1, 0.6901961, 0.3764706, 1)
+energy = 1.5
+range_item_cull_mask = 3
+shadow_enabled = true
+texture = SubResource("GradientTexture2D_hfs8p")
