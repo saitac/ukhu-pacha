@@ -16,6 +16,9 @@ public partial class Antorcha : Node2D
 	[Export]
 	public float EscalaLuzMaxima = 1.0f;
 
+	[Export(PropertyHint.Range, "0.05,1,0.05")]
+	public float UmbralAgotamiento = 0.4f;
+
 	public override void _Ready()
 	{
 		_llama = GetNode<PointLight2D>("AnimatedSprite2D/PointLight2D");
@@ -23,8 +26,11 @@ public partial class Antorcha : Node2D
 
 	public void AjustarLlama(float nivel)
 	{
-		_llama.Energy = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, nivel);
-		_llama.TextureScale = Mathf.Lerp(EscalaLuzMinima, EscalaLuzMaxima, nivel);
+		// Por encima del umbral la luz queda plena (meseta); debajo se achica hasta el mínimo
+		float t = Mathf.InverseLerp(0f, UmbralAgotamiento, nivel);
+		t = Mathf.Clamp(t, 0f, 1f);
+		_llama.Energy = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, t);
+		_llama.TextureScale = Mathf.Lerp(EscalaLuzMinima, EscalaLuzMaxima, t);
 		_llama.Enabled = nivel > 0f;
 	}
 }
