@@ -71,6 +71,38 @@ animations = [{
 "loop": 1,
 "name": &"antorcha-up",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_x6hk6")
+}],
+"loop": 1,
+"name": &"apagada-down",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_632vd")
+}],
+"loop": 1,
+"name": &"apagada-left",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_1klnj")
+}],
+"loop": 1,
+"name": &"apagada-right",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_4q64l")
+}],
+"loop": 1,
+"name": &"apagada-up",
+"speed": 3.0
 }]
 
 [sub_resource type="Gradient" id="Gradient_632vd"]

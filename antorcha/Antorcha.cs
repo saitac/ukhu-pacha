@@ -6,6 +6,8 @@ public partial class Antorcha : Node2D
 
 	private AnimatedSprite2D _sprite;
 
+	private string _direccion = "down";
+
 	private bool _encendida = true;
 
 	[Export]
@@ -32,6 +34,7 @@ public partial class Antorcha : Node2D
 	public void AjustarLlama(float nivel)
 	{
 		bool encendidaAhora = nivel > 0f;
+		bool cambio = _encendida != encendidaAhora;
 
 		// Por encima del umbral la luz queda plena (meseta); debajo se achica hasta el mínimo
 		float t = Mathf.InverseLerp(0f, UmbralAgotamiento, nivel);
@@ -39,20 +42,32 @@ public partial class Antorcha : Node2D
 		_llama.Energy = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, t);
 		_llama.TextureScale = Mathf.Lerp(EscalaLuzMinima, EscalaLuzMaxima, t);
 
-		if (_encendida && !encendidaAhora)
-		{
-			GD.Print("Se acaba de apagar: Humo una vez!!");
-		} else if (!_encendida && encendidaAhora)
-		{
-			GD.Print("Se acaba de encender: Recarga");
-		}
-
 		_encendida = encendidaAhora;
 		_llama.Enabled = _encendida;
+
+		if (cambio)
+		{
+			ActualizarSprite();
+
+			if (_encendida)
+			{
+				GD.Print("Se acaba de encender: Recarga");
+			} else
+			{
+				GD.Print("Se acaba de apagar: Humo una vez!!");
+			}
+		}
+	}
+
+	private void ActualizarSprite()
+	{
+		string animacion = (_encendida ? "antorcha-" : "apagada-") + _direccion;
+		_sprite.Play(animacion);
 	}
 
 	public void Orientar(string direccion)
 	{
-		_sprite.Play("antorcha-" + direccion);
+		_direccion = direccion;
+		ActualizarSprite();
 	}
 }
