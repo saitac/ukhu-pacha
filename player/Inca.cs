@@ -9,21 +9,34 @@ public partial class Inca : CharacterBody2D
 	private Antorcha _antorcha;
 	private string _incaUltimaDireccion = "down";
 
-    public override void _Ready()
-    {
-        _incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
+	public override void _Ready()
+	{
+		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_combustible.NivelCambiado += _antorcha.AjustarLlama;
-    }
+	}
 
-    public override void _PhysicsProcess(double delta)
-    {
+	public override void _PhysicsProcess(double delta)
+	{
 		Vector2 direccion = Input.GetVector("move_left", "move_right", "move_up", "move_down");
 		ActualizaAnimacion(direccion);
 		Velocity = direccion * _speed;
 		MoveAndSlide();
-    }
+	}
+
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (!OS.IsDebugBuild())
+		{
+			return;
+		}
+
+		if (@event.IsActionPressed("debug_recargar"))
+		{
+			_combustible.Recargar();
+		}
+	}
 
 	private void ActualizaAnimacion(Vector2 direccion)
 	{
