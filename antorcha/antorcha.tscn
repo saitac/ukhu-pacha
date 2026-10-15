@@ -130,3 +130,12 @@ energy = 1.5
 range_item_cull_mask = 3
 shadow_enabled = true
 texture = SubResource("GradientTexture2D_hfs8p")
+
+[node name="Brasa" type="PointLight2D" parent="AnimatedSprite2D" unique_id=473873053]
+position = Vector2(7, -4)
+enabled = false
+color = Color(1, 0.2901961, 0.101960786, 1)
+energy = 0.4
+range_item_cull_mask = 3
+texture = SubResource("GradientTexture2D_hfs8p")
+texture_scale = 0.3

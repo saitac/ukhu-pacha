@@ -4,6 +4,8 @@ public partial class Antorcha : Node2D
 {
 	private PointLight2D _llama;
 
+	private PointLight2D _brasa;
+
 	private AnimatedSprite2D _sprite;
 
 	private string _direccion = "down";
@@ -29,6 +31,7 @@ public partial class Antorcha : Node2D
 	{
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_llama = _sprite.GetNode<PointLight2D>("PointLight2D");
+		_brasa = _sprite.GetNode<PointLight2D>("Brasa");
 	}
 
 	public void AjustarLlama(float nivel)
@@ -44,6 +47,7 @@ public partial class Antorcha : Node2D
 
 		_encendida = encendidaAhora;
 		_llama.Enabled = _encendida;
+		_brasa.Enabled = !_encendida;
 
 		if (cambio)
 		{
