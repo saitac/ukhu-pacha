@@ -4,6 +4,8 @@ public partial class Antorcha : Node2D
 {
 	private PointLight2D _llama;
 
+	private AnimatedSprite2D _sprite;
+
 	[Export]
 	public float EnergiaMinima = 0.2f;
 
@@ -21,7 +23,8 @@ public partial class Antorcha : Node2D
 
 	public override void _Ready()
 	{
-		_llama = GetNode<PointLight2D>("AnimatedSprite2D/PointLight2D");
+		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
+		_llama = _sprite.GetNode<PointLight2D>("PointLight2D");
 	}
 
 	public void AjustarLlama(float nivel)
@@ -32,5 +35,10 @@ public partial class Antorcha : Node2D
 		_llama.Energy = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, t);
 		_llama.TextureScale = Mathf.Lerp(EscalaLuzMinima, EscalaLuzMaxima, t);
 		_llama.Enabled = nivel > 0f;
+	}
+
+	public void Orientar(string direccion)
+	{
+		_sprite.Play("antorcha-" + direccion);
 	}
 }

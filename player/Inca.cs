@@ -5,7 +5,6 @@ public partial class Inca : CharacterBody2D
 {
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
-	private AnimatedSprite2D _antorchaSprite;
 	private Combustible _combustible;
 	private Antorcha _antorcha;
 	private string _incaUltimaDireccion = "down";
@@ -13,7 +12,6 @@ public partial class Inca : CharacterBody2D
     public override void _Ready()
     {
         _incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-		_antorchaSprite = GetNode<AnimatedSprite2D>("antorcha/AnimatedSprite2D");
 		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_combustible.NivelCambiado += _antorcha.AjustarLlama;
@@ -32,7 +30,7 @@ public partial class Inca : CharacterBody2D
 		if ( direccion == Vector2.Zero)
 		{
 			_incaSprite.Play("idle-" + _incaUltimaDireccion);
-			_antorchaSprite.Play("antorcha-" + _incaUltimaDireccion);
+			_antorcha.Orientar(_incaUltimaDireccion);
 			return;
 
 		}
@@ -46,6 +44,6 @@ public partial class Inca : CharacterBody2D
 		}
 
 		_incaSprite.Play("walk-" + _incaUltimaDireccion + "-inca");
-		_antorchaSprite.Play("antorcha-" + _incaUltimaDireccion);
+		_antorcha.Orientar(_incaUltimaDireccion);
 	}
 }
