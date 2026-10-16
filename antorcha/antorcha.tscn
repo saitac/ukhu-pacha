@@ -116,6 +116,17 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_mmumd"]
+light_mode = 1
+
+[sub_resource type="Curve" id="Curve_hfs8p"]
+_data = [Vector2(0, 0.2), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_n3ga3"]
+offsets = PackedFloat32Array(0.001968504, 1)
+colors = PackedColorArray(0.627451, 0.627451, 0.627451, 0.5019608, 0.627451, 0.627451, 0.627451, 0)
+
 [node name="antorcha" type="Node2D" unique_id=1918987338]
 script = ExtResource("1_jdmet")
 
@@ -124,18 +135,41 @@ scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_ekqyl")
 animation = &"antorcha-down"
 
-[node name="PointLight2D" type="PointLight2D" parent="AnimatedSprite2D" unique_id=1080011927]
+[node name="Punta" type="Marker2D" parent="AnimatedSprite2D" unique_id=21969599]
+position = Vector2(7, -4)
+
+[node name="PointLight2D" type="PointLight2D" parent="AnimatedSprite2D/Punta" unique_id=1080011927]
 color = Color(1, 0.6901961, 0.3764706, 1)
 energy = 1.5
 range_item_cull_mask = 3
 shadow_enabled = true
 texture = SubResource("GradientTexture2D_hfs8p")
 
-[node name="Brasa" type="PointLight2D" parent="AnimatedSprite2D" unique_id=473873053]
-position = Vector2(7, -4)
+[node name="Brasa" type="PointLight2D" parent="AnimatedSprite2D/Punta" unique_id=473873053]
 enabled = false
 color = Color(1, 0.2901961, 0.101960786, 1)
 energy = 0.4
 range_item_cull_mask = 3
 texture = SubResource("GradientTexture2D_hfs8p")
 texture_scale = 0.3
+
+[node name="Humo" type="CPUParticles2D" parent="AnimatedSprite2D/Punta" unique_id=1518203157]
+material = SubResource("CanvasItemMaterial_mmumd")
+emitting = false
+amount = 50
+lifetime = 2.5
+one_shot = true
+explosiveness = 0.2
+direction = Vector2(0, -1)
+spread = 40.0
+gravity = Vector2(0, -2)
+initial_velocity_min = 4.0
+initial_velocity_max = 8.0
+angular_velocity_min = -30.0
+angular_velocity_max = 30.0
+damping_min = 2.0
+damping_max = 5.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+scale_amount_curve = SubResource("Curve_hfs8p")
+color_ramp = SubResource("Gradient_n3ga3")

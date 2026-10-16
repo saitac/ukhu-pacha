@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public partial class Antorcha : Node2D
@@ -6,7 +7,11 @@ public partial class Antorcha : Node2D
 
 	private PointLight2D _brasa;
 
+	private CpuParticles2D _humo;
+
 	private AnimatedSprite2D _sprite;
+
+	private Marker2D _punta;
 
 	private Direccion _direccion = Direccion.Abajo;
 
@@ -30,8 +35,23 @@ public partial class Antorcha : Node2D
 	public override void _Ready()
 	{
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-		_llama = _sprite.GetNode<PointLight2D>("PointLight2D");
-		_brasa = _sprite.GetNode<PointLight2D>("Brasa");
+		_punta = _sprite.GetNode<Marker2D>("Punta");
+		_llama = _punta.GetNode<PointLight2D>("PointLight2D");
+		_brasa = _punta.GetNode<PointLight2D>("Brasa");
+		_humo = _punta.GetNode<CpuParticles2D>("Humo");
+		ActualizarSprite();
+	}
+
+	private Vector2 PosicionPunta(Direccion direccion)
+	{
+		return direccion switch
+		{
+			Direccion.Abajo => new Vector2(7, -4),
+			Direccion.Arriba => new Vector2(-7, -8),
+			Direccion.Derecha => new Vector2(10, -7),
+			Direccion.Izquierda => new Vector2(-10, -7),
+			_ => throw new ArgumentOutOfRangeException(nameof(direccion), direccion, null),
+		};
 	}
 
 	public void AjustarLlama(float nivel)
@@ -58,7 +78,7 @@ public partial class Antorcha : Node2D
 				GD.Print("Se acaba de encender: Recarga");
 			} else
 			{
-				GD.Print("Se acaba de apagar: Humo una vez!!");
+				_humo.Emitting = true;
 			}
 		}
 	}
@@ -66,11 +86,16 @@ public partial class Antorcha : Node2D
 	private void ActualizarSprite()
 	{
 		string animacion = (_encendida ? "antorcha-" : "apagada-") + _direccion.Sufijo();
+		_punta.Position = PosicionPunta(_direccion);
 		_sprite.Play(animacion);
 	}
 
 	public void Orientar(Direccion direccion)
 	{
+		if (_direccion == direccion)
+		{
+			return;
+		}
 		_direccion = direccion;
 		ActualizarSprite();
 	}
