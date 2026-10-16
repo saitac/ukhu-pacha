@@ -7,7 +7,7 @@ public partial class Inca : CharacterBody2D
 	private AnimatedSprite2D _incaSprite;
 	private Combustible _combustible;
 	private Antorcha _antorcha;
-	private string _incaUltimaDireccion = "down";
+	private Direccion _incaUltimaDireccion = Direccion.Abajo;
 
 	public override void _Ready()
 	{
@@ -40,23 +40,22 @@ public partial class Inca : CharacterBody2D
 
 	private void ActualizaAnimacion(Vector2 direccion)
 	{
-		if ( direccion == Vector2.Zero)
+		if (direccion == Vector2.Zero)
 		{
-			_incaSprite.Play("idle-" + _incaUltimaDireccion);
+			_incaSprite.Play("idle-" + _incaUltimaDireccion.Sufijo());
 			_antorcha.Orientar(_incaUltimaDireccion);
 			return;
-
 		}
 
 		if(Math.Abs(direccion.X) > Math.Abs(direccion.Y)) // se mueve en el eje X
 		{
-			_incaUltimaDireccion = direccion.X > 0 ? "right" : "left";
+			_incaUltimaDireccion = direccion.X > 0 ? Direccion.Derecha : Direccion.Izquierda;
 		} else
 		{
-			_incaUltimaDireccion = direccion.Y > 0 ? "down" : "up";
+			_incaUltimaDireccion = direccion.Y > 0 ? Direccion.Abajo : Direccion.Arriba;
 		}
 
-		_incaSprite.Play("walk-" + _incaUltimaDireccion + "-inca");
+		_incaSprite.Play("walk-" + _incaUltimaDireccion.Sufijo() + "-inca");
 		_antorcha.Orientar(_incaUltimaDireccion);
 	}
 }

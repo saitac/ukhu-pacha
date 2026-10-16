@@ -8,7 +8,7 @@ public partial class Antorcha : Node2D
 
 	private AnimatedSprite2D _sprite;
 
-	private string _direccion = "down";
+	private Direccion _direccion = Direccion.Abajo;
 
 	private bool _encendida = true;
 
@@ -65,11 +65,11 @@ public partial class Antorcha : Node2D
 
 	private void ActualizarSprite()
 	{
-		string animacion = (_encendida ? "antorcha-" : "apagada-") + _direccion;
+		string animacion = (_encendida ? "antorcha-" : "apagada-") + _direccion.Sufijo();
 		_sprite.Play(animacion);
 	}
 
-	public void Orientar(string direccion)
+	public void Orientar(Direccion direccion)
 	{
 		_direccion = direccion;
 		ActualizarSprite();
