@@ -15,7 +15,7 @@
 
 ### Premisa
 
-Un príncipe inca huye de la conquista española y se refugia en una cueva ancestral, un lugar sagrado de la propia tradición andina anterior incluso al Imperio Inca, ligado al culto a Viracocha y a las fuerzas del Uku Pacha (el mundo de abajo). La cueva no es un espacio estático: está viva, muta constantemente, y en sus profundidades habitan entidades mitológicas andinas. La única salida es encontrar la **Ciudad Perdida**, un santuario oculto donde su pueblo puede sobrevivir.
+Un príncipe inca huye de la conquista española y se refugia en una cueva ancestral, un lugar sagrado de la propia tradición andina anterior incluso al Imperio Inca, ligado al culto a Wiracocha y a las fuerzas del Uku Pacha (el mundo de abajo). La cueva no es un espacio estático: está viva, muta constantemente, y en sus profundidades habitan entidades mitológicas andinas. La única salida es encontrar la **Ciudad Perdida**, un santuario oculto donde su pueblo puede sobrevivir.
 
 ### Pilares de diseño
 
@@ -28,7 +28,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 ## 2. Narrativa
 
 - **Inicio:** El protagonista escapa de una masacre española, se adentra en una cueva y bloquea la entrada con una piedra sagrada (*wanka*). No hay vuelta atrás.
-- **Contexto mítico:** La cueva es un lugar sagrado ancestral de la propia cosmovisión andina, anterior al esplendor del Imperio Inca pero perteneciente a la misma tradición cultural y religiosa (Viracocha, Inti, el Uku Pacha). No se mezclan culturas externas: todo el simbolismo, arquitectura y entidades del juego pertenecen al mismo universo andino/inca.
+- **Contexto mítico:** La cueva es un lugar sagrado ancestral de la propia cosmovisión andina, anterior al esplendor del Imperio Inca pero perteneciente a la misma tradición cultural y religiosa (Wiracocha, Inti, el Uku Pacha). No se mezclan culturas externas: todo el simbolismo, arquitectura y entidades del juego pertenecen al mismo universo andino/inca.
 - **Objetivo narrativo:** Encontrar la Ciudad Perdida para salvar a su pueblo.
 - **La cueva protege la Ciudad Perdida:** cada vez que el Inca coloca un disco de Inti en la puerta de piedra, la cueva se reordena y esconde la puerta en otro lugar. No es un enemigo que lo odie, sino un guardián que pone a prueba a quien busca el santuario.
 - **Final:** Al colocar los tres discos sagrados en la puerta de piedra, esta se abre revelando la ciudad santuario al amanecer. El protagonista dejar caer su antorcha ya consumida — el viaje ha terminado.
@@ -50,7 +50,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   | Disparador | Qué cambia | Sensación buscada |
   |---|---|---|
   | **Tiempo** (ciclos periódicos) | La disposición de las **puertas** (se cierran unas, se abren otras); la forma de las salas se mantiene | Inquietud constante: "¿esta puerta estaba aquí?" |
-  | **Colocar un disco de Inti en la puerta final** | La **forma de las salas** (y con ellas las puertas) + **reubicación de la puerta final** + recolocación de tótems de Viracocha y altares de Cóndor | Golpe dramático, un cambio de acto: la cueva reacciona a la reliquia devuelta y se reordena por completo |
+  | **Colocar un disco de Inti en la puerta final** | La **forma de las salas** (y con ellas las puertas) + **reubicación de la puerta final** + recolocación de tótems de Wiracocha y altares de Cóndor | Golpe dramático, un cambio de acto: la cueva reacciona a la reliquia devuelta y se reordena por completo |
 
   - Con tres discos, la cueva tiene **cuatro "versiones"** de salas por partida: el juego se estructura en actos.
   - Entre un disco y el siguiente las salas y los tótems no se mueven, así que "volver a recargar" sigue siendo un plan válido aunque las puertas hayan cambiado (ver 3.3).
@@ -78,7 +78,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - Temporizador de luz (`float`) que baja con el tiempo.
 - El cono de luz se reduce y parpadea a medida que se agota.
 - En 0%: oscuridad total → alto riesgo de muerte.
-- **Recarga:** en tótems de **Viracocha**, repartidos en el mapa.
+- **Recarga:** en tótems de **Wiracocha**, repartidos en el mapa.
   - Los tótems se mantienen fijos mientras las salas no cambian; **se recolocan cada vez que cambia la forma de las salas** (al colocar un disco de Inti en la puerta final, ver 3.2).
   - Se colocan según parámetros de distancia al Inca, medida **caminando** (por el recorrido real a través de las puertas, no en línea recta).
   - La distancia es un **rango** (ni demasiado cerca ni demasiado lejos), no una garantía de llegar a tiempo: si siempre hubiera un tótem justo al alcance, la oscuridad dejaría de ser una amenaza.
@@ -112,7 +112,7 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 
 | Recurso | Cómo se recarga |
 |---|---|
-| Luz (antorcha) | Tótems de Viracocha (en un lugar) |
+| Luz (antorcha) | Tótems de Wiracocha (en un lugar) |
 | Cóndor | Altares (en un lugar) |
 | Puma | Tiempo (cooldown), sin tótem ni altar |
 
@@ -140,7 +140,7 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 | **Dios Urka** | Acelerador de caos | Rige los temblores y mutaciones violentas del laberinto |
 
 **Deidades aliadas:**
-- **Viracocha** — deidad de los tótems de recarga de antorcha.
+- **Wiracocha** — deidad de los tótems de recarga de antorcha.
 - **Inti** — dios sol, dueño de las reliquias objetivo.
 - **Cóndor y Puma** — espíritus tutelares de ayuda táctica limitada.
 
@@ -231,7 +231,7 @@ public partial class Inca : CharacterBody2D
 - ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
 - ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
 - ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
-- ¿Valores concretos del rango de distancia para colocar tótems de Viracocha?
+- ¿Valores concretos del rango de distancia para colocar tótems de Wiracocha?
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
