@@ -13,6 +13,18 @@
 [ext_resource type="Texture2D" uid="uid://c545rubbhbnyk" path="res://antorcha/sprites/right/antorcha-right-01-llama1.png" id="7_1klnj"]
 [ext_resource type="Texture2D" uid="uid://dnv0xftxxc4on" path="res://antorcha/sprites/right/antorcha-right-02-llama2.png" id="8_f8n1w"]
 [ext_resource type="Texture2D" uid="uid://lgysd4ueqda6" path="res://antorcha/sprites/right/antorcha-right-03-llama3.png" id="9_xm6n4"]
+[ext_resource type="Texture2D" uid="uid://dk6u3opplvpg7" path="res://antorcha/sprites/down/antorcha-down-apagada-01.png" id="14_ix837"]
+[ext_resource type="Texture2D" uid="uid://4kuky15mpi7w" path="res://antorcha/sprites/down/antorcha-down-apagada-02.png" id="15_jcws0"]
+[ext_resource type="Texture2D" uid="uid://vnpfc1kc3bkr" path="res://antorcha/sprites/down/antorcha-down-apagada-03.png" id="16_20hns"]
+[ext_resource type="Texture2D" uid="uid://dj2lii472kd3k" path="res://antorcha/sprites/left/antorcha-left-apagada-01.png" id="17_qttd3"]
+[ext_resource type="Texture2D" uid="uid://dbhpcqn35fygw" path="res://antorcha/sprites/left/antorcha-left-apagada-02.png" id="18_kwyix"]
+[ext_resource type="Texture2D" uid="uid://b6ueg8feoqfpw" path="res://antorcha/sprites/left/antorcha-left-apagada-03.png" id="19_cq5ns"]
+[ext_resource type="Texture2D" uid="uid://cg8de2lpmq6es" path="res://antorcha/sprites/right/antorcha-right-apagada-01.png" id="20_d13nv"]
+[ext_resource type="Texture2D" uid="uid://2ec6yuvfflgt" path="res://antorcha/sprites/right/antorcha-right-apagada-02.png" id="21_ohlw2"]
+[ext_resource type="Texture2D" uid="uid://50peyswaqng5" path="res://antorcha/sprites/right/antorcha-right-apagada-03.png" id="22_xva8b"]
+[ext_resource type="Texture2D" uid="uid://js4pdvob68tf" path="res://antorcha/sprites/up/antorcha-up-apagada-01.png" id="23_x85m1"]
+[ext_resource type="Texture2D" uid="uid://u00383qcqrx2" path="res://antorcha/sprites/up/antorcha-up-apagada-02.png" id="24_gfayw"]
+[ext_resource type="Texture2D" uid="uid://gy8o4uhl4js" path="res://antorcha/sprites/up/antorcha-up-apagada-03.png" id="25_hhcf0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ekqyl"]
 animations = [{
@@ -74,7 +86,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_x6hk6")
+"texture": ExtResource("14_ix837")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_jcws0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_20hns")
 }],
 "loop": 1,
 "name": &"apagada-down",
@@ -82,7 +100,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("4_632vd")
+"texture": ExtResource("17_qttd3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_kwyix")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_cq5ns")
 }],
 "loop": 1,
 "name": &"apagada-left",
@@ -90,7 +114,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("7_1klnj")
+"texture": ExtResource("20_d13nv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_ohlw2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_xva8b")
 }],
 "loop": 1,
 "name": &"apagada-right",
@@ -98,7 +128,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("4_4q64l")
+"texture": ExtResource("23_x85m1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_gfayw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_hhcf0")
 }],
 "loop": 1,
 "name": &"apagada-up",
@@ -146,6 +182,7 @@ shadow_enabled = true
 texture = SubResource("GradientTexture2D_hfs8p")
 
 [node name="Brasa" type="PointLight2D" parent="AnimatedSprite2D/Punta" unique_id=473873053]
+position = Vector2(0, 3)
 enabled = false
 color = Color(1, 0.2901961, 0.101960786, 1)
 energy = 0.4
@@ -155,6 +192,7 @@ texture_scale = 0.3
 
 [node name="Humo" type="CPUParticles2D" parent="AnimatedSprite2D/Punta" unique_id=1518203157]
 material = SubResource("CanvasItemMaterial_mmumd")
+position = Vector2(0, 3)
 emitting = false
 amount = 50
 lifetime = 2.5
