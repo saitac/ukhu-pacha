@@ -288,6 +288,7 @@ offsets = PackedFloat32Array(0, 0.24401198, 1)
 colors = PackedColorArray(0.003921569, 0.003921569, 0.003921569, 0, 1, 1, 1, 0.8, 0.003921569, 0.003921569, 0.003921569, 0)
 
 [node name="Laberinto" type="Node2D" unique_id=322285212]
+y_sort_enabled = true
 script = ExtResource("1_8w83w")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
@@ -304,6 +305,7 @@ physics_quadrant_size = 4
 position = Vector2(1920, 1920)
 
 [node name="CamaraInca" type="Camera2D" parent="Inca" unique_id=1320824097]
+position = Vector2(0, -42)
 limit_left = 0
 limit_top = 0
 limit_right = 3840

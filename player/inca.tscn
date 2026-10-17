@@ -133,12 +133,14 @@ script = ExtResource("1_uj2a5")
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_jdori")
 animation = &"idle-down"
+offset = Vector2(0, -14)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1876004864]
-position = Vector2(2.5, 0)
+position = Vector2(2.5, -42)
 shape = SubResource("RectangleShape2D_hfs8p")
 
 [node name="antorcha" parent="." unique_id=1918987338 instance=ExtResource("18_ye0y5")]
+position = Vector2(0, -42)
 
 [node name="Combustible" type="Node" parent="." unique_id=1514074754]
 script = ExtResource("19_y1eoe")
