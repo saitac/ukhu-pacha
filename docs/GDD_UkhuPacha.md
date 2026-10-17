@@ -80,7 +80,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - En 0%: oscuridad total → alto riesgo de muerte.
 - **Recarga:** en tótems de **Wiracocha**, repartidos en el mapa.
   - La recarga es **automática**: basta con que el Inca se acerque al tótem (entre en su zona), sin presionar ninguna tecla. La zona es pequeña, pegada al tótem, para que no recargue con solo pasar cerca.
-  - Cada tótem tiene un **par de antorchas** encendidas que nunca se agotan: iluminan el tótem y lo hacen visible a la distancia en la oscuridad.
+  - Cada tótem tiene al pie un **brasero ceremonial** de piedra con un fuego que nunca se apaga: ilumina el tótem desde abajo y lo hace visible a la distancia en la oscuridad.
   - Los tótems se mantienen fijos mientras las salas no cambian; **se recolocan cada vez que cambia la forma de las salas** (al colocar un disco de Inti en la puerta final, ver 3.2).
   - Se colocan según parámetros de distancia al Inca, medida **caminando** (por el recorrido real a través de las puertas, no en línea recta).
   - La distancia es un **rango** (ni demasiado cerca ni demasiado lejos), no una garantía de llegar a tiempo: si siempre hubiera un tótem justo al alcance, la oscuridad dejaría de ser una amenaza.

@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://k838h6abax1d"]
+
+[ext_resource type="Texture2D" uid="uid://b2vn6kir5qvy" path="res://sagrados/wiracocha/sprites/totem-wiracocha.png" id="1_jg42r"]
+[ext_resource type="Texture2D" uid="uid://c3d1gs0cwpqjf" path="res://sagrados/wiracocha/sprites/brasero-wiracocha-01.png" id="2_qs3cu"]
+[ext_resource type="Texture2D" uid="uid://cou2ykj8ii7d0" path="res://sagrados/wiracocha/sprites/brasero-wiracocha-02.png" id="3_nuoou"]
+[ext_resource type="Texture2D" uid="uid://i86825jriki2" path="res://sagrados/wiracocha/sprites/brasero-wiracocha-03.png" id="4_h54j2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ejoef"]
+size = Vector2(66, 18)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jg42r"]
+size = Vector2(81, 33)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hfs8p"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_qs3cu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_nuoou")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_h54j2")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_632vd"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_hfs8p"]
+gradient = SubResource("Gradient_632vd")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="TotemWiracocha" type="StaticBody2D" unique_id=1137116262]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=856846028]
+scale = Vector2(3, 3)
+texture = ExtResource("1_jg42r")
+offset = Vector2(0, -22)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=681928902]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_ejoef")
+
+[node name="ZonaRecarga" type="Area2D" parent="." unique_id=1505080380]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaRecarga" unique_id=1893755373]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_jg42r")
+
+[node name="Brasero" type="AnimatedSprite2D" parent="." unique_id=329936677]
+position = Vector2(0, 9)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_hfs8p")
+autoplay = "default"
+frame = 2
+frame_progress = 0.5517952
+offset = Vector2(0, -7)
+
+[node name="PointLight2D" type="PointLight2D" parent="Brasero" unique_id=825635563]
+position = Vector2(0, -10)
+color = Color(1, 0.6901961, 0.3764706, 1)
+energy = 0.8
+range_item_cull_mask = 3
+shadow_enabled = true
+texture = SubResource("GradientTexture2D_hfs8p")
