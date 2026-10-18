@@ -58,4 +58,9 @@ public partial class Inca : CharacterBody2D
 		_incaSprite.Play("walk-" + _incaUltimaDireccion.Sufijo() + "-inca");
 		_antorcha.Orientar(_incaUltimaDireccion);
 	}
+
+	public void RecargarCombustible()
+	{
+		_combustible.Recargar();
+	}
 }
