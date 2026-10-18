@@ -13,6 +13,8 @@ public partial class Combustible : Node
 
 	private float _restante;
 
+	private bool _consumoPausado = false;
+
 	public override void _Ready()
 	{
 		_restante = TiempoMaximo;
@@ -20,6 +22,11 @@ public partial class Combustible : Node
 
 	public override void _Process(double delta)
 	{
+		if (_consumoPausado)
+		{
+			return;
+		}
+
 		if (_restante <= 0f)
 		{
 			return;
@@ -38,5 +45,11 @@ public partial class Combustible : Node
 	public void Recargar()
 	{
 		_restante = TiempoMaximo;
+		EmitSignal(SignalName.NivelCambiado, _restante / TiempoMaximo);
+	}
+
+	public void PausarConsumo(bool pausado)
+	{
+		_consumoPausado = pausado;
 	}
 }

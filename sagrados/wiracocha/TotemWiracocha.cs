@@ -8,13 +8,22 @@ public partial class TotemWiracocha : StaticBody2D
 	{
 		_zonaRecarga = GetNode<Area2D>("ZonaRecarga");
 		_zonaRecarga.BodyEntered += OnZonaRecargaBodyEntered;
+		_zonaRecarga.BodyExited += OnZonaRecargaBodyExited;
 	}
 
 	private void OnZonaRecargaBodyEntered(Node2D body)
 	{
 		if (body is Inca inca)
 		{
-			inca.RecargarCombustible();
+			inca.IniciarRecargaAntorcha();
+		}
+	}
+
+	private void OnZonaRecargaBodyExited(Node2D body)
+	{
+		if (body is Inca inca)
+		{
+			inca.DetenerRecargaAntorcha();
 		}
 	}
 }

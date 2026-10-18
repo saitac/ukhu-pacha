@@ -59,8 +59,14 @@ public partial class Inca : CharacterBody2D
 		_antorcha.Orientar(_incaUltimaDireccion);
 	}
 
-	public void RecargarCombustible()
+	public void IniciarRecargaAntorcha()
 	{
 		_combustible.Recargar();
+		_combustible.PausarConsumo(true);
+	}
+
+	public void DetenerRecargaAntorcha()
+	{
+		_combustible.PausarConsumo(false);
 	}
 }
