@@ -5,6 +5,8 @@ using System.Linq;
 
 public partial class Laberinto : Node2D
 {
+	[Export] public PackedScene EscenaTotemWiracocha { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -126,6 +128,8 @@ public partial class Laberinto : Node2D
 		_TimerMutacion.Timeout += OnCicloPuertas;
 		ProgramarSiguienteCiclo();
 
+		// TEMPORAL: prueba, lo reemplaza ColocarTotemsWiracocha()
+		ColocarTotemWiracocha(centro + new Vector2I(0, 1));
 	}
 
 	private void PintarMuroPerimetral()
@@ -992,5 +996,12 @@ public partial class Laberinto : Node2D
 		}
 
 		return areasPuertas;
+	}
+
+	private void ColocarTotemWiracocha(Vector2I celda)
+	{
+		TotemWiracocha totemWiracocha = EscenaTotemWiracocha.Instantiate<TotemWiracocha>();
+		AddChild(totemWiracocha);
+		totemWiracocha.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 	}
 }

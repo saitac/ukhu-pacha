@@ -84,6 +84,9 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - Los tótems se mantienen fijos mientras las salas no cambian; **se recolocan cada vez que cambia la forma de las salas** (al colocar un disco de Inti en la puerta final, ver 3.2).
   - Se colocan según parámetros de distancia al Inca, medida **caminando** (por el recorrido real a través de las puertas, no en línea recta).
   - La distancia es un **rango** (ni demasiado cerca ni demasiado lejos), no una garantía de llegar a tiempo: si siempre hubiera un tótem justo al alcance, la oscuridad dejaría de ser una amenaza.
+  - **Cantidad:** un porcentaje del número de salas (mínimo 1), para que escale si cambia el tamaño del mapa.
+  - **Reparto:** solo el **primer** tótem respeta el rango de distancia al Inca (garantiza uno alcanzable); los demás respetan una **separación mínima** entre tótems (medida en salas) y solo la distancia **mínima** al Inca (sin máximo), para quedar repartidos por todo el mapa sin aparecer pegados al Inca.
+  - La distancia se mide al momento de colocarlos; luego las puertas mutan y deja de ser exacta (coherente con que el rango no es una garantía).
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
 
 ### 3.4 Objetivo: Los 3 Discos de Inti
