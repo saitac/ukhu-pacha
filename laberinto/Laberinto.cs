@@ -107,7 +107,13 @@ public partial class Laberinto : Node2D
 
 		AbrirPuertasExtra();
 
-		ColocarPilares(bloqueInca);
+		// Calcula en que bloques se colocarán los tótems de Wiracocha
+		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
+
+		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
+
+		// Se colocan los tótems Wiracocha en los bloques seleccionados.
+		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
@@ -127,9 +133,6 @@ public partial class Laberinto : Node2D
 		_TimerMutacion = GetNode<Timer>("TimerMutacion");
 		_TimerMutacion.Timeout += OnCicloPuertas;
 		ProgramarSiguienteCiclo();
-
-		// TEMPORAL: prueba, lo reemplaza ColocarTotemsWiracocha()
-		ColocarTotemWiracocha(centro + new Vector2I(0, 1));
 	}
 
 	private void PintarMuroPerimetral()
@@ -732,7 +735,7 @@ public partial class Laberinto : Node2D
 
 	}
 
-	private void ColocarPilares(int bloqueInca)
+	private void ColocarPilares(int bloqueInca, HashSet<int> bloquesExcluidos)
 	{
 		if (!LaberintoConfig.Pilares.Activo)
 		{
@@ -741,7 +744,7 @@ public partial class Laberinto : Node2D
 
 		for (int indice = 0; indice < _bloques.Count; indice++)
 		{
-			if (indice == bloqueInca)
+			if (indice == bloqueInca || bloquesExcluidos.Contains(indice))
 			{
 				continue;
 			}
@@ -998,10 +1001,131 @@ public partial class Laberinto : Node2D
 		return areasPuertas;
 	}
 
-	private void ColocarTotemWiracocha(Vector2I celda)
+	private void ColocarTotem(PackedScene escenaTotem, Vector2I celda)
 	{
-		TotemWiracocha totemWiracocha = EscenaTotemWiracocha.Instantiate<TotemWiracocha>();
-		AddChild(totemWiracocha);
-		totemWiracocha.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		Node2D totem = escenaTotem.Instantiate<Node2D>();
+		AddChild(totem);
+		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+	}
+
+	private int[] DistanciasDesde(int bloqueOrigen)
+	{
+		int[] distancias = new int[_bloques.Count];
+		Array.Fill(distancias, -1);
+		Queue<int> cola = new();
+
+		// Agrego el bloqueOrigen como primer elemento de la cola y le asigno distancia cero
+		cola.Enqueue(bloqueOrigen);
+		distancias[bloqueOrigen] = 0;
+
+		// Loop hasta que la cola este vacía
+		while (cola.Count != 0)
+		{
+			// Obtengo el primer elemento de la cola
+			int actual = cola.Dequeue();
+
+			for (int pp = 0; pp < _puertasPosibles.Count; pp++)
+			{
+				PuertaPosible puerta = _puertasPosibles[pp];
+
+				// Valido que la puerta pp toque a actual
+				if (puerta.IndiceBloqueA != actual && puerta.IndiceBloqueB != actual)
+				{
+					continue;
+				}
+
+				// Valido que haya una puerta que conecta a los dos bloques de puerta posible
+				if (!_puertasAbiertas.ContainsKey(pp))
+				{
+					continue;
+				}
+
+				// Obtengo el vecino de actual
+				int vecino = puerta.IndiceBloqueA == actual ? puerta.IndiceBloqueB : puerta.IndiceBloqueA;
+
+				// Si vecino no fue visitado, se aumenta la distancia en 1 y se encola vecino
+				if (distancias[vecino] == -1)
+				{
+					distancias[vecino] = distancias[actual] + 1;
+					cola.Enqueue(vecino);
+				}
+			}
+		}
+
+		return distancias;
+	}
+
+	private HashSet<int> ElegirBloquesTotemWiracocha(int bloqueInca)
+	{
+		// Obtengo el número de totems que voy a colocar - mínimo 1
+		int cantidadDeTotems = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Totems.Wiracocha.PorcentajeSalas));
+
+		// Diccionario que contendrá el indice del bloque con sus distancias
+		Dictionary<int, int[]> distanciasPorTotem = [];
+		List<int> bloquesCandidatosBase = [];
+
+		// Obtengo las distancias al inca de cada bloque
+		int[] distanciasInca = DistanciasDesde(bloqueInca);
+
+		// Filtro por el primer criterio: distanciasInca >= Min, los que cumplen el criterio los almaceno en la lista bloquesCandidatosBase
+		for (int di = 0; di < distanciasInca.Length; di++)
+		{
+			if (distanciasInca[di] >= LaberintoConfig.Totems.Wiracocha.DistanciaMinima)
+			{
+				bloquesCandidatosBase.Add(di);
+			}
+		}
+
+		for (int t = 0; t < cantidadDeTotems; t++)
+		{
+			List<int> bloquesCandidatos = [];
+
+			// Por cada candidato base
+			foreach (int bcb in bloquesCandidatosBase)
+			{
+				// Si es el primer totem a colocar y el bloque candidato base (bcb) supera la distancia máxima permitida, se descarta.
+				if (distanciasPorTotem.Count == 0 && distanciasInca[bcb] > LaberintoConfig.Totems.Wiracocha.DistanciaMaxima)
+				{
+					continue;
+				}
+
+				bool muyCerca = false;
+				// Si ya hay, al menos, un totem colocado, se excluyen aquellos bloques candidatos base que se encuentren a una distancia menor a Separación.
+				foreach (int[] distanciasTotem in distanciasPorTotem.Values)
+				{
+					if (distanciasTotem[bcb] < LaberintoConfig.Totems.Wiracocha.SeparacionMinima)
+					{
+						muyCerca = true;
+						break;
+					}
+				}
+
+				if (muyCerca)
+				{
+					continue;
+				}
+
+				bloquesCandidatos.Add(bcb);
+			}
+
+			if (bloquesCandidatos.Count == 0)
+			{
+				GD.Print($"Tótems Wiracocha: bloques asignados {distanciasPorTotem.Count} de {cantidadDeTotems}");
+				break;
+			}
+
+			int elegido = bloquesCandidatos[_rng.RandiRange(0, bloquesCandidatos.Count - 1)];
+			distanciasPorTotem[elegido] = DistanciasDesde(elegido);
+		}
+
+		return [..distanciasPorTotem.Keys];
+	}
+
+	private void ColocarTotemsWiracocha(HashSet<int> bloquesTotemWiracocha)
+	{
+		foreach (int idBloque in bloquesTotemWiracocha)
+		{
+			ColocarTotem(EscenaTotemWiracocha, _bloques[idBloque].GetCenter());
+		}
 	}
 }

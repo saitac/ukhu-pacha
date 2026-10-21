@@ -57,4 +57,15 @@ public static class LaberintoConfig
         public const int MargenRedibujado = 1; // Recalcula los vecinos del tramo, cuyos tiles apuntan a celdas que cambiaron; con 0 quedan conexiones viejas (mantener siempre en 1)
         public const float DuracionAviso = 5.0f;
     }
+
+	public static class Totems
+	{
+		public static class Wiracocha
+		{
+			public const float PorcentajeSalas = 0.20f;
+			public const int DistanciaMinima = 2;
+			public const int DistanciaMaxima = 3;
+			public const int SeparacionMinima = 3;
+		}
+	}
 }
