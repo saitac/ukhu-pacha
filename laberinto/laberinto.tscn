@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d3m7udno27md0" path="res://laberinto/Laberinto.cs" id="1_8w83w"]
 [ext_resource type="Texture2D" uid="uid://b8qycr1xr4pi7" path="res://laberinto/sprites/muro-aislado.png" id="2_j7smx"]
+[ext_resource type="PackedScene" uid="uid://k838h6abax1d" path="res://sagrados/wiracocha/totem_wiracocha.tscn" id="2_yhjxc"]
 [ext_resource type="Texture2D" uid="uid://ce81q3onfo5wc" path="res://laberinto/sprites/piso-1.png" id="4_72xox"]
 [ext_resource type="PackedScene" uid="uid://dduce4cwts817" path="res://player/inca.tscn" id="4_f4ou2"]
 [ext_resource type="Texture2D" uid="uid://frfsi26myyj8" path="res://laberinto/sprites/muro-t.png" id="4_wsvcv"]
@@ -17,13 +18,34 @@
 [ext_resource type="Script" uid="uid://cxg3kx6tiagou" path="res://laberinto/PolvoPuertas.cs" id="15_kwhve"]
 [ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_aislado0"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7fdqi"]
 texture = ExtResource("2_j7smx")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_aislado0")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6.4029713, -6.259083, 6.546858, -6.4029703, 6.115196, 6.4029713, -5.6835356, 6.546858)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_t0"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, 16, -6, 16, 6, 6, 6, 6, 16, -6, 16, -6, 6, -16, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_t1"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, -6, 16, -6, 16, 6, 6, 6, 6, 16, -6, 16)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_t2"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, 16, -6, 16, -6, 6, -16, 6, -16, -6, -6, -6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_t3"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, -6, -6, -6, -16, 6, -16, 6, -6, 16, -6, 16, 6, -16, 6)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m5etf"]
 texture = ExtResource("4_wsvcv")
@@ -32,6 +54,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_t0")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -6.0065613, 16, -5.8324585, 16, 6.006563, 5.6583557, 6.006563, 5.6583557, 16, -5.8324585, 16, -5.6583557, 6.006563, -16, 6.006563)
 0:0/0/terrains_peering_bit/right_side = 0
 0:0/0/terrains_peering_bit/bottom_side = 0
@@ -41,6 +64,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/1/transpose = true
 0:0/1/terrain_set = 0
 0:0/1/terrain = 0
+0:0/1/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_t1")
 0:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-6.0065613, 16, -5.8324585, -16, 6.006563, -16, 6.006563, -5.6583557, 16, -5.6583557, 16, 5.8324585, 6.006563, 5.6583557, 6.006563, 16)
 0:0/1/terrains_peering_bit/right_side = 0
 0:0/1/terrains_peering_bit/bottom_side = 0
@@ -50,6 +74,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/2/transpose = true
 0:0/2/terrain_set = 0
 0:0/2/terrain = 0
+0:0/2/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_t2")
 0:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(6.0065613, -16, 5.8324585, 16, -6.006563, 16, -6.006563, 5.6583557, -16, 5.6583557, -16, -5.8324585, -6.006563, -5.6583557, -6.006563, -16)
 0:0/2/terrains_peering_bit/bottom_side = 0
 0:0/2/terrains_peering_bit/left_side = 0
@@ -59,6 +84,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/3/flip_v = true
 0:0/3/terrain_set = 0
 0:0/3/terrain = 0
+0:0/3/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_t3")
 0:0/3/physics_layer_0/polygon_0/points = PackedVector2Array(16, 6.0065613, -16, 5.8324585, -16, -6.006563, -5.6583557, -6.006563, -5.6583557, -16, 5.8324585, -16, 5.6583557, -6.006563, 16, -6.006563)
 0:0/3/terrains_peering_bit/right_side = 0
 0:0/3/terrains_peering_bit/left_side = 0
@@ -84,17 +110,38 @@ texture = ExtResource("7_rgeaq")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_mmumd"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, -6, -6, -6, -16, 6, -16, 6, -6, 16, -6, 16, 6, 6, 6, 6, 16, -6, 16, -6, 6, -16, 6)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rgymm"]
 texture = ExtResource("9_kwhve")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_mmumd")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-5.8628073, -16, -5.7353554, -5.7353535, -16, -6.245163, -16, 6.245163, -5.225546, 6.245163, -5.225546, 16, 5.480446, 16, 5.480446, 5.9902573, 16, 5.9902573, 16, -6.5000687, 5.7353516, -6.5000687, 5.480446, -16)
 0:0/0/terrains_peering_bit/right_side = 0
 0:0/0/terrains_peering_bit/bottom_side = 0
 0:0/0/terrains_peering_bit/left_side = 0
 0:0/0/terrains_peering_bit/top_side = 0
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_esquina0"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -6, 16, -6, 16, 6, 6, 6, 6, 16, -6, 16)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_esquina1"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, 6, -6, 6, 16, -6, 16, -6, 6, -16, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_esquina2"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, -6, 16, -6, 16, 6, -6, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_esquina3"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, 6, -16, 6, -16, -6, -6, -6)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_krqrs"]
 texture = ExtResource("10_mmumd")
@@ -103,6 +150,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_esquina0")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6.115197, -5.9713087, -5.827423, 6.2590847, -5.9713097, 16, 5.9713097, 16, 5.827423, 5.827423, 16, 5.9713097, 16, -6.4029703, 5.827423, -6.6907444)
 0:0/0/terrains_peering_bit/right_side = 0
 0:0/0/terrains_peering_bit/bottom_side = 0
@@ -111,6 +159,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/1/transpose = true
 0:0/1/terrain_set = 0
 0:0/1/terrain = 0
+0:0/1/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_esquina1")
 0:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(5.9713087, -6.115197, -6.2590847, -5.827423, -16, -5.9713097, -16, 5.9713097, -5.827423, 5.827423, -5.9713097, 16, 6.4029703, 16, 6.6907444, 5.827423)
 0:0/1/terrains_peering_bit/bottom_side = 0
 0:0/1/terrains_peering_bit/left_side = 0
@@ -119,6 +168,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/2/transpose = true
 0:0/2/terrain_set = 0
 0:0/2/terrain = 0
+0:0/2/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_esquina2")
 0:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-5.9713087, 6.115197, 6.2590847, 5.827423, 16, 5.9713097, 16, -5.9713097, 5.827423, -5.827423, 5.9713097, -16, -6.4029703, -16, -6.6907444, -5.827423)
 0:0/2/terrains_peering_bit/right_side = 0
 0:0/2/terrains_peering_bit/top_side = 0
@@ -127,9 +177,26 @@ texture_region_size = Vector2i(32, 32)
 0:0/3/flip_v = true
 0:0/3/terrain_set = 0
 0:0/3/terrain = 0
+0:0/3/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_esquina3")
 0:0/3/physics_layer_0/polygon_0/points = PackedVector2Array(6.115197, 5.9713087, 5.827423, -6.2590847, 5.9713097, -16, -5.9713097, -16, -5.827423, -5.827423, -16, -5.9713097, -16, 6.4029703, -5.827423, 6.6907444)
 0:0/3/terrains_peering_bit/left_side = 0
 0:0/3/terrains_peering_bit/top_side = 0
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_punta0"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -6, 6, -6, 6, 16, -6, 16)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_punta1"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -6, 16, -6, 16, 6, -6, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_punta2"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, 6, -6, 6, 6, -16, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_punta3"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, 6, -6, 6)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_24ehs"]
 texture = ExtResource("11_yhjxc")
@@ -138,6 +205,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_punta0")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6.4029713, -6.259083, 6.546858, -6.4029703, 6.115196, 16, -5.9713097, 16)
 0:0/0/terrains_peering_bit/bottom_side = 0
 0:0/1 = 1
@@ -145,6 +213,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/1/transpose = true
 0:0/1/terrain_set = 0
 0:0/1/terrain = 0
+0:0/1/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_punta1")
 0:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-6.259083, 6.4029713, -6.4029703, -6.546858, 16, -6.115196, 16, 5.9713097)
 0:0/1/terrains_peering_bit/right_side = 0
 0:0/2 = 2
@@ -152,6 +221,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/2/transpose = true
 0:0/2/terrain_set = 0
 0:0/2/terrain = 0
+0:0/2/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_punta2")
 0:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(6.259083, -6.4029713, 6.4029703, 6.546858, -16, 6.115196, -16, -5.9713097)
 0:0/2/terrains_peering_bit/left_side = 0
 0:0/3 = 3
@@ -159,8 +229,17 @@ texture_region_size = Vector2i(32, 32)
 0:0/3/flip_v = true
 0:0/3/terrain_set = 0
 0:0/3/terrain = 0
+0:0/3/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_punta3")
 0:0/3/physics_layer_0/polygon_0/points = PackedVector2Array(6.4029713, 6.259083, -6.546858, 6.4029703, -6.115196, -16, 5.9713097, -16)
 0:0/3/terrains_peering_bit/top_side = 0
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_recta0"]
+cull_mode = 1
+polygon = PackedVector2Array(-16, -6, 16, -6, 16, 6, -16, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_recta1"]
+cull_mode = 1
+polygon = PackedVector2Array(-6, -16, 6, -16, 6, 16, -6, 16)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xtfm4"]
 texture = ExtResource("12_glftc")
@@ -169,6 +248,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 0:0/0/terrain_set = 0
 0:0/0/terrain = 0
+0:0/0/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_recta0")
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -6.259083, 16, -6.115196, 16, 5.9713097, -16, 6.115198)
 0:0/0/terrains_peering_bit/right_side = 0
 0:0/0/terrains_peering_bit/left_side = 0
@@ -177,12 +257,14 @@ texture_region_size = Vector2i(32, 32)
 0:0/1/transpose = true
 0:0/1/terrain_set = 0
 0:0/1/terrain = 0
+0:0/1/occlusion_layer_0/polygon_0/polygon = SubResource("OccluderPolygon2D_recta1")
 0:0/1/physics_layer_0/polygon_0/points = PackedVector2Array(-5.9713097, -16, 5.9713097, -16, 6.115196, 16, -5.827423, 16)
 0:0/1/terrains_peering_bit/bottom_side = 0
 0:0/1/terrains_peering_bit/top_side = 0
 
 [sub_resource type="TileSet" id="TileSet_hfs8p"]
 tile_size = Vector2i(32, 32)
+occlusion_layer_0/light_mask = 1
 physics_layer_0/collision_layer = 1
 terrain_set_0/mode = 2
 terrain_set_0/terrain_0/name = "Muro"
@@ -207,13 +289,16 @@ offsets = PackedFloat32Array(0, 0.24401198, 1)
 colors = PackedColorArray(0.003921569, 0.003921569, 0.003921569, 0, 1, 1, 1, 0.8, 0.003921569, 0.003921569, 0.003921569, 0)
 
 [node name="Laberinto" type="Node2D" unique_id=322285212]
+y_sort_enabled = true
 script = ExtResource("1_8w83w")
+EscenaTotemWiracocha = ExtResource("2_yhjxc")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
 scale = Vector2(3, 3)
 tile_set = SubResource("TileSet_hfs8p")
 
 [node name="Muros" type="TileMapLayer" parent="." unique_id=829144962]
+light_mask = 2
 scale = Vector2(3, 3)
 tile_set = SubResource("TileSet_hfs8p")
 physics_quadrant_size = 4
@@ -222,6 +307,7 @@ physics_quadrant_size = 4
 position = Vector2(1920, 1920)
 
 [node name="CamaraInca" type="Camera2D" parent="Inca" unique_id=1320824097]
+position = Vector2(0, -42)
 limit_left = 0
 limit_top = 0
 limit_right = 3840
@@ -253,3 +339,6 @@ one_shot = true
 [node name="PolvoPuertas" type="Node2D" parent="." unique_id=1457463925]
 script = ExtResource("15_kwhve")
 EscenaNube = ExtResource("16_mmumd")
+
+[node name="Oscuridad" type="CanvasModulate" parent="." unique_id=1053698352]
+color = Color(0.050980393, 0.043137256, 0.0627451, 1)

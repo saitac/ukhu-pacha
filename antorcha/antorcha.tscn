@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://c2nnbqwxietn2"]
 
+[ext_resource type="Script" uid="uid://j3mhmq44p01p" path="res://antorcha/Antorcha.cs" id="1_jdmet"]
 [ext_resource type="Texture2D" uid="uid://c4bxbxbt6e8j8" path="res://antorcha/sprites/down/antorcha-down-01-llama1.png" id="1_x6hk6"]
 [ext_resource type="Texture2D" uid="uid://b4s3hbxtwgkib" path="res://antorcha/sprites/down/antorcha-down-02-llama2.png" id="2_jhqaa"]
 [ext_resource type="Texture2D" uid="uid://bd14q5f68c4y2" path="res://antorcha/sprites/down/antorcha-down-03-llama3.png" id="3_yyvjg"]
@@ -12,6 +13,18 @@
 [ext_resource type="Texture2D" uid="uid://c545rubbhbnyk" path="res://antorcha/sprites/right/antorcha-right-01-llama1.png" id="7_1klnj"]
 [ext_resource type="Texture2D" uid="uid://dnv0xftxxc4on" path="res://antorcha/sprites/right/antorcha-right-02-llama2.png" id="8_f8n1w"]
 [ext_resource type="Texture2D" uid="uid://lgysd4ueqda6" path="res://antorcha/sprites/right/antorcha-right-03-llama3.png" id="9_xm6n4"]
+[ext_resource type="Texture2D" uid="uid://dk6u3opplvpg7" path="res://antorcha/sprites/down/antorcha-down-apagada-01.png" id="14_ix837"]
+[ext_resource type="Texture2D" uid="uid://4kuky15mpi7w" path="res://antorcha/sprites/down/antorcha-down-apagada-02.png" id="15_jcws0"]
+[ext_resource type="Texture2D" uid="uid://vnpfc1kc3bkr" path="res://antorcha/sprites/down/antorcha-down-apagada-03.png" id="16_20hns"]
+[ext_resource type="Texture2D" uid="uid://dj2lii472kd3k" path="res://antorcha/sprites/left/antorcha-left-apagada-01.png" id="17_qttd3"]
+[ext_resource type="Texture2D" uid="uid://dbhpcqn35fygw" path="res://antorcha/sprites/left/antorcha-left-apagada-02.png" id="18_kwyix"]
+[ext_resource type="Texture2D" uid="uid://b6ueg8feoqfpw" path="res://antorcha/sprites/left/antorcha-left-apagada-03.png" id="19_cq5ns"]
+[ext_resource type="Texture2D" uid="uid://cg8de2lpmq6es" path="res://antorcha/sprites/right/antorcha-right-apagada-01.png" id="20_d13nv"]
+[ext_resource type="Texture2D" uid="uid://2ec6yuvfflgt" path="res://antorcha/sprites/right/antorcha-right-apagada-02.png" id="21_ohlw2"]
+[ext_resource type="Texture2D" uid="uid://50peyswaqng5" path="res://antorcha/sprites/right/antorcha-right-apagada-03.png" id="22_xva8b"]
+[ext_resource type="Texture2D" uid="uid://js4pdvob68tf" path="res://antorcha/sprites/up/antorcha-up-apagada-01.png" id="23_x85m1"]
+[ext_resource type="Texture2D" uid="uid://u00383qcqrx2" path="res://antorcha/sprites/up/antorcha-up-apagada-02.png" id="24_gfayw"]
+[ext_resource type="Texture2D" uid="uid://gy8o4uhl4js" path="res://antorcha/sprites/up/antorcha-up-apagada-03.png" id="25_hhcf0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ekqyl"]
 animations = [{
@@ -70,11 +83,131 @@ animations = [{
 "loop": 1,
 "name": &"antorcha-up",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_ix837")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_jcws0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_20hns")
+}],
+"loop": 1,
+"name": &"apagada-down",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_qttd3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_kwyix")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_cq5ns")
+}],
+"loop": 1,
+"name": &"apagada-left",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("20_d13nv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_ohlw2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_xva8b")
+}],
+"loop": 1,
+"name": &"apagada-right",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("23_x85m1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_gfayw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_hhcf0")
+}],
+"loop": 1,
+"name": &"apagada-up",
+"speed": 3.0
 }]
 
+[sub_resource type="Gradient" id="Gradient_632vd"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_hfs8p"]
+gradient = SubResource("Gradient_632vd")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_mmumd"]
+light_mode = 1
+
+[sub_resource type="Curve" id="Curve_hfs8p"]
+_data = [Vector2(0, 0.2), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_n3ga3"]
+offsets = PackedFloat32Array(0.001968504, 1)
+colors = PackedColorArray(0.627451, 0.627451, 0.627451, 0.5019608, 0.627451, 0.627451, 0.627451, 0)
+
 [node name="antorcha" type="Node2D" unique_id=1918987338]
+script = ExtResource("1_jdmet")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=852748141]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_ekqyl")
 animation = &"antorcha-down"
+
+[node name="Punta" type="Marker2D" parent="AnimatedSprite2D" unique_id=21969599]
+position = Vector2(7, -4)
+
+[node name="PointLight2D" type="PointLight2D" parent="AnimatedSprite2D/Punta" unique_id=1080011927]
+color = Color(1, 0.6901961, 0.3764706, 1)
+energy = 1.5
+range_item_cull_mask = 3
+shadow_enabled = true
+texture = SubResource("GradientTexture2D_hfs8p")
+
+[node name="Brasa" type="PointLight2D" parent="AnimatedSprite2D/Punta" unique_id=473873053]
+position = Vector2(0, 3)
+enabled = false
+color = Color(1, 0.2901961, 0.101960786, 1)
+energy = 0.4
+range_item_cull_mask = 3
+texture = SubResource("GradientTexture2D_hfs8p")
+texture_scale = 0.3
+
+[node name="Humo" type="CPUParticles2D" parent="AnimatedSprite2D/Punta" unique_id=1518203157]
+material = SubResource("CanvasItemMaterial_mmumd")
+position = Vector2(0, 3)
+emitting = false
+amount = 50
+lifetime = 2.5
+one_shot = true
+explosiveness = 0.2
+direction = Vector2(0, -1)
+spread = 40.0
+gravity = Vector2(0, -2)
+initial_velocity_min = 4.0
+initial_velocity_max = 8.0
+angular_velocity_min = -30.0
+angular_velocity_max = 30.0
+damping_min = 2.0
+damping_max = 5.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+scale_amount_curve = SubResource("Curve_hfs8p")
+color_ramp = SubResource("Gradient_n3ga3")

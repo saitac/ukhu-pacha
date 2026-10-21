@@ -4,7 +4,7 @@ Juego de terror/survival 2D con temática andina/inca, hecho en **Godot 4.7 (.NE
 
 ## Premisa
 
-Un príncipe inca huye de la conquista española y se refugia en una cueva ancestral, un lugar sagrado anterior incluso al propio Imperio Inca, ligado al culto a Viracocha y a las fuerzas del **Uku Pacha** (el mundo de abajo). La cueva no es un espacio estático: está viva, muta constantemente, y en sus profundidades habitan entidades mitológicas andinas. La única salida es encontrar la **Ciudad Perdida**.
+Un príncipe inca huye de la conquista española y se refugia en una cueva ancestral, un lugar sagrado anterior incluso al propio Imperio Inca, ligado al culto a Wiracocha y a las fuerzas del **Uku Pacha** (el mundo de abajo). La cueva no es un espacio estático: está viva, muta constantemente, y en sus profundidades habitan entidades mitológicas andinas. La única salida es encontrar la **Ciudad Perdida**.
 
 ## Pilares de diseño
 
