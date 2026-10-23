@@ -25,6 +25,10 @@ public partial class Antorcha : Node2D
 
 	private FastNoiseLite _ruido;
 
+	private float _progresoEncendido = 1f;
+
+	private Tween _tweenEncendido;
+
 	[Export]
 	public float AmplitudParpadeo = 0.8f;
 
@@ -45,6 +49,9 @@ public partial class Antorcha : Node2D
 
 	[Export(PropertyHint.Range, "0.05,1,0.05")]
 	public float UmbralAgotamiento = 0.4f;
+
+	[Export(PropertyHint.Range, "0.05,3,0.05,suffix:s")]
+	public float DuracionEncendidoSeg = 0.8f;
 
 	public override void _Ready()
 	{
@@ -67,7 +74,7 @@ public partial class Antorcha : Node2D
 		}
 		_tiempo += (float)delta;
 		float variacion = _ruido.GetNoise1D(_tiempo);
-		_llama.Energy = _energiaBase * (1f + variacion * AmplitudParpadeo * _intensidadParpadeo);
+		_llama.Energy = (_energiaBase * (1f + variacion * AmplitudParpadeo * _intensidadParpadeo)) * _progresoEncendido;
 	}
 
 	private Vector2 PosicionPunta(Direccion direccion)
@@ -104,7 +111,11 @@ public partial class Antorcha : Node2D
 
 			if (_encendida)
 			{
-				GD.Print("Se acaba de encender: Recarga");
+				_tweenEncendido?.Kill(); // Mata la animación previa
+				_progresoEncendido = 0f;
+				_tweenEncendido = CreateTween();
+				_tweenEncendido.TweenMethod(Callable.From<float>(v => _progresoEncendido = v), 0f, 1f, DuracionEncendidoSeg)
+					.SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
 			} else
 			{
 				_humo.Emitting = true;
