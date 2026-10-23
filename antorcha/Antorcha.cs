@@ -17,6 +17,20 @@ public partial class Antorcha : Node2D
 
 	private bool _encendida = true;
 
+	private float _energiaBase;
+
+	private float _intensidadParpadeo = 0f;
+
+	private float _tiempo = 0f;
+
+	private FastNoiseLite _ruido;
+
+	[Export]
+	public float AmplitudParpadeo = 0.8f;
+
+	[Export]
+	public float FrecuenciaParpadeo = 2f;
+
 	[Export]
 	public float EnergiaMinima = 0.2f;
 
@@ -34,12 +48,26 @@ public partial class Antorcha : Node2D
 
 	public override void _Ready()
 	{
+		_ruido = new FastNoiseLite();
+		_ruido.Frequency = FrecuenciaParpadeo;
+		_energiaBase = EnergiaMaxima;
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_punta = _sprite.GetNode<Marker2D>("Punta");
 		_llama = _punta.GetNode<PointLight2D>("PointLight2D");
 		_brasa = _punta.GetNode<PointLight2D>("Brasa");
 		_humo = _punta.GetNode<CpuParticles2D>("Humo");
 		ActualizarSprite();
+	}
+
+	public override void _Process(double delta)
+	{
+		if (!_encendida)
+		{
+			return;
+		}
+		_tiempo += (float)delta;
+		float variacion = _ruido.GetNoise1D(_tiempo);
+		_llama.Energy = _energiaBase * (1f + variacion * AmplitudParpadeo * _intensidadParpadeo);
 	}
 
 	private Vector2 PosicionPunta(Direccion direccion)
@@ -62,7 +90,8 @@ public partial class Antorcha : Node2D
 		// Por encima del umbral la luz queda plena (meseta); debajo se achica hasta el mínimo
 		float t = Mathf.InverseLerp(0f, UmbralAgotamiento, nivel);
 		t = Mathf.Clamp(t, 0f, 1f);
-		_llama.Energy = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, t);
+		_energiaBase = Mathf.Lerp(EnergiaMinima, EnergiaMaxima, t);
+		_intensidadParpadeo = 1f - t;
 		_llama.TextureScale = Mathf.Lerp(EscalaLuzMinima, EscalaLuzMaxima, t);
 
 		_encendida = encendidaAhora;
