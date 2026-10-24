@@ -78,6 +78,9 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - Temporizador de luz (`float`) que baja con el tiempo.
 - El cono de luz se reduce y parpadea a medida que se agota.
 - En 0%: oscuridad total → alto riesgo de muerte.
+  - Al apagarse empieza un **tiempo de gracia**: una cuenta regresiva para llegar a un tótem en la oscuridad. Si el Inca recarga antes de que termine, se cancela; si se acaba, es **game over** (ver 4. Condiciones de derrota).
+  - La duración es **proporcional** a la duración de la antorcha: por defecto la mitad (60 s de antorcha → 30 s de gracia), para que escale si cambia la duración (p. ej. por dificultad).
+  - *A vigilar en pruebas:* con estos valores pasan hasta 90 s entre recargas (60 con luz + 30 a oscuras). Si la oscuridad no se siente como una amenaza, lo primero que conviene bajar es la proporción de gracia.
 - **Recarga:** en tótems de **Wiracocha**, repartidos en el mapa.
   - La recarga es **automática**: basta con que el Inca se acerque al tótem (entre en su zona), sin presionar ninguna tecla. La zona es pequeña, pegada al tótem, para que no recargue con solo pasar cerca.
   - Cada tótem tiene al pie un **brasero ceremonial** de piedra con un fuego que nunca se apaga: ilumina el tótem desde abajo y lo hace visible a la distancia en la oscuridad.
@@ -130,7 +133,7 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 
 1. **Daño directo:** ataques enemigos o trampas físicas.
 2. **Aplastamiento ("El Abrazo de Urka"):** quedar atrapado cuando el laberinto cierra un pasillo o puerta.
-3. **Oscuridad total:** la antorcha se apaga y no se logra recargar a tiempo.
+3. **Oscuridad total:** la antorcha se apaga y no se logra recargar antes de que termine el tiempo de gracia (ver 3.3).
 4. **Parálisis:** ser inmovilizado por un enemigo (ej. Muqui) mientras otro (ej. Supay) se acerca para el golpe final.
 
 ---
