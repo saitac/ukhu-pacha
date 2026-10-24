@@ -10,7 +10,7 @@ public partial class Laberinto : Node2D
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
-	CharacterBody2D _Inca;
+	Inca _Inca;
 	Timer _TimerMutacion;
 	CamaraInca _CamaraInca;
 	PolvoTecho _PolvoTecho;
@@ -74,7 +74,7 @@ public partial class Laberinto : Node2D
 		_Piso = GetNode<TileMapLayer>("Piso");
 		_Muros = GetNode<TileMapLayer>("Muros");
 		_Muros.Modulate = new Color(0.6f, 0.6f, 0.6f);
-		_Inca = GetNode<CharacterBody2D>("Inca");
+		_Inca = GetNode<Inca>("Inca");
 		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
 		_PolvoTecho = GetNode<PolvoTecho>("Inca/CamaraInca/PolvoTecho");
 		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
@@ -87,6 +87,8 @@ public partial class Laberinto : Node2D
 		MutacionOcurrida += _PolvoTecho.OnMutacionOcurrida;
 
 		PuertasCambiadas += _PolvoPuertas.OnPuertasCambiadas;
+
+		_Inca.Murio += OnIncaMurio;
 
 		PintarMuroPerimetral();
 		DibujarPiso();
@@ -1127,5 +1129,10 @@ public partial class Laberinto : Node2D
 		{
 			ColocarTotem(EscenaTotemWiracocha, _bloques[idBloque].GetCenter());
 		}
+	}
+
+	private void OnIncaMurio()
+	{
+		GetTree().ReloadCurrentScene();
 	}
 }
