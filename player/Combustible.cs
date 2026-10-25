@@ -8,9 +8,6 @@ public partial class Combustible : Node
 	[Signal]
 	public delegate void AgotadoEventHandler();
 
-	[Signal]
-	public delegate void GraciaAgotadaEventHandler();
-
 	[Export]
 	public float TiempoMaximo = 60f;
 
@@ -21,15 +18,9 @@ public partial class Combustible : Node
 
 	private bool _consumoPausado = false;
 
-	private Timer _timerGracia;
-
 	public override void _Ready()
 	{
 		_restante = TiempoMaximo;
-		_timerGracia = new Timer();
-		_timerGracia.OneShot = true;
-		_timerGracia.Timeout += OnTimerGraciaTimeout;
-		AddChild(_timerGracia);
 	}
 
 	public override void _Process(double delta)
@@ -50,8 +41,6 @@ public partial class Combustible : Node
 
 		if (_restante <= 0f)
 		{
-			_timerGracia.WaitTime = TiempoMaximo * ProporcionGracia;
-			_timerGracia.Start();
 			EmitSignal(SignalName.Agotado);
 		}
 	}
@@ -60,16 +49,10 @@ public partial class Combustible : Node
 	{
 		_restante = TiempoMaximo;
 		EmitSignal(SignalName.NivelCambiado, _restante / TiempoMaximo);
-		_timerGracia.Stop();
 	}
 
 	public void PausarConsumo(bool pausado)
 	{
 		_consumoPausado = pausado;
-	}
-
-	private void OnTimerGraciaTimeout()
-	{
-		EmitSignal(SignalName.GraciaAgotada);
 	}
 }

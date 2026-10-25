@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://ci2x0513yeurh" path="res://player/sprites/walk-right-inca-04-izquierda.png" id="13_8ybet"]
 [ext_resource type="PackedScene" uid="uid://c2nnbqwxietn2" path="res://antorcha/antorcha.tscn" id="18_ye0y5"]
 [ext_resource type="Script" uid="uid://kpepuuyrtygq" path="res://player/Combustible.cs" id="19_y1eoe"]
+[ext_resource type="Script" uid="uid://rsr7kc5iw1mx" path="res://comun/Vigor.cs" id="20_8ybet"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jdori"]
 animations = [{
@@ -144,3 +145,6 @@ position = Vector2(0, -42)
 
 [node name="Combustible" type="Node" parent="." unique_id=1514074754]
 script = ExtResource("19_y1eoe")
+
+[node name="Vigor" type="Node" parent="." unique_id=767662802]
+script = ExtResource("20_8ybet")
