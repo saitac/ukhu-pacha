@@ -78,10 +78,10 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - Temporizador de luz (`float`) que baja con el tiempo.
 - El cono de luz se reduce y parpadea a medida que se agota.
 - En 0%: oscuridad total → alto riesgo de muerte.
-  - Al apagarse, **la oscuridad consume la vida del Inca** (ver 3.7) a ritmo constante hasta que recargue en un tótem. Si la vida llega a 0, es **game over** (ver 4. Condiciones de derrota).
-  - **Tiempo de gracia:** lo que tarda la oscuridad en matar a un Inca con la **vida llena**. Es **proporcional** a la duración de la antorcha: por defecto la mitad (60 s de antorcha → 30 s de gracia), para que escale si cambia la duración (p. ej. por dificultad). Ritmo de drenaje = vida máxima / tiempo de gracia.
-  - Con menos vida se aguanta menos a oscuras (p. ej. a media vida, 15 s): las amenazas se suman.
-  - **Recargar la antorcha detiene el drenaje, pero no devuelve la vida perdida**: cada apagón deja una "cicatriz". La vida solo se recupera con hojas de coca (ver 3.7).
+  - Al apagarse, **la oscuridad consume el vigor del Inca** (ver 3.7) a ritmo constante hasta que recargue en un tótem. Si el vigor llega a 0, es **game over** (ver 4. Condiciones de derrota).
+  - **Tiempo de gracia:** lo que tarda la oscuridad en matar a un Inca con el **vigor lleno**. Es **proporcional** a la duración de la antorcha: por defecto la mitad (60 s de antorcha → 30 s de gracia), para que escale si cambia la duración (p. ej. por dificultad). Ritmo de drenaje = vigor máximo / tiempo de gracia.
+  - Con menos vigor se aguanta menos a oscuras (p. ej. a medio vigor, 15 s): las amenazas se suman.
+  - **Recargar la antorcha detiene el drenaje, pero no devuelve el vigor perdido**: cada apagón deja una "cicatriz". El vigor solo se recupera con hojas de coca (ver 3.7).
   - *A vigilar en pruebas:* con estos valores pasan hasta 90 s entre recargas (60 con luz + 30 a oscuras). Si la oscuridad no se siente como una amenaza, lo primero que conviene bajar es la proporción de gracia.
 - **Recarga:** en tótems de **Wiracocha**, repartidos en el mapa.
   - La recarga es **automática**: basta con que el Inca se acerque al tótem (entre en su zona), sin presionar ninguna tecla. La zona es pequeña, pegada al tótem, para que no recargue con solo pasar cerca.
@@ -125,35 +125,36 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 | Luz (antorcha) | Tótems de Wiracocha (en un lugar) |
 | Cóndor | Altares (en un lugar) |
 | Puma | Tiempo (cooldown), sin tótem ni altar |
-| Vida | Hojas de coca flotantes, que se recolocan con cada ciclo de puertas (ver 3.7) |
+| Vigor | Hojas de coca flotantes, que se recolocan con cada ciclo de puertas (ver 3.7) |
 
 - **Cóndor:** invocable en altares específicos → vista cenital temporal para "espiar" el laberinto. Los altares **se recolocan junto con los tótems** cada vez que cambian las salas. Es especialmente valioso justo después de un cambio de salas, para reorientarse en la cueva nueva.
 - **Puma:** empuje/aturdimiento de emergencia con cooldown largo, para escapar de un acorralamiento.
 
-### 3.7 Vida del Inca
-- El Inca tiene una **vida** (`float`, vida máxima configurable). **Toda muerte pasa por la vida:** cuando llega a 0, el Inca muere (ver 4. Condiciones de derrota).
-- **Qué la baja:** la oscuridad (drenaje constante mientras la antorcha está apagada, ver 3.3) y, desde la Fase 5, los ataques de enemigos y las trampas.
-- **Barra de vida sobre la cabeza del Inca:** aparece **solo cuando la vida cambia** (sube o baja) y se oculta unos segundos después de que deja de cambiar. A oscuras se ve todo el tiempo, porque la vida baja sin parar: es el aviso de que el Inca se está muriendo, sin un reloj en pantalla.
+### 3.7 Vigor del Inca
+- El Inca tiene un **vigor** (`float`, vigor máximo configurable). **Toda muerte pasa por el vigor:** cuando llega a 0, el Inca muere (ver 4. Condiciones de derrota).
+- **El vigor es compartido con las criaturas**, pero en ellas 0 no significa muerte: quedan **aturdidas** y, pasado un tiempo, despiertan con el vigor completo (ver 3.5, "no puede matar").
+- **Qué lo baja:** la oscuridad (drenaje constante mientras la antorcha está apagada, ver 3.3) y, desde la Fase 5, los ataques de enemigos y las trampas.
+- **Barra de vigor sobre la cabeza del Inca:** aparece **solo cuando el vigor cambia** (sube o baja) y se oculta unos segundos después de que deja de cambiar. A oscuras se ve todo el tiempo, porque el vigor baja sin parar: es el aviso de que el Inca se está muriendo, sin un reloj en pantalla.
   - Va pegada al Inca porque a oscuras la mirada del jugador está en él, no en una esquina de la pantalla.
   - Tiene que verse aunque la escena esté oscura: no la debe oscurecer el `CanvasModulate`.
 - **Recuperación: hojas de coca.** Planta sagrada y medicinal andina, usada contra el cansancio y el dolor.
   - Flotan en el aire con un **brillo verde tenue**, visible en la oscuridad para que el Inca pueda ubicarlas.
-  - El Inca las **atraviesa** (no son obstáculo) y al pasar por encima las recoge y recupera vida.
-  - **Al consumirla:** un **destello verde** breve alrededor del Inca confirma la curación (y la barra de vida aparece y sube).
+  - El Inca las **atraviesa** (no son obstáculo) y al pasar por encima las recoge y recupera vigor.
+  - **Al consumirla:** un **destello verde** breve alrededor del Inca confirma la curación (y la barra de vigor aparece y sube).
   - **Se recolocan en cada ciclo de puertas** (ver 3.2), con más frecuencia que los tótems, así que no sirven como punto fijo de referencia.
   - Su ubicación es independiente de los tótems: si coinciden en una sala, es casualidad.
   - **Cantidad:** un porcentaje del número de salas, a ajustar en pruebas.
-- **Respiración según la vida (Fase 9, sonido):** la respiración del Inca cambia según cuánta vida le queda: tranquila con vida alta, cada vez más agitada y entrecortada a medida que baja. A oscuras se vuelve un segundo aviso, sonoro, de que se está muriendo, complementario a la barra.
+- **Respiración según el vigor (Fase 9, sonido):** la respiración del Inca cambia según cuánto vigor le queda: tranquila con vigor alto, cada vez más agitada y entrecortada a medida que baja. A oscuras se vuelve un segundo aviso, sonoro, de que se está muriendo, complementario a la barra.
 
 ---
 
 ## 4. Condiciones de derrota
 
-Todas las causas terminan igual: la **vida del Inca llega a 0** (ver 3.7). Algunas la bajan de a poco y otras de golpe.
+Todas las causas terminan igual: el **vigor del Inca llega a 0** (ver 3.7). Algunas lo bajan de a poco y otras de golpe.
 
-1. **Daño directo:** ataques enemigos o trampas físicas bajan la vida.
-2. **Aplastamiento ("El Abrazo de Urka"):** quedar atrapado cuando el laberinto cierra un pasillo o puerta. Deja la vida en 0 de inmediato.
-3. **Oscuridad total:** la antorcha se apaga y la oscuridad consume la vida hasta 0 antes de que el Inca logre recargar (ver 3.3).
+1. **Daño directo:** ataques enemigos o trampas físicas bajan el vigor.
+2. **Aplastamiento ("El Abrazo de Urka"):** quedar atrapado cuando el laberinto cierra un pasillo o puerta. Deja el vigor en 0 de inmediato.
+3. **Oscuridad total:** la antorcha se apaga y la oscuridad consume el vigor hasta 0 antes de que el Inca logre recargar (ver 3.3).
 4. **Parálisis:** ser inmovilizado por un enemigo (ej. Muqui) mientras otro (ej. Supay) se acerca para el golpe final.
 
 ---
@@ -263,7 +264,7 @@ public partial class Inca : CharacterBody2D
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
-- Vida del Inca (ver 3.7): ¿cuánta vida devuelve cada hoja de coca? ¿qué porcentaje de salas tiene coca? ¿cuántos segundos queda visible la barra después del último cambio? ¿la coca puede aparecer en la sala donde está el Inca?
+- Vigor del Inca (ver 3.7): ¿cuánto vigor devuelve cada hoja de coca? ¿qué porcentaje de salas tiene coca? ¿cuántos segundos queda visible la barra después del último cambio? ¿la coca puede aparecer en la sala donde está el Inca?
 - ¿La respiración del Inca (ver 3.7) va acompañada de un latido que se acelera, o basta con la respiración?
 
 ---
