@@ -3,11 +3,16 @@ using System;
 
 public partial class Inca : CharacterBody2D
 {
+	[Signal]
+	public delegate void MurioEventHandler();
+
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
 	private Combustible _combustible;
 	private Antorcha _antorcha;
 	private Direccion _incaUltimaDireccion = Direccion.Abajo;
+
+	private bool _muerto = false;
 
 	public override void _Ready()
 	{
@@ -15,6 +20,7 @@ public partial class Inca : CharacterBody2D
 		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_combustible.NivelCambiado += _antorcha.AjustarLlama;
+		_combustible.GraciaAgotada += Morir;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -68,5 +74,15 @@ public partial class Inca : CharacterBody2D
 	public void DetenerRecargaAntorcha()
 	{
 		_combustible.PausarConsumo(false);
+	}
+
+	private void Morir()
+	{
+		if (_muerto)
+		{
+			return;
+		}
+		_muerto = true;
+		EmitSignal(SignalName.Murio);
 	}
 }
