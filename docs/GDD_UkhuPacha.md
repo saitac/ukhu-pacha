@@ -139,9 +139,11 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 - **Recuperación: hojas de coca.** Planta sagrada y medicinal andina, usada contra el cansancio y el dolor.
   - Flotan en el aire con un **brillo verde tenue**, visible en la oscuridad para que el Inca pueda ubicarlas.
   - El Inca las **atraviesa** (no son obstáculo) y al pasar por encima las recoge y recupera vida.
+  - **Al consumirla:** un **destello verde** breve alrededor del Inca confirma la curación (y la barra de vida aparece y sube).
   - **Se recolocan en cada ciclo de puertas** (ver 3.2), con más frecuencia que los tótems, así que no sirven como punto fijo de referencia.
   - Su ubicación es independiente de los tótems: si coinciden en una sala, es casualidad.
   - **Cantidad:** un porcentaje del número de salas, a ajustar en pruebas.
+- **Respiración según la vida (Fase 9, sonido):** la respiración del Inca cambia según cuánta vida le queda: tranquila con vida alta, cada vez más agitada y entrecortada a medida que baja. A oscuras se vuelve un segundo aviso, sonoro, de que se está muriendo, complementario a la barra.
 
 ---
 
@@ -262,7 +264,7 @@ public partial class Inca : CharacterBody2D
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
 - Vida del Inca (ver 3.7): ¿cuánta vida devuelve cada hoja de coca? ¿qué porcentaje de salas tiene coca? ¿cuántos segundos queda visible la barra después del último cambio? ¿la coca puede aparecer en la sala donde está el Inca?
-- *Idea para Fase 9:* respiración agitada o latido que se acelera a medida que baja la vida.
+- ¿La respiración del Inca (ver 3.7) va acompañada de un latido que se acelera, o basta con la respiración?
 
 ---
 
