@@ -136,6 +136,9 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 - **Qué lo baja:** la oscuridad (drenaje constante mientras la antorcha está apagada, ver 3.3) y, desde la Fase 5, los ataques de enemigos y las trampas.
 - **Barra de vigor sobre la cabeza del Inca:** aparece **solo cuando el vigor cambia** (sube o baja) y se oculta unos segundos después de que deja de cambiar. A oscuras se ve todo el tiempo, porque el vigor baja sin parar: es el aviso de que el Inca se está muriendo, sin un reloj en pantalla.
   - Va pegada al Inca porque a oscuras la mirada del jugador está en él, no en una esquina de la pantalla.
+- **Las criaturas también tienen barra de vigor** sobre la cabeza, con la misma regla: aparece **solo cuando su vigor cambia**. Como a ellas nada las drena, en la práctica solo se ve cuando el Inca las golpea (ver 3.5): es la confirmación de que el golpe sirvió y de cuánto falta para aturdirlas.
+  - **A diferencia de la del Inca, solo se ve si la criatura está iluminada** por la antorcha: en la oscuridad la barra no delata a la criatura.
+  - **También aparece al despertar del aturdimiento**, cuando el vigor vuelve a llenarse: avisa que la criatura se levantó. Si no hay antorcha cerca, no se ve (misma regla de la luz).
   - Tiene que verse aunque la escena esté oscura: no la debe oscurecer el `CanvasModulate`.
 - **Recuperación: hojas de coca.** Planta sagrada y medicinal andina, usada contra el cansancio y el dolor.
   - Flotan en el aire con un **brillo verde tenue**, visible en la oscuridad para que el Inca pueda ubicarlas.
