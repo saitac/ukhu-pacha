@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" uid="uid://c2nnbqwxietn2" path="res://antorcha/antorcha.tscn" id="18_ye0y5"]
 [ext_resource type="Script" uid="uid://kpepuuyrtygq" path="res://player/Combustible.cs" id="19_y1eoe"]
 [ext_resource type="Script" uid="uid://rsr7kc5iw1mx" path="res://comun/Vigor.cs" id="20_8ybet"]
+[ext_resource type="Script" uid="uid://bmrten5j8dx7e" path="res://comun/Seguidor.cs" id="21_8xacw"]
+[ext_resource type="PackedScene" uid="uid://clcvbl088ll40" path="res://comun/BarraVigor.tscn" id="22_pn03x"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jdori"]
 animations = [{
@@ -148,3 +150,14 @@ script = ExtResource("19_y1eoe")
 
 [node name="Vigor" type="Node" parent="." unique_id=767662802]
 script = ExtResource("20_8ybet")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1030483221]
+follow_viewport_enabled = true
+
+[node name="SeguidorInca" type="Node2D" parent="CanvasLayer" unique_id=579227510 node_paths=PackedStringArray("Objetivo")]
+script = ExtResource("21_8xacw")
+Objetivo = NodePath("../..")
+Desplazamiento = Vector2(0, -98)
+
+[node name="BarraVigor" parent="CanvasLayer/SeguidorInca" unique_id=545503112 node_paths=PackedStringArray("Vigor") instance=ExtResource("22_pn03x")]
+Vigor = NodePath("../../../Vigor")
