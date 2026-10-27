@@ -41,6 +41,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
 [node name="TotemWiracocha" type="StaticBody2D" unique_id=1137116262]
+collision_mask = 0
 script = ExtResource("1_nuoou")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=856846028]
@@ -53,6 +54,8 @@ position = Vector2(0, -9)
 shape = SubResource("RectangleShape2D_ejoef")
 
 [node name="ZonaRecarga" type="Area2D" parent="." unique_id=1505080380]
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaRecarga" unique_id=1893755373]
 position = Vector2(0, -9)
