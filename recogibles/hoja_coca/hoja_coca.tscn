@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dejbe7qosjrhr"]
+
+[ext_resource type="Script" uid="uid://borfwmtpnourf" path="res://recogibles/hoja_coca/HojaCoca.cs" id="1_bn6hc"]
+[ext_resource type="Texture2D" uid="uid://jbf5c4a8vsm1" path="res://recogibles/hoja_coca/sprites/hoja_coca.png" id="2_uf0du"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bn6hc"]
+radius = 20.0
+
+[sub_resource type="Gradient" id="Gradient_uf0du"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_uf0du"]
+gradient = SubResource("Gradient_uf0du")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="HojaCoca" type="Area2D" unique_id=1868943793]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_bn6hc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=236736469]
+scale = Vector2(3, 3)
+texture = ExtResource("2_uf0du")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1366817067]
+shape = SubResource("CircleShape2D_bn6hc")
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=861456362]
+color = Color(0.6117647, 0.8235294, 0.41568628, 1)
+energy = 0.3
+texture = SubResource("GradientTexture2D_uf0du")
+texture_scale = 0.7
