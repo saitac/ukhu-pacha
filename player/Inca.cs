@@ -10,17 +10,18 @@ public partial class Inca : CharacterBody2D
 	private AnimatedSprite2D _incaSprite;
 	private Combustible _combustible;
 	private Antorcha _antorcha;
+	private Vigor _vigor;
 	private Direccion _incaUltimaDireccion = Direccion.Abajo;
-
-	private bool _muerto = false;
 
 	public override void _Ready()
 	{
 		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
+		_vigor = GetNode<Vigor>("Vigor");
 		_combustible.NivelCambiado += _antorcha.AjustarLlama;
-		_combustible.GraciaAgotada += Morir;
+		_combustible.Agotado += OnCombustibleAgotado;
+		_vigor.Agotado += Morir;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -40,7 +41,7 @@ public partial class Inca : CharacterBody2D
 
 		if (@event.IsActionPressed("debug_recargar"))
 		{
-			_combustible.Recargar();
+			RecargarAntorcha();
 		}
 	}
 
@@ -67,7 +68,7 @@ public partial class Inca : CharacterBody2D
 
 	public void IniciarRecargaAntorcha()
 	{
-		_combustible.Recargar();
+		RecargarAntorcha();
 		_combustible.PausarConsumo(true);
 	}
 
@@ -78,11 +79,18 @@ public partial class Inca : CharacterBody2D
 
 	private void Morir()
 	{
-		if (_muerto)
-		{
-			return;
-		}
-		_muerto = true;
 		EmitSignal(SignalName.Murio);
+	}
+
+	private void OnCombustibleAgotado()
+	{
+		float tasa = _vigor.Maximo / (_combustible.TiempoMaximo * _combustible.ProporcionGracia);
+		_vigor.IniciarDrenaje(tasa);
+	}
+
+	private void RecargarAntorcha()
+	{
+		_combustible.Recargar();
+		_vigor.DetenerDrenaje();
 	}
 }

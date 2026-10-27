@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://clcvbl088ll40"]
+
+[ext_resource type="Script" uid="uid://uiet6uucrvgs" path="res://comun/BarraVigor.cs" id="1_gpxpr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f6pw3"]
+bg_color = Color(0.05490196, 0.16470589, 0.105882354, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2sckk"]
+bg_color = Color(0.20392157, 0.827451, 0.6, 1)
+
+[node name="BarraVigor" type="ProgressBar" unique_id=545503112]
+offset_left = -25.0
+offset_right = 25.0
+offset_bottom = 10.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_f6pw3")
+theme_override_styles/fill = SubResource("StyleBoxFlat_2sckk")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+script = ExtResource("1_gpxpr")
+
+[node name="Timer" type="Timer" parent="." unique_id=928758472]
+one_shot = true
