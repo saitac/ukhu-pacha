@@ -20,14 +20,16 @@ collision_layer = 4
 collision_mask = 2
 script = ExtResource("1_bn6hc")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=236736469]
-scale = Vector2(3, 3)
-texture = ExtResource("2_uf0du")
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1366817067]
 shape = SubResource("CircleShape2D_bn6hc")
 
-[node name="PointLight2D" type="PointLight2D" parent="." unique_id=861456362]
+[node name="Visual" type="Node2D" parent="." unique_id=1434010165]
+
+[node name="Sprite2D" type="Sprite2D" parent="Visual" unique_id=236736469]
+scale = Vector2(3, 3)
+texture = ExtResource("2_uf0du")
+
+[node name="PointLight2D" type="PointLight2D" parent="Visual" unique_id=861456362]
 color = Color(0.6117647, 0.8235294, 0.41568628, 1)
 energy = 0.3
 texture = SubResource("GradientTexture2D_uf0du")
