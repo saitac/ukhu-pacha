@@ -50,7 +50,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   | Disparador | Qué cambia | Sensación buscada |
   |---|---|---|
   | **Tiempo** (ciclos periódicos) | La disposición de las **puertas** (se cierran unas, se abren otras); la forma de las salas se mantiene | Inquietud constante: "¿esta puerta estaba aquí?" |
-  | **Colocar un disco de Inti en la puerta final** | La **forma de las salas** (y con ellas las puertas) + **reubicación de la puerta final** + recolocación de tótems de Wiracocha y altares de Cóndor | Golpe dramático, un cambio de acto: la cueva reacciona a la reliquia devuelta y se reordena por completo |
+  | **Colocar un disco de Inti en la puerta final** | La **forma de las salas** (y con ellas las puertas) + **reubicación de la puerta final** + recolocación de tótems de Wiracocha y altares de Cóndor + reposición de las hojas de coca (ver 3.7) | Golpe dramático, un cambio de acto: la cueva reacciona a la reliquia devuelta y se reordena por completo |
 
   - Con tres discos, la cueva tiene **cuatro "versiones"** de salas por partida: el juego se estructura en actos.
   - Entre un disco y el siguiente las salas y los tótems no se mueven, así que "volver a recargar" sigue siendo un plan válido aunque las puertas hayan cambiado (ver 3.3).
@@ -125,7 +125,7 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 | Luz (antorcha) | Tótems de Wiracocha (en un lugar) |
 | Cóndor | Altares (en un lugar) |
 | Puma | Tiempo (cooldown), sin tótem ni altar |
-| Vigor | Hojas de coca flotantes, que se recolocan con cada ciclo de puertas (ver 3.7) |
+| Vigor | Hojas de coca flotantes y limitadas: se recolocan con cada ciclo de puertas y se reponen al colocar un disco de Inti (ver 3.7) |
 
 - **Cóndor:** invocable en altares específicos → vista cenital temporal para "espiar" el laberinto. Los altares **se recolocan junto con los tótems** cada vez que cambian las salas. Es especialmente valioso justo después de un cambio de salas, para reorientarse en la cueva nueva.
 - **Puma:** empuje/aturdimiento de emergencia con cooldown largo, para escapar de un acorralamiento.
@@ -142,11 +142,18 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
   - **También aparece al despertar del aturdimiento**, cuando el vigor vuelve a llenarse: avisa que la criatura se levantó. Si no hay antorcha cerca, no se ve (misma regla de la luz).
 - **Recuperación: hojas de coca.** Planta sagrada y medicinal andina, usada contra el cansancio y el dolor.
   - Flotan en el aire con un **brillo verde tenue**, visible en la oscuridad para que el Inca pueda ubicarlas.
-  - El Inca las **atraviesa** (no son obstáculo) y al pasar por encima las recoge y recupera vigor.
+  - El Inca las **atraviesa** (no son obstáculo) y al pasar por encima las recoge (las *chaccha*) y recupera vigor.
+  - **Curación aleatoria:** cada hoja devuelve un porcentaje del vigor máximo, sorteado al crearla entre un mínimo y un máximo (inicial: **10 %–100 %**, a ajustar en pruebas). Se sortea con la semilla del laberinto: la misma semilla da las mismas hojas.
+  - **Con el vigor lleno, el Inca no la recoge:** la hoja queda donde está y no se desperdicia. Tampoco la recoge si ya está muerto.
   - **Al consumirla:** un **destello verde** breve alrededor del Inca confirma la curación (y la barra de vigor aparece y sube).
-  - **Se recolocan en cada ciclo de puertas** (ver 3.2), con más frecuencia que los tótems, así que no sirven como punto fijo de referencia.
-  - Su ubicación es independiente de los tótems: si coinciden en una sala, es casualidad.
-  - **Cantidad:** un porcentaje del número de salas, a ajustar en pruebas.
+  - **Cantidad:** un porcentaje del número de salas, una hoja por sala elegida (inicial: **30 %**, a ajustar en pruebas).
+  - **Ubicación:** en una **esquina** de la sala, elegida al azar entre las cuatro. El jugador aprende dónde buscar pero no en cuál, y tiene que recorrer la sala con la antorcha. Cuando haya criaturas, las esquinas son callejones sin salida: ir por la coca es riesgo contra recompensa.
+    - Puede aparecer en la sala donde está el Inca.
+    - Puede compartir sala con un tótem de Wiracocha (el tótem va en el centro, la hoja en una esquina): llegar a las justas a recargar la luz y encontrar también coca es un alivio.
+  - **Son limitadas, no se regeneran con el tiempo:** las hojas consumidas desaparecen; las que quedan se **recolocan en cada ciclo de puertas** (ver 3.2), así que no sirven como punto fijo de referencia. Si al inicio hay 10 y el Inca consumió 5, solo se recolocan las 5 restantes.
+    - Al recolocarlas se **mueven** (no se destruyen y recrean): cada hoja conserva su curación sorteada.
+  - **Se reponen al colocar un disco de Inti** en la puerta final (ver 3.2 y 3.4): con el cambio de salas vuelve a haber la cantidad inicial de hojas (las que quedaban se recolocan en las salas nuevas y se crean las que faltan). Al colocar el tercer disco termina el juego, así que en la práctica se reponen dos veces por partida.
+    - Esto convierte la coca en un recurso de cada acto: quien la gasta rápido llega a la puerta final con menos margen. Junto con la "cicatriz" de los apagones (ver 3.3), el vigor se vuelve un recurso que la partida va gastando.
 - **Respiración según el vigor (Fase 9, sonido):** la respiración del Inca cambia según cuánto vigor le queda: tranquila con vigor alto, cada vez más agitada y entrecortada a medida que baja. A oscuras se vuelve un segundo aviso, sonoro, de que se está muriendo, complementario a la barra.
 
 ---
@@ -236,7 +243,7 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
 - [ ] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
 - [ ] **Fase 5:** Primer enemigo funcional (IA básica de persecución/patrulla)
-- [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final
+- [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye reponer las hojas de coca al colocar cada disco, ver 3.7)
 - [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo)
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
 - [ ] **Fase 9:** Pulido, sonido, música, menú y pantalla de derrota/victoria
@@ -267,7 +274,6 @@ public partial class Inca : CharacterBody2D
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
-- Vigor del Inca (ver 3.7): ¿cuánto vigor devuelve cada hoja de coca? ¿qué porcentaje de salas tiene coca? ¿la coca puede aparecer en la sala donde está el Inca?
 - ¿La respiración del Inca (ver 3.7) va acompañada de un latido que se acelera, o basta con la respiración?
 
 ---
