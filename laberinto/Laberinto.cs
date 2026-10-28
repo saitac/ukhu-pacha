@@ -7,6 +7,8 @@ public partial class Laberinto : Node2D
 {
 	[Export] public PackedScene EscenaTotemWiracocha { get; set; }
 
+	[Export] public PackedScene EscenaHojaCoca { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -122,6 +124,9 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		// Para prueba => eliminar
+		ColocarHojaDeCoca(centro + new Vector2I(2, 0));
 
 		// Alerta - no debe existir cuartos sin acceso
 		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
@@ -1134,5 +1139,13 @@ public partial class Laberinto : Node2D
 	private void OnIncaMurio()
 	{
 		GetTree().ReloadCurrentScene();
+	}
+
+	private void ColocarHojaDeCoca(Vector2I celda)
+	{
+		HojaCoca hojaDeCoca = EscenaHojaCoca.Instantiate<HojaCoca>();
+		hojaDeCoca.Curacion = _rng.RandfRange(LaberintoConfig.Recogibles.HojaDeCoca.CuracionMinima, LaberintoConfig.Recogibles.HojaDeCoca.CuracionMaxima);
+		AddChild(hojaDeCoca);
+		hojaDeCoca.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 	}
 }

@@ -17,6 +17,7 @@
 [ext_resource type="Script" uid="uid://cij1erbyrbeqh" path="res://laberinto/PolvoTecho.cs" id="14_wsvcv"]
 [ext_resource type="Script" uid="uid://cxg3kx6tiagou" path="res://laberinto/PolvoPuertas.cs" id="15_kwhve"]
 [ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
+[ext_resource type="PackedScene" uid="uid://dejbe7qosjrhr" path="res://recogibles/hoja_coca/hoja_coca.tscn" id="18_glftc"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_aislado0"]
 cull_mode = 1
@@ -293,6 +294,7 @@ colors = PackedColorArray(0.003921569, 0.003921569, 0.003921569, 0, 1, 1, 1, 0.8
 y_sort_enabled = true
 script = ExtResource("1_8w83w")
 EscenaTotemWiracocha = ExtResource("2_yhjxc")
+EscenaHojaCoca = ExtResource("18_glftc")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
 scale = Vector2(3, 3)

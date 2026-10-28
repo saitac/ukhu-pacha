@@ -93,4 +93,14 @@ public partial class Inca : CharacterBody2D
 		_combustible.Recargar();
 		_vigor.DetenerDrenaje();
 	}
+
+	public bool ChaccharCoca(float curacion)
+	{
+		if (_vigor.EstaAgotado || _vigor.EstaLleno)
+		{
+			return false;
+		}
+		_vigor.Modificar(_vigor.Maximo * curacion);
+		return true;
+	}
 }
