@@ -108,7 +108,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - **Supay custodia los discos** (señor del Ukhu Pacha y de las riquezas ocultas bajo la tierra):
   - Aparece **al tomar** un disco (no antes) y persigue al Inca mientras lo lleva a la puerta final. No se le puede vencer ni aturdir de forma definitiva: **solo se le escapa**.
   - Al colocar el disco en la puerta, Supay **se desvanece y se hunde en el Ukhu Pacha** (no muere; ver 3.5).
-  - **Un solo Supay activo a la vez:** cada disco trae el suyo y nunca se acumulan. Cada uno puede ser más peligroso que el anterior (más rápido, más agresivo), en línea con la mutación que se acelera.
+  - **Es siempre el mismo Supay**, que regresa con cada disco: nunca hay más de uno. Cada vez vuelve más peligroso (más rápido, más fuerte), en línea con la mutación que se acelera.
   - Cada acto alterna calma y tensión: explorar (solo Muquis) → tomar el disco → huir de Supay → colocarlo → temblor.
 - **Explorar tiene recompensa:** quien prestó atención a la ubicación de la puerta final mientras buscaba el disco regresa con más facilidad; quien no, debe buscarla cargando el disco.
 - Al colocar el **tercer** disco, la puerta se abre (ver Final en 2. Narrativa); no hay cambio de salas.
@@ -186,8 +186,8 @@ Las criaturas forman una **jerarquía**: de la más común a la más poderosa.
 
 | Rango | Criatura | Rol de diseño | Comportamiento |
 |---|---|---|---|
-| Bajo | **Muqui** | Enemigo común de la cueva | Duende pequeño, dueño y guardián de las minas. Hay **varios** recorriendo la cueva. Primer enemigo (Fase 5). |
-| Medio | **Supay** | Guardián de los discos de Inti | Aparece al tomar un disco y persigue al Inca hasta la puerta final; presencia lenta e inevitable, tipo "stalker". No se puede vencer, solo escapar. Uno solo a la vez (ver 3.4). |
+| Bajo | **Muqui** | Enemigo común de la cueva | Duende pequeño, dueño y guardián de las minas. Hay **varios** recorriendo la cueva. **Patrulla** salas y pasillos y **persigue** al Inca cuando lo ve. Entra en escena **saliendo de un muro** (vive dentro de la roca), siempre con aviso previo (polvo y crujido) para que sea justo. Sin sabotaje y sin relación con la coca. Primer enemigo (Fase 5). |
+| Medio | **Supay** | Guardián de los discos de Inti | Aparece al tomar un disco y persigue al Inca hasta la puerta final; presencia lenta e inevitable, tipo "stalker". No se puede vencer, solo escapar. Es siempre el mismo, y vuelve más peligroso con cada disco (ver 3.4). |
 | Final | **Amaru** | Último guardián | Serpiente colosal de dos cabezas que cierra el paso a la Ciudad Perdida tras colocar el tercer disco. Se le vence aturdiéndolo con la macana (ver 3.5). |
 | Entorno | **Dios Urka** | Acelerador de caos | No es una criatura que camine: rige los temblores y mutaciones violentas del laberinto. |
 
@@ -281,8 +281,6 @@ public partial class Inca : CharacterBody2D
 ## 10. Preguntas abiertas / por definir
 
 - ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
-- ¿Cómo se comporta el Muqui? (¿patrulla y persigue, o sale de las paredes, ataca y desaparece?) ¿Conserva el sabotaje (colapsos, mutaciones sorpresa)? ¿Las ofrendas de coca lo calman o distraen?
-- ¿Supay es el mismo que regresa con cada disco o uno distinto cada vez? (La mecánica funciona igual; es una decisión narrativa.)
 - ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
 - ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
