@@ -61,6 +61,13 @@ debug_recargar={
 ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="mundo"
+2d_physics/layer_2="inca"
+2d_physics/layer_3="recogibles"
+2d_physics/layer_4="criaturas"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

@@ -68,4 +68,14 @@ public static class LaberintoConfig
 			public const int SeparacionMinima = 3;
 		}
 	}
+
+	public static class Recogibles
+	{
+		public static class HojaDeCoca
+		{
+			public const float CuracionMinima = 0.1f;
+			public const float CuracionMaxima = 1.0f;
+			public const float PorcentajeSalas = 0.30f;
+		}
+	}
 }

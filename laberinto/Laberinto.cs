@@ -7,6 +7,8 @@ public partial class Laberinto : Node2D
 {
 	[Export] public PackedScene EscenaTotemWiracocha { get; set; }
 
+	[Export] public PackedScene EscenaHojaCoca { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -28,6 +30,7 @@ public partial class Laberinto : Node2D
 	List<Rect2I> _bloques;
 	List<PuertaPosible> _puertasPosibles;
 	private Dictionary<int, int> _puertasAbiertas;
+	private List<HojaCoca> _hojasCoca;
 
 	private enum PuertaOrientacion
 	{
@@ -116,6 +119,11 @@ public partial class Laberinto : Node2D
 
 		// Se colocan los tótems Wiracocha en los bloques seleccionados.
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
+
+		// Se crean las hojas de coca
+		_hojasCoca = [];
+		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
+		UbicarHojasDeCoca();
 
 		// Centro del bloque del inca
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
@@ -780,6 +788,10 @@ public partial class Laberinto : Node2D
 
 			RedibujarPuertas(puertasCambiadas.Keys);
 
+			// Quito de la lista las hojas de coca que ya fueron consumidas y reubico las que quedan pendientes
+			_hojasCoca.RemoveAll(h => !IsInstanceValid(h));
+			UbicarHojasDeCoca();
+
 			if (!SalasConectadas(-1))
 			{
 				GD.PushError("Salas no conectadas");
@@ -1134,5 +1146,55 @@ public partial class Laberinto : Node2D
 	private void OnIncaMurio()
 	{
 		GetTree().ReloadCurrentScene();
+	}
+
+	private List<int> ElegirBloquesHojasCoca(int cantidad)
+	{
+		// Creo el arreglo de índices de los bloques
+		int[] indices = [.. Enumerable.Range(0, _bloques.Count)];
+
+		// Me aseguro que cantidad nunca sea mayor que la cantidad de salas existentes
+		int cantidadReal = Mathf.Min(cantidad, indices.Length);
+
+		// Algoritmo Fisher-Yates
+		for (int i = 0; i < cantidadReal; i++)
+		{
+			int j = _rng.RandiRange(i, indices.Length - 1);
+			(indices[j], indices[i]) = (indices[i], indices[j]);
+		}
+
+		return [.. indices[..cantidadReal]];
+	}
+
+	private Vector2 ElegirEsquinaBloqueHojaCoca(int indiceBloque)
+	{
+		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
+		Vector2I[] esquinas = [
+			piso.Position,
+			new Vector2I(piso.End.X - 1, piso.Position.Y),
+			new Vector2I(piso.Position.X, piso.End.Y - 1),
+			piso.End - Vector2I.One
+		];
+		return IndiceMapaAPosicionMundo(esquinas[_rng.RandiRange(0, esquinas.Length - 1)]);
+	}
+
+	private void CrearHojasDeCoca(int cantidad)
+	{
+		for (int c = 0; c < cantidad; c++)
+		{
+			HojaCoca hojaDeCoca = EscenaHojaCoca.Instantiate<HojaCoca>();
+			hojaDeCoca.Curacion = _rng.RandfRange(LaberintoConfig.Recogibles.HojaDeCoca.CuracionMinima, LaberintoConfig.Recogibles.HojaDeCoca.CuracionMaxima);
+			AddChild(hojaDeCoca);
+			_hojasCoca.Add(hojaDeCoca);
+		}
+	}
+
+	private void UbicarHojasDeCoca()
+	{
+		List<int> bloques = ElegirBloquesHojasCoca(_hojasCoca.Count);
+		for (int i = 0; i < _hojasCoca.Count; i++)
+		{
+			_hojasCoca[i].GlobalPosition = ElegirEsquinaBloqueHojaCoca(bloques[i]);
+		}
 	}
 }

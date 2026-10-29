@@ -17,6 +17,10 @@ public partial class Vigor : Node
 
 	private float _tasaDrenaje = 0.0f;
 
+	public bool EstaLleno => _restante == Maximo;
+
+	public bool EstaAgotado => _agotado;
+
 	public override void _Ready()
 	{
 		SetProcess(false);
