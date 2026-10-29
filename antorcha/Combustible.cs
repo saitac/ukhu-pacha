@@ -5,14 +5,8 @@ public partial class Combustible : Node
 	[Signal]
 	public delegate void NivelCambiadoEventHandler(float nivel);
 
-	[Signal]
-	public delegate void AgotadoEventHandler();
-
 	[Export]
 	public float TiempoMaximo = 60f;
-
-	[Export]
-	public float ProporcionGracia = 0.5f;
 
 	private float _restante;
 
@@ -38,11 +32,6 @@ public partial class Combustible : Node
 		_restante = Mathf.Max(_restante - (float)delta, 0f);
 
 		EmitSignal(SignalName.NivelCambiado, _restante / TiempoMaximo);
-
-		if (_restante <= 0f)
-		{
-			EmitSignal(SignalName.Agotado);
-		}
 	}
 
 	public void Recargar()

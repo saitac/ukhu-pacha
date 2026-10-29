@@ -6,6 +6,9 @@ public partial class Inca : CharacterBody2D
 	[Signal]
 	public delegate void MurioEventHandler();
 
+	[Export]
+	public float ProporcionGracia = 0.5f;
+
 	private const float DuracionSubida = 0.5f;
 	private const float DuracionBajada = 0.8f;
 	private const float EnergiaDestello = 2.5f;
@@ -14,7 +17,6 @@ public partial class Inca : CharacterBody2D
 
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
-	private Combustible _combustible;
 	private Antorcha _antorcha;
 	private Vigor _vigor;
 	private PointLight2D _destello;
@@ -24,12 +26,10 @@ public partial class Inca : CharacterBody2D
 	public override void _Ready()
 	{
 		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_vigor = GetNode<Vigor>("Vigor");
 		_destello = GetNode<PointLight2D>("Destello");
-		_combustible.NivelCambiado += _antorcha.AjustarLlama;
-		_combustible.Agotado += OnCombustibleAgotado;
+		_antorcha.Apagada += OnAntorchaApagada;
 		_vigor.Agotado += Morir;
 	}
 
@@ -78,12 +78,12 @@ public partial class Inca : CharacterBody2D
 	public void IniciarRecargaAntorcha()
 	{
 		RecargarAntorcha();
-		_combustible.PausarConsumo(true);
+		_antorcha.PausarConsumo(true);
 	}
 
 	public void DetenerRecargaAntorcha()
 	{
-		_combustible.PausarConsumo(false);
+		_antorcha.PausarConsumo(false);
 	}
 
 	private void Morir()
@@ -91,15 +91,15 @@ public partial class Inca : CharacterBody2D
 		EmitSignal(SignalName.Murio);
 	}
 
-	private void OnCombustibleAgotado()
+	private void OnAntorchaApagada()
 	{
-		float tasa = _vigor.Maximo / (_combustible.TiempoMaximo * _combustible.ProporcionGracia);
+		float tasa = _vigor.Maximo / (_antorcha.TiempoMaximo * ProporcionGracia);
 		_vigor.IniciarDrenaje(tasa);
 	}
 
 	private void RecargarAntorcha()
 	{
-		_combustible.Recargar();
+		_antorcha.Recargar();
 		_vigor.DetenerDrenaje();
 	}
 
