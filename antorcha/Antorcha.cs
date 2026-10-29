@@ -3,6 +3,9 @@ using Godot;
 
 public partial class Antorcha : Node2D
 {
+	[Signal]
+	public delegate void ApagadaEventHandler();
+
 	private PointLight2D _llama;
 
 	private PointLight2D _brasa;
@@ -10,6 +13,8 @@ public partial class Antorcha : Node2D
 	private CpuParticles2D _humo;
 
 	private AnimatedSprite2D _sprite;
+
+	private Combustible _combustible;
 
 	private Marker2D _punta;
 
@@ -28,6 +33,8 @@ public partial class Antorcha : Node2D
 	private float _progresoEncendido = 1f;
 
 	private Tween _tweenEncendido;
+
+	public float TiempoMaximo => _combustible.TiempoMaximo;
 
 	[Export]
 	public float AmplitudParpadeo = 0.8f;
@@ -63,6 +70,9 @@ public partial class Antorcha : Node2D
 		_llama = _punta.GetNode<PointLight2D>("PointLight2D");
 		_brasa = _punta.GetNode<PointLight2D>("Brasa");
 		_humo = _punta.GetNode<CpuParticles2D>("Humo");
+		_combustible = GetNode<Combustible>("Combustible");
+		_combustible.NivelCambiado += AjustarLlama;
+
 		ActualizarSprite();
 	}
 
@@ -89,7 +99,7 @@ public partial class Antorcha : Node2D
 		};
 	}
 
-	public void AjustarLlama(float nivel)
+	private void AjustarLlama(float nivel)
 	{
 		bool encendidaAhora = nivel > 0f;
 		bool cambio = _encendida != encendidaAhora;
@@ -119,6 +129,7 @@ public partial class Antorcha : Node2D
 			} else
 			{
 				_humo.Emitting = true;
+				EmitSignal(SignalName.Apagada);
 			}
 		}
 	}
@@ -138,5 +149,15 @@ public partial class Antorcha : Node2D
 		}
 		_direccion = direccion;
 		ActualizarSprite();
+	}
+
+	public void Recargar()
+	{
+		_combustible.Recargar();
+	}
+
+	public void PausarConsumo(bool pausado)
+	{
+		_combustible.PausarConsumo(pausado);
 	}
 }

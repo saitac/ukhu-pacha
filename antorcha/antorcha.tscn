@@ -25,6 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://js4pdvob68tf" path="res://antorcha/sprites/up/antorcha-up-apagada-01.png" id="23_x85m1"]
 [ext_resource type="Texture2D" uid="uid://u00383qcqrx2" path="res://antorcha/sprites/up/antorcha-up-apagada-02.png" id="24_gfayw"]
 [ext_resource type="Texture2D" uid="uid://gy8o4uhl4js" path="res://antorcha/sprites/up/antorcha-up-apagada-03.png" id="25_hhcf0"]
+[ext_resource type="Script" uid="uid://kpepuuyrtygq" path="res://antorcha/Combustible.cs" id="26_jcws0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ekqyl"]
 animations = [{
@@ -211,3 +212,6 @@ scale_amount_min = 2.0
 scale_amount_max = 4.0
 scale_amount_curve = SubResource("Curve_hfs8p")
 color_ramp = SubResource("Gradient_n3ga3")
+
+[node name="Combustible" type="Node" parent="." unique_id=1687699933]
+script = ExtResource("26_jcws0")
