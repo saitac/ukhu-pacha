@@ -18,7 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://b5otimw1v0res" path="res://player/sprites/walk-right-inca-03-apoyo.png" id="12_y1eoe"]
 [ext_resource type="Texture2D" uid="uid://ci2x0513yeurh" path="res://player/sprites/walk-right-inca-04-izquierda.png" id="13_8ybet"]
 [ext_resource type="PackedScene" uid="uid://c2nnbqwxietn2" path="res://antorcha/antorcha.tscn" id="18_ye0y5"]
-[ext_resource type="Script" uid="uid://kpepuuyrtygq" path="res://player/Combustible.cs" id="19_y1eoe"]
+[ext_resource type="Script" uid="uid://kpepuuyrtygq" path="res://antorcha/Combustible.cs" id="19_y1eoe"]
 [ext_resource type="Script" uid="uid://rsr7kc5iw1mx" path="res://comun/Vigor.cs" id="20_8ybet"]
 [ext_resource type="Script" uid="uid://bmrten5j8dx7e" path="res://comun/Seguidor.cs" id="21_8xacw"]
 [ext_resource type="PackedScene" uid="uid://clcvbl088ll40" path="res://comun/BarraVigor.tscn" id="22_pn03x"]
