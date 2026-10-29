@@ -22,6 +22,7 @@
 [ext_resource type="Script" uid="uid://rsr7kc5iw1mx" path="res://comun/Vigor.cs" id="20_8ybet"]
 [ext_resource type="Script" uid="uid://bmrten5j8dx7e" path="res://comun/Seguidor.cs" id="21_8xacw"]
 [ext_resource type="PackedScene" uid="uid://clcvbl088ll40" path="res://comun/BarraVigor.tscn" id="22_pn03x"]
+[ext_resource type="Texture2D" uid="uid://b0kjmvj1rdlrp" path="res://comun/luz_radial.tres" id="23_pn03x"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_jdori"]
 animations = [{
@@ -162,3 +163,9 @@ Desplazamiento = Vector2(0, -98)
 
 [node name="BarraVigor" parent="CanvasLayer/SeguidorInca" unique_id=545503112 node_paths=PackedStringArray("Vigor") instance=ExtResource("22_pn03x")]
 Vigor = NodePath("../../../Vigor")
+
+[node name="Destello" type="PointLight2D" parent="." unique_id=220241905]
+position = Vector2(0, -42)
+energy = 0.0
+texture = ExtResource("23_pn03x")
+texture_scale = 2.0

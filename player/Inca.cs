@@ -6,12 +6,20 @@ public partial class Inca : CharacterBody2D
 	[Signal]
 	public delegate void MurioEventHandler();
 
+	private const float DuracionSubida = 0.5f;
+	private const float DuracionBajada = 0.8f;
+	private const float EnergiaDestello = 2.5f;
+
+	private static readonly Color ColorCura = new(0.61f, 0.82f, 0.42f);
+
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
 	private Combustible _combustible;
 	private Antorcha _antorcha;
 	private Vigor _vigor;
+	private PointLight2D _destello;
 	private Direccion _incaUltimaDireccion = Direccion.Abajo;
+	private Tween _tweenDestello;
 
 	public override void _Ready()
 	{
@@ -19,6 +27,7 @@ public partial class Inca : CharacterBody2D
 		_combustible = GetNode<Combustible>("Combustible");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_vigor = GetNode<Vigor>("Vigor");
+		_destello = GetNode<PointLight2D>("Destello");
 		_combustible.NivelCambiado += _antorcha.AjustarLlama;
 		_combustible.Agotado += OnCombustibleAgotado;
 		_vigor.Agotado += Morir;
@@ -101,6 +110,20 @@ public partial class Inca : CharacterBody2D
 			return false;
 		}
 		_vigor.Modificar(_vigor.Maximo * curacion);
+		Destellar(ColorCura);
 		return true;
+	}
+
+	private void Destellar(Color color)
+	{
+		// evita dos tweens peleando por energy si come hojas seguidas
+		_tweenDestello?.Kill();
+		_destello.Color = color;
+		_tweenDestello = CreateTween();
+		_tweenDestello.SetTrans(Tween.TransitionType.Sine);
+		_tweenDestello.SetEase(Tween.EaseType.Out);
+
+		_tweenDestello.TweenProperty(_destello, "energy", EnergiaDestello, DuracionSubida);
+		_tweenDestello.TweenProperty(_destello, "energy", 0f, DuracionBajada);
 	}
 }
