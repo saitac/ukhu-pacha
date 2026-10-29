@@ -31,7 +31,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
 - **Contexto mítico:** La cueva es un lugar sagrado ancestral de la propia cosmovisión andina, anterior al esplendor del Imperio Inca pero perteneciente a la misma tradición cultural y religiosa (Wiracocha, Inti, el Uku Pacha). No se mezclan culturas externas: todo el simbolismo, arquitectura y entidades del juego pertenecen al mismo universo andino/inca.
 - **Objetivo narrativo:** Encontrar la Ciudad Perdida para salvar a su pueblo.
 - **La cueva protege la Ciudad Perdida:** cada vez que el Inca coloca un disco de Inti en la puerta de piedra, la cueva se reordena y esconde la puerta en otro lugar. No es un enemigo que lo odie, sino un guardián que pone a prueba a quien busca el santuario.
-- **Final:** Al colocar los tres discos sagrados en la puerta de piedra, esta se abre revelando la ciudad santuario al amanecer. El protagonista dejar caer su antorcha ya consumida — el viaje ha terminado.
+- **Final:** Al colocar los tres discos sagrados en la puerta de piedra, esta se abre, pero el **Amaru**, la serpiente de dos cabezas, le cierra el paso: es el último guardián entre el Ukhu Pacha y la Ciudad Perdida. El Inca lo enfrenta con la macana hasta aturdirlo (ver 3.5), cruza y la ciudad santuario se revela al amanecer. El protagonista deja caer su antorcha ya consumida — el viaje ha terminado.
 
 ---
 
@@ -105,6 +105,11 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   1. El Inca coloca un disco en la puerta final → temblor: cambia la forma de las salas y **la puerta final se reubica**.
   2. Explora la cueva nueva buscando el siguiente disco; mientras explora puede descubrir dónde quedó la puerta final.
   3. Encuentra el disco y lo lleva a la puerta final. Las salas no cambiaron (solo las puertas, por tiempo), así que lo explorado le sirve para regresar.
+- **Supay custodia los discos** (señor del Ukhu Pacha y de las riquezas ocultas bajo la tierra):
+  - Aparece **al tomar** un disco (no antes) y persigue al Inca mientras lo lleva a la puerta final. No se le puede vencer ni aturdir de forma definitiva: **solo se le escapa**.
+  - Al colocar el disco en la puerta, Supay **se desvanece y se hunde en el Ukhu Pacha** (no muere; ver 3.5).
+  - **Es siempre el mismo Supay**, que regresa con cada disco: nunca hay más de uno. Cada vez vuelve más peligroso (más rápido, más fuerte), en línea con la mutación que se acelera.
+  - Cada acto alterna calma y tensión: explorar (solo Muquis) → tomar el disco → huir de Supay → colocarlo → temblor.
 - **Explorar tiene recompensa:** quien prestó atención a la ubicación de la puerta final mientras buscaba el disco regresa con más facilidad; quien no, debe buscarla cargando el disco.
 - Al colocar el **tercer** disco, la puerta se abre (ver Final en 2. Narrativa); no hay cambio de salas.
 - Cargar un disco probablemente limita otras acciones (uso de armas, sigilo, etc. — a definir).
@@ -120,6 +125,8 @@ El jugador **no puede matar** a las criaturas mitológicas; solo aturdir, cegar 
 | Bolas de humo de coca/ají | Área | Ciega y aturde temporalmente |
 | Amuleto de Inti | Especial | Destello cegador, daña a criaturas de oscuridad, cooldown largo, consume energía de antorcha |
 | Champi (escudo) | Defensa | Bloquea ataques frontales, inmoviliza al usarlo |
+
+- **El Amaru (enfrentamiento final)** es la única criatura a la que el Inca "vence", y aun así sin matarla: tiene mucha energía y hay que bajársela a golpes de macana hasta **aturdirlo**; entonces el Inca gana y cruza a la Ciudad Perdida. Con Supay solo se puede huir; con el Amaru, por fin, se puede plantar cara, pero apenas alcanza para aturdirlo.
 
 ### 3.6 Aliados sagrados (ayudas limitadas)
 Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene de "estaciones" y mantenga su misterio:
@@ -175,12 +182,14 @@ Todas las causas terminan igual: el **vigor del Inca llega a 0** (ver 3.7). Algu
 
 ## 5. Bestiario mitológico
 
-| Criatura | Rol de diseño | Comportamiento |
-|---|---|---|
-| **Muqui** | Sabotaje / trampas | Habita paredes, provoca colapsos o mutaciones sorpresa |
-| **Supay** | Perseguidor implacable | Presencia lenta e inevitable, tipo "stalker"; no se puede matar, solo evadir |
-| **Amaru** | Bloqueo de territorio | Amenaza ambiental / posible jefe de sección, bloquea pasos clave |
-| **Dios Urka** | Acelerador de caos | Rige los temblores y mutaciones violentas del laberinto |
+Las criaturas forman una **jerarquía**: de la más común a la más poderosa.
+
+| Rango | Criatura | Rol de diseño | Comportamiento |
+|---|---|---|---|
+| Bajo | **Muqui** | Enemigo común de la cueva | Duende pequeño, dueño y guardián de las minas. Hay **varios** recorriendo la cueva. **Patrulla** salas y pasillos y **persigue** al Inca cuando lo ve. Entra en escena **saliendo de un muro** (vive dentro de la roca), siempre con aviso previo (polvo y crujido) para que sea justo. Sin sabotaje y sin relación con la coca. Primer enemigo (Fase 5). |
+| Medio | **Supay** | Guardián de los discos de Inti | Aparece al tomar un disco y persigue al Inca hasta la puerta final; presencia lenta e inevitable, tipo "stalker". No se puede vencer, solo escapar. Es siempre el mismo, y vuelve más peligroso con cada disco (ver 3.4). |
+| Final | **Amaru** | Último guardián | Serpiente colosal de dos cabezas que cierra el paso a la Ciudad Perdida tras colocar el tercer disco. Se le vence aturdiéndolo con la macana (ver 3.5). |
+| Entorno | **Dios Urka** | Acelerador de caos | No es una criatura que camine: rige los temblores y mutaciones violentas del laberinto. |
 
 **Deidades aliadas:**
 - **Wiracocha** — deidad de los tótems de recarga de antorcha.
@@ -246,9 +255,9 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
 - [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
 - [x] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
-- [ ] **Fase 5:** Primer enemigo funcional (IA básica de persecución/patrulla; incluye su visibilidad por línea de visión, ver 3.3)
-- [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye reponer las hojas de coca al colocar cada disco, ver 3.7)
-- [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo)
+- [ ] **Fase 5:** Primer enemigo funcional: el **Muqui** (IA básica de persecución/patrulla; incluye su visibilidad por línea de visión, ver 3.3)
+- [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye a Supay como guardián de cada disco y reponer las hojas de coca al colocar cada disco, ver 3.4 y 3.7)
+- [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo) + enfrentamiento final con el Amaru
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
 - [ ] **Fase 9:** Pulido, sonido, música, menú y pantalla de derrota/victoria
 - [ ] **Fase 10:** Exportación y evaluación de plataformas (Steam / Itch.io / móvil)
