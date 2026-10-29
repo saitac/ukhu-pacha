@@ -167,5 +167,6 @@ Vigor = NodePath("../../../Vigor")
 [node name="Destello" type="PointLight2D" parent="." unique_id=220241905]
 position = Vector2(0, -42)
 energy = 0.0
+shadow_enabled = true
 texture = ExtResource("23_pn03x")
 texture_scale = 2.0
