@@ -92,6 +92,10 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - **Cantidad:** un porcentaje del número de salas (mínimo 1), para que escale si cambia el tamaño del mapa.
   - **Reparto:** solo el **primer** tótem respeta el rango de distancia al Inca (garantiza uno alcanzable); los demás respetan una **separación mínima** entre tótems (medida en salas) y solo la distancia **mínima** al Inca (sin máximo), para quedar repartidos por todo el mapa sin aparecer pegados al Inca.
   - La distancia se mide al momento de colocarlos; luego las puertas mutan y deja de ser exacta (coherente con que el rango no es una garantía).
+  - **Valores actuales:** 20% de las salas; el primer tótem entre 2 y 3 salas del Inca; separación mínima de 3 salas entre tótems.
+  - La luz del brasero es **tenue**: marca el tótem como un faro, pero no ilumina toda la sala.
+- **Visibilidad:** la oscuridad casi total y las **sombras** de las luces (los muros bloquean la luz) deciden qué se ve del mapa; no hay una capa aparte de niebla de guerra. Solo se ve a lo lejos lo que tiene luz propia (braseros, hojas de coca).
+  - *Pendiente (Fase 5):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
 
 ### 3.4 Objetivo: Los 3 Discos de Inti
@@ -241,8 +245,8 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 1:** Movimiento libre del personaje + colisiones básicas
 - [x] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
 - [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
-- [ ] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
-- [ ] **Fase 5:** Primer enemigo funcional (IA básica de persecución/patrulla)
+- [x] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
+- [ ] **Fase 5:** Primer enemigo funcional (IA básica de persecución/patrulla; incluye su visibilidad por línea de visión, ver 3.3)
 - [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye reponer las hojas de coca al colocar cada disco, ver 3.7)
 - [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo)
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
@@ -270,7 +274,6 @@ public partial class Inca : CharacterBody2D
 - ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
 - ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
 - ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
-- ¿Valores concretos del rango de distancia para colocar tótems de Wiracocha?
 - ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
