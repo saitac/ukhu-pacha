@@ -73,7 +73,7 @@ offset = Vector2(0, -7)
 [node name="PointLight2D" type="PointLight2D" parent="Brasero" unique_id=825635563]
 position = Vector2(0, -10)
 color = Color(1, 0.6901961, 0.3764706, 1)
-energy = 0.8
+energy = 0.4
 range_item_cull_mask = 3
 shadow_enabled = true
 texture = SubResource("GradientTexture2D_hfs8p")
