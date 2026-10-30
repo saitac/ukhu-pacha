@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://cygaa47yq4ped"]
+
+[ext_resource type="Texture2D" uid="uid://s1kmasxx0yqp" path="res://criaturas/mallqui/sprites/ataque-down-mallqui-01.png" id="1_8te4i"]
+[ext_resource type="Script" uid="uid://dolu7xgo33l6a" path="res://criaturas/mallqui/Mallqui.cs" id="1_8yyr6"]
+[ext_resource type="Texture2D" uid="uid://1xbx4bj336to" path="res://criaturas/mallqui/sprites/ataque-down-mallqui-02.png" id="2_8yyr6"]
+[ext_resource type="Texture2D" uid="uid://c7mn0dgh3thup" path="res://criaturas/mallqui/sprites/walk-down-mallqui-01-apoyo.png" id="3_sbsc3"]
+[ext_resource type="Texture2D" uid="uid://ccvtfb6g4o4q4" path="res://criaturas/mallqui/sprites/walk-down-mallqui-02-derecha.png" id="4_gli1f"]
+[ext_resource type="Texture2D" uid="uid://bc7g53io0tbax" path="res://criaturas/mallqui/sprites/walk-down-mallqui-03-apoyo.png" id="5_dj68m"]
+[ext_resource type="Texture2D" uid="uid://btc3tvcko4jcv" path="res://criaturas/mallqui/sprites/walk-down-mallqui-04-izquierda.png" id="6_f8ra6"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_p5262"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_8te4i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_8yyr6")
+}],
+"loop": 0,
+"name": &"ataque-down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_sbsc3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gli1f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_dj68m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_f8ra6")
+}],
+"loop": 1,
+"name": &"walk-down",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
+size = Vector2(62, 79)
+
+[node name="Mallqui" type="CharacterBody2D" unique_id=631054532]
+collision_layer = 8
+script = ExtResource("1_8yyr6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1071424909]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_p5262")
+animation = &"walk-down"
+autoplay = "walk-down"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1499898629]
+position = Vector2(0, 9)
+shape = SubResource("RectangleShape2D_hfs8p")

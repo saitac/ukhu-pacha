@@ -9,6 +9,8 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaHojaCoca { get; set; }
 
+	[Export] public PackedScene EscenaMallqui { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -53,6 +55,8 @@ public partial class Laberinto : Node2D
 	}
 
 	private EstadoCiclo _estadoCiclo;
+
+	private AStarGrid2D _navegacion;
 
 	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
 	[Signal]
@@ -117,6 +121,10 @@ public partial class Laberinto : Node2D
 
 		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
 
+		// Se crea y actualiza la navegación AStarGrid2D
+		CrearNavegacion();
+		ActualizarNavegacion();
+
 		// Se colocan los tótems Wiracocha en los bloques seleccionados.
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
@@ -130,6 +138,25 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		// Agrego mallqui => ELIMINAR, SOLO PRUEBA
+		for (int b = 0; b < _bloques.Count; b++)
+		{
+			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
+			{
+				continue;
+			}
+
+			Vector2I celda = _bloques[b].GetCenter();
+
+			if (_mapa[celda.Y, celda.X] != Celda.Piso)
+			{
+				continue;
+			}
+
+			ColocarMallqui(celda);
+			break;
+		}
 
 		// Alerta - no debe existir cuartos sin acceso
 		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
@@ -1195,6 +1222,34 @@ public partial class Laberinto : Node2D
 		for (int i = 0; i < _hojasCoca.Count; i++)
 		{
 			_hojasCoca[i].GlobalPosition = ElegirEsquinaBloqueHojaCoca(bloques[i]);
+		}
+	}
+
+	private void ColocarMallqui(Vector2I celda)
+	{
+		Mallqui mallqui = EscenaMallqui.Instantiate<Mallqui>();
+		mallqui.Inicializar(this);
+		AddChild(mallqui);
+		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+	}
+
+	private void CrearNavegacion()
+	{
+		_navegacion = new AStarGrid2D();
+		_navegacion.Region = new Rect2I(0, 0, _mapa.GetLength(1), _mapa.GetLength(0));
+		_navegacion.DiagonalMode = AStarGrid2D.DiagonalModeEnum.Never;
+		_navegacion.Update();
+	}
+
+	private void ActualizarNavegacion()
+	{
+		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
+		{
+			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
+			{
+				bool esMuro = _mapa[fila, columna] == Celda.Muro;
+				_navegacion.SetPointSolid(new Vector2I(columna, fila), esMuro);
+			}
 		}
 	}
 }
