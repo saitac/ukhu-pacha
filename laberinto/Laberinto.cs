@@ -60,6 +60,10 @@ public partial class Laberinto : Node2D
 
 	private readonly HashSet<Vector2I> _celdasObstaculo = [];
 
+	// Desplazamientos usados para buscar una celda transitable cercana.
+	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
+	private static readonly Vector2I[] _desplazamientos = [Vector2I.Zero, Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right];
+
 	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
 	[Signal]
 	public delegate void AvisoIniciadoEventHandler(float duracion);
@@ -169,6 +173,10 @@ public partial class Laberinto : Node2D
 				ZIndex = 1
 			};
 			AddChild(linea);
+			NavegacionActualizada += () =>
+			{
+				linea.Points = CalcularRuta(IndiceMapaAPosicionMundo(celda), _Inca.GlobalPosition);
+			};
 			break;
 		}
 
@@ -1278,26 +1286,28 @@ public partial class Laberinto : Node2D
 	/// <param name="desde">Posición de origen, en coordenadas del mundo.</param>
 	/// <param name="hasta">Posición de destino, en coordenadas del mundo.</param>
 	/// <returns>
-	/// Los centros de cada celda de la ruta, en coordenadas del mundo, incluida la celda de origen.
-	/// Devuelve un arreglo vacío si alguna posición está fuera del mapa o sobre una celda sólida,
-	/// o si no existe camino.
+	/// Los centros de cada celda de la ruta, en coordenadas del mundo, empezando por la celda de origen.
+	/// Si el origen o el destino caen en una celda no transitable (por ejemplo, un cuerpo pegado a un muro
+	/// o sobre una puerta que se cerró), se usa en su lugar la vecina transitable más cercana.
+	/// Devuelve un arreglo vacío si no hay ninguna celda transitable cerca del origen o del destino,
+	/// o si no existe camino entre ellos.
 	/// </returns>
 	public Vector2[] CalcularRuta(Vector2 desde, Vector2 hasta)
 	{
 		Vector2I origen = PosicionMundoAIndiceMapa(desde);
 		Vector2I destino = PosicionMundoAIndiceMapa(hasta);
 
-		if (!_navegacion.IsInBounds(origen.X, origen.Y) || !_navegacion.IsInBounds(destino.X, destino.Y))
+		if (CeldaTransitableCercana(origen) is not Vector2I origenValido)
 		{
 			return [];
 		}
 
-		if (_navegacion.IsPointSolid(origen) || _navegacion.IsPointSolid(destino))
+		if (CeldaTransitableCercana(destino) is not Vector2I destinoValido)
 		{
 			return [];
 		}
 
-		Godot.Collections.Array<Vector2I> celdas = _navegacion.GetIdPath(origen, destino);
+		Godot.Collections.Array<Vector2I> celdas = _navegacion.GetIdPath(origenValido, destinoValido);
 
 		Vector2[] ruta = new Vector2[celdas.Count];
 
@@ -1308,4 +1318,20 @@ public partial class Laberinto : Node2D
 
 		return ruta;
 	}
+
+	private Vector2I? CeldaTransitableCercana(Vector2I celda)
+	{
+		foreach (Vector2I desplazamiento in _desplazamientos)
+		{
+			Vector2I candidata = celda + desplazamiento;
+			if (EsTransitable(candidata))
+			{
+				return candidata;
+			}
+		}
+
+		return null;
+	}
+
+	private bool EsTransitable(Vector2I celda) => _navegacion.IsInBounds(celda.X, celda.Y) && !_navegacion.IsPointSolid(celda);
 }
