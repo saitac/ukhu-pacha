@@ -58,6 +58,8 @@ public partial class Laberinto : Node2D
 
 	private AStarGrid2D _navegacion;
 
+	private readonly HashSet<Vector2I> _celdasObstaculo = [];
+
 	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
 	[Signal]
 	public delegate void AvisoIniciadoEventHandler(float duracion);
@@ -68,6 +70,9 @@ public partial class Laberinto : Node2D
 
 	[Signal]
 	public delegate void PuertasCambiadasEventHandler(Godot.Collections.Array<Rect2> areasPuertas);
+
+	[Signal]
+	public delegate void NavegacionActualizadaEventHandler();
 
 	public override void _Ready()
 	{
@@ -121,12 +126,12 @@ public partial class Laberinto : Node2D
 
 		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
 
+		// Se colocan los tótems Wiracocha en los bloques seleccionados.
+		ColocarTotemsWiracocha(bloquesTotemWiracocha);
+
 		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
 		ActualizarNavegacion();
-
-		// Se colocan los tótems Wiracocha en los bloques seleccionados.
-		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
 		// Se crean las hojas de coca
 		_hojasCoca = [];
@@ -155,6 +160,15 @@ public partial class Laberinto : Node2D
 			}
 
 			ColocarMallqui(celda);
+			Vector2[] ruta = CalcularRuta(IndiceMapaAPosicionMundo(celda), _Inca.GlobalPosition);
+			Line2D linea = new()
+			{
+				Points = ruta,
+				Width = 8,
+				DefaultColor = Colors.Yellow,
+				ZIndex = 1
+			};
+			AddChild(linea);
 			break;
 		}
 
@@ -814,6 +828,7 @@ public partial class Laberinto : Node2D
 			Dictionary<int, int> puertasCambiadas = abiertas.Concat(cerradas).ToDictionary();
 
 			RedibujarPuertas(puertasCambiadas.Keys);
+			ActualizarNavegacion();
 
 			// Quito de la lista las hojas de coca que ya fueron consumidas y reubico las que quedan pendientes
 			_hojasCoca.RemoveAll(h => !IsInstanceValid(h));
@@ -1047,6 +1062,7 @@ public partial class Laberinto : Node2D
 		Node2D totem = escenaTotem.Instantiate<Node2D>();
 		AddChild(totem);
 		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_celdasObstaculo.Add(celda);
 	}
 
 	private int[] DistanciasDesde(int bloqueOrigen)
@@ -1247,9 +1263,49 @@ public partial class Laberinto : Node2D
 		{
 			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
-				bool esMuro = _mapa[fila, columna] == Celda.Muro;
-				_navegacion.SetPointSolid(new Vector2I(columna, fila), esMuro);
+				Vector2I celda = new(columna, fila);
+				bool esObstaculo = _mapa[fila, columna] == Celda.Muro || _celdasObstaculo.Contains(celda);
+				_navegacion.SetPointSolid(celda, esObstaculo);
 			}
 		}
+		EmitSignal(SignalName.NavegacionActualizada);
+	}
+
+	/// <summary>
+	/// Calcula la ruta más corta entre dos posiciones del mundo usando la grilla de navegación,
+	/// evitando muros, pilares y tótems.
+	/// </summary>
+	/// <param name="desde">Posición de origen, en coordenadas del mundo.</param>
+	/// <param name="hasta">Posición de destino, en coordenadas del mundo.</param>
+	/// <returns>
+	/// Los centros de cada celda de la ruta, en coordenadas del mundo, incluida la celda de origen.
+	/// Devuelve un arreglo vacío si alguna posición está fuera del mapa o sobre una celda sólida,
+	/// o si no existe camino.
+	/// </returns>
+	public Vector2[] CalcularRuta(Vector2 desde, Vector2 hasta)
+	{
+		Vector2I origen = PosicionMundoAIndiceMapa(desde);
+		Vector2I destino = PosicionMundoAIndiceMapa(hasta);
+
+		if (!_navegacion.IsInBounds(origen.X, origen.Y) || !_navegacion.IsInBounds(destino.X, destino.Y))
+		{
+			return [];
+		}
+
+		if (_navegacion.IsPointSolid(origen) || _navegacion.IsPointSolid(destino))
+		{
+			return [];
+		}
+
+		Godot.Collections.Array<Vector2I> celdas = _navegacion.GetIdPath(origen, destino);
+
+		Vector2[] ruta = new Vector2[celdas.Count];
+
+		for (int i = 0; i < celdas.Count; i++)
+		{
+			ruta[i] = IndiceMapaAPosicionMundo(celdas[i]);
+		}
+
+		return ruta;
 	}
 }
