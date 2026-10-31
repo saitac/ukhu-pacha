@@ -149,6 +149,7 @@ public partial class Laberinto : Node2D
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
 
 		// Agrego mallqui => ELIMINAR, SOLO PRUEBA
+		Vector2 destino = _Inca.GlobalPosition;
 		for (int b = 0; b < _bloques.Count; b++)
 		{
 			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
@@ -163,8 +164,8 @@ public partial class Laberinto : Node2D
 				continue;
 			}
 
-			ColocarMallqui(celda);
-			Vector2[] ruta = CalcularRuta(IndiceMapaAPosicionMundo(celda), _Inca.GlobalPosition);
+			Mallqui mallqui = ColocarMallqui(celda);
+			Vector2[] ruta = CalcularRuta(IndiceMapaAPosicionMundo(celda), destino);
 			Line2D linea = new()
 			{
 				Points = ruta,
@@ -175,8 +176,9 @@ public partial class Laberinto : Node2D
 			AddChild(linea);
 			NavegacionActualizada += () =>
 			{
-				linea.Points = CalcularRuta(IndiceMapaAPosicionMundo(celda), _Inca.GlobalPosition);
+				linea.Points = CalcularRuta(mallqui.GlobalPosition, destino);
 			};
+			mallqui.IrA(destino);
 			break;
 		}
 
@@ -1249,12 +1251,13 @@ public partial class Laberinto : Node2D
 		}
 	}
 
-	private void ColocarMallqui(Vector2I celda)
+	private Mallqui ColocarMallqui(Vector2I celda)
 	{
 		Mallqui mallqui = EscenaMallqui.Instantiate<Mallqui>();
 		mallqui.Inicializar(this);
 		AddChild(mallqui);
 		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		return mallqui;
 	}
 
 	private void CrearNavegacion()
