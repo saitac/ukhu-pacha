@@ -33,6 +33,7 @@ public partial class Laberinto : Node2D
 	List<PuertaPosible> _puertasPosibles;
 	private Dictionary<int, int> _puertasAbiertas;
 	private List<HojaCoca> _hojasCoca;
+	private List<Mallqui> _mallquis;
 
 	private enum PuertaOrientacion
 	{
@@ -147,6 +148,9 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		// Se crean los mallquis
+		_mallquis = [];
 
 		// Agrego mallqui => ELIMINAR, SOLO PRUEBA
 		Vector2 destino = _Inca.GlobalPosition;
@@ -930,7 +934,12 @@ public partial class Laberinto : Node2D
 		Dictionary<int, int> abiertasEnCiclo = [];
 		Dictionary<int, int> cerradasEnCiclo = [];
 
-		Vector2I celdaInca = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+		List<Rect2I> areasOcupadas = [];
+		areasOcupadas.Add(AreaMundoAAreaMapa(_Inca.AreaGlobal()));
+		foreach (Mallqui mallqui in _mallquis)
+		{
+			areasOcupadas.Add(AreaMundoAAreaMapa(mallqui.AreaGlobal()));
+		}
 
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
@@ -950,7 +959,7 @@ public partial class Laberinto : Node2D
 			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count - 1)];
 			abiertasEnCiclo[indiceAbrir] = AbrirPuerta(indiceAbrir);
 
-			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
+			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde haya una criatura)
 			// candidatas a cerrar.
 			List<int> candidatasCerrar = [];
 			foreach (int key in _puertasAbiertas.Keys)
@@ -960,7 +969,7 @@ public partial class Laberinto : Node2D
 					continue;
 				}
 
-				if (IncaEnPuerta(key, celdaInca))
+				if (PuertaOcupada(key, areasOcupadas))
 				{
 					continue;
 				}
@@ -991,13 +1000,23 @@ public partial class Laberinto : Node2D
 		return (abiertasEnCiclo, cerradasEnCiclo);
 	}
 
-	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
+	private bool PuertaOcupada(int indicePuerta, List<Rect2I> areasOcupadas)
 	{
 		PuertaPosible puerta = _puertasPosibles[indicePuerta];
 		int inicio = _puertasAbiertas[indicePuerta];
 		Rect2I areaPuerta = AreaEnTramo(puerta, inicio, LaberintoConfig.Bloque.AnchoPuerta);
 
-		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
+		Rect2I areaSegura = areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaOcupada);
+
+		foreach (Rect2I area in areasOcupadas)
+		{
+			if (areaSegura.Intersects(area))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void RedibujarPuertas(IEnumerable<int> puertas)
@@ -1257,6 +1276,7 @@ public partial class Laberinto : Node2D
 		mallqui.Inicializar(this);
 		AddChild(mallqui);
 		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_mallquis.Add(mallqui);
 		return mallqui;
 	}
 
@@ -1337,4 +1357,11 @@ public partial class Laberinto : Node2D
 	}
 
 	private bool EsTransitable(Vector2I celda) => _navegacion.IsInBounds(celda.X, celda.Y) && !_navegacion.IsPointSolid(celda);
+
+	private Rect2I AreaMundoAAreaMapa(Rect2 areaMundo)
+	{
+		Vector2I inicio = PosicionMundoAIndiceMapa(areaMundo.Position);
+		Vector2I fin = PosicionMundoAIndiceMapa(areaMundo.End);
+		return new Rect2I(inicio, fin - inicio + Vector2I.One);
+	}
 }

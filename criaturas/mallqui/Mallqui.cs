@@ -6,12 +6,14 @@ public partial class Mallqui : CharacterBody2D
 	private Vector2[] _ruta = [];
 	private int _indicePunto;
 	private Vector2? _destino;
+	private CollisionShape2D _formaColision;
 
 	[Export]
 	public float Velocidad = 100f;
 
 	public override void _Ready()
 	{
+		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
 	}
 
@@ -55,6 +57,13 @@ public partial class Mallqui : CharacterBody2D
 	{
 		_destino = destino;
 		RecalcularRuta();
+	}
+
+	public Rect2 AreaGlobal()
+	{
+		Rect2 local = _formaColision.Shape.GetRect();
+		Rect2 global = new(local.Position + _formaColision.GlobalPosition, local.Size);
+		return global;
 	}
 
 	private void RecalcularRuta()

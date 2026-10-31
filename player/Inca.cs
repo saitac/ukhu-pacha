@@ -22,10 +22,12 @@ public partial class Inca : CharacterBody2D
 	private PointLight2D _destello;
 	private Direccion _incaUltimaDireccion = Direccion.Abajo;
 	private Tween _tweenDestello;
+	private CollisionShape2D _formaColision;
 
 	public override void _Ready()
 	{
 		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
+		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_vigor = GetNode<Vigor>("Vigor");
 		_destello = GetNode<PointLight2D>("Destello");
@@ -112,6 +114,13 @@ public partial class Inca : CharacterBody2D
 		_vigor.Modificar(_vigor.Maximo * curacion);
 		Destellar(ColorCura);
 		return true;
+	}
+
+	public Rect2 AreaGlobal()
+	{
+		Rect2 local = _formaColision.Shape.GetRect();
+		Rect2 global = new(local.Position + _formaColision.GlobalPosition, local.Size);
+		return global;
 	}
 
 	private void Destellar(Color color)
