@@ -2,17 +2,31 @@ using Godot;
 
 public partial class Mallqui : CharacterBody2D
 {
+	[Export]
+	public float Velocidad = 100f;
+
+	[Export]
+	public int DistanciaMinPatrulla = 2;
+
+	[Export]
+	public int DistanciaMaxPatrulla = 4;
+
+	[Export]
+	public float EsperaMin = 1.5f;
+
+	[Export]
+	public float EsperaMax = 4.0f;
+
 	private Laberinto _laberinto;
 	private Vector2[] _ruta = [];
 	private int _indicePunto;
 	private Vector2? _destino;
 	private CollisionShape2D _formaColision;
-
-	[Export]
-	public float Velocidad = 100f;
+	private double _tiempoEspera;
 
 	public override void _Ready()
 	{
+		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
 	}
@@ -21,7 +35,7 @@ public partial class Mallqui : CharacterBody2D
 	{
 		if (_indicePunto >= _ruta.Length)
 		{
-			Velocity = Vector2.Zero;
+			Patrullar(delta);
 			return;
 		}
 
@@ -79,5 +93,20 @@ public partial class Mallqui : CharacterBody2D
 	private void OnNavegacionActualizada()
 	{
 		RecalcularRuta();
+	}
+
+	private void Patrullar(double delta)
+	{
+		Velocity = Vector2.Zero;
+
+		if (_tiempoEspera > 0)
+		{
+			_tiempoEspera -= delta;
+			return;
+		}
+
+		Vector2 destino = _laberinto.ElegirDestinoPatrulla(GlobalPosition, DistanciaMinPatrulla, DistanciaMaxPatrulla);
+		IrA(destino);
+		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 	}
 }

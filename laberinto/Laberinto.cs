@@ -152,8 +152,8 @@ public partial class Laberinto : Node2D
 		// Se crean los mallquis
 		_mallquis = [];
 
-		// Agrego mallqui => ELIMINAR, SOLO PRUEBA
-		Vector2 destino = _Inca.GlobalPosition;
+		// Colocación provisional de Mallquis (paso 8: salir de los muros).
+		int cantMallquis = 3;
 		for (int b = 0; b < _bloques.Count; b++)
 		{
 			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
@@ -168,22 +168,13 @@ public partial class Laberinto : Node2D
 				continue;
 			}
 
-			Mallqui mallqui = ColocarMallqui(celda);
-			Vector2[] ruta = CalcularRuta(IndiceMapaAPosicionMundo(celda), destino);
-			Line2D linea = new()
+			ColocarMallqui(celda);
+
+			cantMallquis--;
+			if (cantMallquis == 0)
 			{
-				Points = ruta,
-				Width = 8,
-				DefaultColor = Colors.Yellow,
-				ZIndex = 1
-			};
-			AddChild(linea);
-			NavegacionActualizada += () =>
-			{
-				linea.Points = CalcularRuta(mallqui.GlobalPosition, destino);
-			};
-			mallqui.IrA(destino);
-			break;
+				break;
+			}
 		}
 
 		// Alerta - no debe existir cuartos sin acceso
@@ -1363,5 +1354,70 @@ public partial class Laberinto : Node2D
 		Vector2I inicio = PosicionMundoAIndiceMapa(areaMundo.Position);
 		Vector2I fin = PosicionMundoAIndiceMapa(areaMundo.End);
 		return new Rect2I(inicio, fin - inicio + Vector2I.One);
+	}
+
+	public Vector2 ElegirDestinoPatrulla(Vector2 desde, int distanciaMin, int distanciaMax)
+	{
+		int bloqueOrigen = IndiceBloqueDe(PosicionMundoAIndiceMapa(desde));
+
+		if (bloqueOrigen == -1)
+		{
+			return desde;
+		}
+
+		int[] distancias = DistanciasDesde(bloqueOrigen);
+
+		List<int> candidatos = [];
+		List<int> candidatosAlternativos = [];
+
+		for (int i = 0; i < distancias.Length; i++)
+		{
+			if (distancias[i] >= distanciaMin && distancias[i] <= distanciaMax)
+			{
+				// i corresponde al índice de un bloque en _bloques
+				candidatos.Add(i);
+			}
+
+			if (distancias[i] != -1 && i != bloqueOrigen)
+			{
+				candidatosAlternativos.Add(i);
+			}
+		}
+
+		if (candidatos.Count == 0 && candidatosAlternativos.Count == 0)
+		{
+			return desde;
+		}
+
+		if (candidatos.Count == 0)
+		{
+			candidatos = candidatosAlternativos;
+		}
+
+		int indiceBloque = candidatos[_rng.RandiRange(0, candidatos.Count - 1)];
+		Rect2I bloque = _bloques[indiceBloque];
+		Rect2I bloqueInterior = bloque.Grow(-LaberintoConfig.Muro.GrosorBorde);
+
+		List<Vector2I> transitables = [];
+		for (int y = bloqueInterior.Position.Y; y < bloqueInterior.End.Y; y++)
+		{
+			for (int x = bloqueInterior.Position.X; x < bloqueInterior.End.X; x++)
+			{
+				Vector2I celda = new(x, y);
+				if (EsTransitable(celda))
+				{
+					transitables.Add(celda);
+				}
+			}
+		}
+
+		if (transitables.Count == 0)
+		{
+			return desde;
+		}
+
+		Vector2I destino = transitables[_rng.RandiRange(0, transitables.Count - 1)];
+
+		return IndiceMapaAPosicionMundo(destino);
 	}
 }
