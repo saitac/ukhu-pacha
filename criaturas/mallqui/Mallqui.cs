@@ -24,6 +24,9 @@ public partial class Mallqui : CharacterBody2D
 	private CollisionShape2D _formaColision;
 	private double _tiempoEspera;
 
+	// true si no quedan puntos por recorrer
+	private bool RutaTerminada => _indicePunto >= _ruta.Length;
+
 	public override void _Ready()
 	{
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
@@ -33,28 +36,7 @@ public partial class Mallqui : CharacterBody2D
 
 	public override void _PhysicsProcess(double delta)
 	{
-		if (_indicePunto >= _ruta.Length)
-		{
-			Patrullar(delta);
-			return;
-		}
-
-		Vector2 objetivo = _ruta[_indicePunto];
-
-		// ¿Estoy suficientemente cerca del objetivo?
-		// Calculo distancia del mallqui (GlobalPosition) al objetivo (DistanceTo)
-		// En paso calculo cuantos píxels implica un paso al mallqui => velocidad * delta
-		// Si la distancia que falta es menor o igual a un paso del mallqui, avanzo al siguiente punto de la ruta
-		float distancia = GlobalPosition.DistanceTo(objetivo);
-		float paso = Velocidad * (float)delta;
-		if (distancia <= paso)
-		{
-			_indicePunto++;
-			return;
-		}
-
-		Velocity = GlobalPosition.DirectionTo(objetivo) * Velocidad;
-		MoveAndSlide();
+		Patrullar(delta);
 	}
 
 	public override void _ExitTree()
@@ -95,8 +77,35 @@ public partial class Mallqui : CharacterBody2D
 		RecalcularRuta();
 	}
 
+	private void AvanzarPorRuta(double delta)
+	{
+		Vector2 objetivo = _ruta[_indicePunto];
+
+		// ¿Estoy suficientemente cerca del objetivo?
+		// Calculo distancia del mallqui (GlobalPosition) al objetivo (DistanceTo)
+		// En paso calculo cuantos píxels implica un paso al mallqui => velocidad * delta
+		// Si la distancia que falta es menor o igual a un paso del mallqui, avanzo al siguiente punto de la ruta
+		float distancia = GlobalPosition.DistanceTo(objetivo);
+		float paso = Velocidad * (float)delta;
+		if (distancia <= paso)
+		{
+			_indicePunto++;
+			return;
+		}
+
+		Velocity = GlobalPosition.DirectionTo(objetivo) * Velocidad;
+		MoveAndSlide();
+	}
+
 	private void Patrullar(double delta)
 	{
+		if (!RutaTerminada)
+		{
+			AvanzarPorRuta(delta);
+			return;
+		}
+
+		// Llegué al destino: espero y luego elijo uno nuevo
 		Velocity = Vector2.Zero;
 
 		if (_tiempoEspera > 0)
