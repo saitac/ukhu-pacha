@@ -2,10 +2,19 @@ using Godot;
 
 public partial class Mallqui : CharacterBody2D
 {
+	private enum Estado
+	{
+		Patrulla,
+		Persecucion
+	}
+
 	private const uint CapaMundo = 1;
 
 	[Export]
-	public float Velocidad = 100f;
+	public float VelocidadPatrulla = 80f;
+
+	[Export]
+	public float VelocidadPersecucion = 180f;
 
 	[Export]
 	public int DistanciaMinPatrulla = 2;
@@ -29,6 +38,8 @@ public partial class Mallqui : CharacterBody2D
 	private Vector2? _destino;
 	private CollisionShape2D _formaColision;
 	private double _tiempoEspera;
+	private Vector2I _celdaInca;
+	private Estado _estado = Estado.Patrulla;
 
 	// true si no quedan puntos por recorrer
 	private bool RutaTerminada => _indicePunto >= _ruta.Length;
@@ -42,16 +53,29 @@ public partial class Mallqui : CharacterBody2D
 
 	public override void _PhysicsProcess(double delta)
 	{
-		if (PuedeVerAlInca())
+		switch (_estado)
 		{
-			Modulate = Colors.Red;
+			case Estado.Patrulla:
+				if (PuedeVerAlInca())
+				{
+					CambiarEstado(Estado.Persecucion);
+				}
+				else
+				{
+					Patrullar(delta);
+				}
+				break;
+			case Estado.Persecucion:
+				if (!PuedeVerAlInca())
+				{
+					CambiarEstado(Estado.Patrulla);
+				}
+				else
+				{
+					Perseguir(delta);
+				}
+				break;
 		}
-		else
-		{
-			Modulate = Colors.White;
-		}
-
-		Patrullar(delta);
 	}
 
 	public override void _ExitTree()
@@ -93,7 +117,7 @@ public partial class Mallqui : CharacterBody2D
 		RecalcularRuta();
 	}
 
-	private void AvanzarPorRuta(double delta)
+	private void AvanzarPorRuta(double delta, float velocidad)
 	{
 		Vector2 objetivo = _ruta[_indicePunto];
 
@@ -102,14 +126,14 @@ public partial class Mallqui : CharacterBody2D
 		// En paso calculo cuantos píxels implica un paso al mallqui => velocidad * delta
 		// Si la distancia que falta es menor o igual a un paso del mallqui, avanzo al siguiente punto de la ruta
 		float distancia = GlobalPosition.DistanceTo(objetivo);
-		float paso = Velocidad * (float)delta;
+		float paso = velocidad * (float)delta;
 		if (distancia <= paso)
 		{
 			_indicePunto++;
 			return;
 		}
 
-		Velocity = GlobalPosition.DirectionTo(objetivo) * Velocidad;
+		Velocity = GlobalPosition.DirectionTo(objetivo) * velocidad;
 		MoveAndSlide();
 	}
 
@@ -117,7 +141,7 @@ public partial class Mallqui : CharacterBody2D
 	{
 		if (!RutaTerminada)
 		{
-			AvanzarPorRuta(delta);
+			AvanzarPorRuta(delta, VelocidadPatrulla);
 			return;
 		}
 
@@ -148,5 +172,39 @@ public partial class Mallqui : CharacterBody2D
 
 		// el rayo solo mira la capa mundo: si no chocó, nada tapa la vista
 		return resultado.Count == 0;
+	}
+
+	private void CambiarEstado(Estado nuevo)
+	{
+		if (nuevo == _estado)
+		{
+			return;
+		}
+
+		_estado = nuevo;
+
+		if (_estado == Estado.Persecucion)
+		{
+			IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
+		}
+	}
+
+	private void Perseguir(double delta)
+	{
+		Vector2I celdaIncaActual = _laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition);
+		if (celdaIncaActual != _celdaInca)
+		{
+			IrHaciaElInca(celdaIncaActual);
+		}
+		if (!RutaTerminada)
+		{
+			AvanzarPorRuta(delta, VelocidadPersecucion);
+		}
+	}
+
+	private void IrHaciaElInca(Vector2I celdaInca)
+	{
+		_celdaInca = celdaInca;
+		IrA(_inca.GlobalPosition);
 	}
 }

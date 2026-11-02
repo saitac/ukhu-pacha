@@ -342,7 +342,7 @@ public partial class Laberinto : Node2D
 		return region;
 	}
 
-	private Vector2I PosicionMundoAIndiceMapa(Vector2 posicionMundo)
+	public Vector2I PosicionMundoAIndiceMapa(Vector2 posicionMundo)
 	{
 		float tileX = posicionMundo.X / (_Piso.TileSet.TileSize.X * _Piso.Scale.X);
 		float tileY = posicionMundo.Y / (_Piso.TileSet.TileSize.Y * _Piso.Scale.Y);
