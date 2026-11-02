@@ -154,7 +154,12 @@ public partial class Laberinto : Node2D
 
 		// Colocación provisional de Mallquis (paso 8: salir de los muros).
 		int cantMallquis = 3;
-		for (int b = 0; b < _bloques.Count; b++)
+
+		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
+		List<int> indices = [.. Enumerable.Range(0, _bloques.Count)];
+		Barajar(indices);
+
+		foreach (int b in indices)
 		{
 			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
 			{
@@ -1219,12 +1224,7 @@ public partial class Laberinto : Node2D
 		// Me aseguro que cantidad nunca sea mayor que la cantidad de salas existentes
 		int cantidadReal = Mathf.Min(cantidad, indices.Length);
 
-		// Algoritmo Fisher-Yates
-		for (int i = 0; i < cantidadReal; i++)
-		{
-			int j = _rng.RandiRange(i, indices.Length - 1);
-			(indices[j], indices[i]) = (indices[i], indices[j]);
-		}
+		Barajar(indices);
 
 		return [.. indices[..cantidadReal]];
 	}
@@ -1264,7 +1264,7 @@ public partial class Laberinto : Node2D
 	private Mallqui ColocarMallqui(Vector2I celda)
 	{
 		Mallqui mallqui = EscenaMallqui.Instantiate<Mallqui>();
-		mallqui.Inicializar(this);
+		mallqui.Inicializar(this, _Inca);
 		AddChild(mallqui);
 		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_mallquis.Add(mallqui);
@@ -1419,5 +1419,15 @@ public partial class Laberinto : Node2D
 		Vector2I destino = transitables[_rng.RandiRange(0, transitables.Count - 1)];
 
 		return IndiceMapaAPosicionMundo(destino);
+	}
+
+	private void Barajar<T>(IList<T> elementos)
+	{
+		// Algoritmo Fisher-Yates
+		for (int i = 0; i < elementos.Count; i++)
+		{
+			int j = _rng.RandiRange(i, elementos.Count - 1);
+			(elementos[j], elementos[i]) = (elementos[i], elementos[j]);
+		}
 	}
 }

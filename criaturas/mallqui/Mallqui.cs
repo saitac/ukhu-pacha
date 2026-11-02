@@ -2,6 +2,8 @@ using Godot;
 
 public partial class Mallqui : CharacterBody2D
 {
+	private const uint CapaMundo = 1;
+
 	[Export]
 	public float Velocidad = 100f;
 
@@ -17,7 +19,11 @@ public partial class Mallqui : CharacterBody2D
 	[Export]
 	public float EsperaMax = 4.0f;
 
+	[Export]
+	public float RadioVision = 300f;
+
 	private Laberinto _laberinto;
+	private Inca _inca;
 	private Vector2[] _ruta = [];
 	private int _indicePunto;
 	private Vector2? _destino;
@@ -36,6 +42,15 @@ public partial class Mallqui : CharacterBody2D
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (PuedeVerAlInca())
+		{
+			Modulate = Colors.Red;
+		}
+		else
+		{
+			Modulate = Colors.White;
+		}
+
 		Patrullar(delta);
 	}
 
@@ -44,9 +59,10 @@ public partial class Mallqui : CharacterBody2D
 		_laberinto.NavegacionActualizada -= OnNavegacionActualizada;
 	}
 
-	public void Inicializar(Laberinto laberinto)
+	public void Inicializar(Laberinto laberinto, Inca inca)
 	{
 		_laberinto = laberinto;
+		_inca = inca;
 	}
 
 	public void IrA(Vector2 destino)
@@ -117,5 +133,20 @@ public partial class Mallqui : CharacterBody2D
 		Vector2 destino = _laberinto.ElegirDestinoPatrulla(GlobalPosition, DistanciaMinPatrulla, DistanciaMaxPatrulla);
 		IrA(destino);
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
+	}
+
+	private bool PuedeVerAlInca()
+	{
+		if (GlobalPosition.DistanceSquaredTo(_inca.GlobalPosition) > RadioVision * RadioVision)
+		{
+			return false;
+		}
+
+		PhysicsDirectSpaceState2D espacio = GetWorld2D().DirectSpaceState;
+		PhysicsRayQueryParameters2D consulta = PhysicsRayQueryParameters2D.Create(GlobalPosition, _inca.GlobalPosition, CapaMundo);
+		Godot.Collections.Dictionary resultado = espacio.IntersectRay(consulta);
+
+		// el rayo solo mira la capa mundo: si no chocó, nada tapa la vista
+		return resultado.Count == 0;
 	}
 }
