@@ -11,6 +11,9 @@ public partial class Mallqui : CharacterBody2D
 	private const uint CapaMundo = 1;
 
 	[Export]
+	public bool Depuracion = false;
+
+	[Export]
 	public float VelocidadPatrulla = 80f;
 
 	[Export]
@@ -42,6 +45,9 @@ public partial class Mallqui : CharacterBody2D
 	private Estado _estado = Estado.Patrulla;
 	private Direccion _ultimaDireccion = Direccion.Abajo;
 	private AnimatedSprite2D _sprite;
+	private Area2D _zonaAlcance;
+	private bool _incaAMiAlcance = false;
+	private Label _etiquetaDepuracion;
 
 	// true si no quedan puntos por recorrer
 	private bool RutaTerminada => _indicePunto >= _ruta.Length;
@@ -54,7 +60,15 @@ public partial class Mallqui : CharacterBody2D
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
+		_zonaAlcance = GetNode<Area2D>("ZonaAlcance");
+
+		// Solo por depuración
+		_etiquetaDepuracion = GetNode<Label>("EtiquetaDepuracion");
+		_etiquetaDepuracion.Visible = Depuracion;
+
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
+		_zonaAlcance.BodyEntered += OnZonaAlcanceBodyEntered;
+		_zonaAlcance.BodyExited += OnZonaAlcanceBodyExited;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -84,6 +98,11 @@ public partial class Mallqui : CharacterBody2D
 		}
 
 		ActualizarAnimacion();
+
+		if (Depuracion)
+		{
+			_etiquetaDepuracion.Text = $"{Name}\n{_estado}\nalcance: {_incaAMiAlcance}";
+		}
 	}
 
 	public override void _ExitTree()
@@ -125,24 +144,35 @@ public partial class Mallqui : CharacterBody2D
 		RecalcularRuta();
 	}
 
-	private void AvanzarPorRuta(double delta, float velocidad)
+	private bool MoverHacia(Vector2 objetivo, double delta, float velocidad)
 	{
-		Vector2 objetivo = _ruta[_indicePunto];
-
 		// ¿Estoy suficientemente cerca del objetivo?
 		// Calculo distancia del mallqui (GlobalPosition) al objetivo (DistanceTo)
 		// En paso calculo cuantos píxels implica un paso al mallqui => velocidad * delta
-		// Si la distancia que falta es menor o igual a un paso del mallqui, avanzo al siguiente punto de la ruta
+		// Si la distancia que falta es menor o igual a un paso del mallqui, devuelvo true porque llegué al destino
 		float distancia = GlobalPosition.DistanceTo(objetivo);
 		float paso = velocidad * (float)delta;
+
 		if (distancia <= paso)
 		{
-			_indicePunto++;
-			return;
+			return true;
 		}
 
 		Velocity = GlobalPosition.DirectionTo(objetivo) * velocidad;
 		MoveAndSlide();
+
+		return false;
+	}
+
+	private void AvanzarPorRuta(double delta, float velocidad)
+	{
+		Vector2 objetivo = _ruta[_indicePunto];
+
+		// Si true, ya llegué al objetivo, entonces marco el siguiente punto de la ruta
+		if (MoverHacia(objetivo, delta, velocidad))
+		{
+			_indicePunto++;
+		}
 	}
 
 	private void Patrullar(double delta)
@@ -200,15 +230,21 @@ public partial class Mallqui : CharacterBody2D
 	private void Perseguir(double delta)
 	{
 		Vector2I celdaIncaActual = _laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition);
+
 		if (celdaIncaActual != _celdaInca)
 		{
 			IrHaciaElInca(celdaIncaActual);
 		}
+
 		if (!RutaTerminada)
 		{
 			AvanzarPorRuta(delta, VelocidadPersecucion);
 		}
-		else
+		else if (_incaAMiAlcance)
+		{
+			Velocity = Vector2.Zero;
+		}
+		else if (MoverHacia(_inca.GlobalPosition, delta, VelocidadPersecucion))
 		{
 			Velocity = Vector2.Zero;
 		}
@@ -230,5 +266,21 @@ public partial class Mallqui : CharacterBody2D
 		_ultimaDireccion = DireccionExtensions.DesdeVector(Velocity);
 		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
 		_sprite.Play("walk-" + SufijoSprite);
+	}
+
+	private void OnZonaAlcanceBodyEntered(Node2D body)
+	{
+		if (body is Inca)
+		{
+			_incaAMiAlcance = true;
+		}
+	}
+
+	private void OnZonaAlcanceBodyExited(Node2D body)
+	{
+		if (body is Inca)
+		{
+			_incaAMiAlcance = false;
+		}
 	}
 }
