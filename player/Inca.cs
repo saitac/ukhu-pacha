@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class Inca : CharacterBody2D
 {
@@ -65,13 +64,7 @@ public partial class Inca : CharacterBody2D
 			return;
 		}
 
-		if(Math.Abs(direccion.X) > Math.Abs(direccion.Y)) // se mueve en el eje X
-		{
-			_incaUltimaDireccion = direccion.X > 0 ? Direccion.Derecha : Direccion.Izquierda;
-		} else
-		{
-			_incaUltimaDireccion = direccion.Y > 0 ? Direccion.Abajo : Direccion.Arriba;
-		}
+		_incaUltimaDireccion = DireccionExtensions.DesdeVector(direccion);
 
 		_incaSprite.Play("walk-" + _incaUltimaDireccion.Sufijo() + "-inca");
 		_antorcha.Orientar(_incaUltimaDireccion);

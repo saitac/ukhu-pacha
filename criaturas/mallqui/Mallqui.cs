@@ -40,12 +40,18 @@ public partial class Mallqui : CharacterBody2D
 	private double _tiempoEspera;
 	private Vector2I _celdaInca;
 	private Estado _estado = Estado.Patrulla;
+	private Direccion _ultimaDireccion = Direccion.Abajo;
+	private AnimatedSprite2D _sprite;
 
 	// true si no quedan puntos por recorrer
 	private bool RutaTerminada => _indicePunto >= _ruta.Length;
 
+	// la izquierda reutiliza los sprites de la derecha con FlipH.
+	private string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
+
 	public override void _Ready()
 	{
+		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
@@ -76,6 +82,8 @@ public partial class Mallqui : CharacterBody2D
 				}
 				break;
 		}
+
+		ActualizarAnimacion();
 	}
 
 	public override void _ExitTree()
@@ -200,11 +208,27 @@ public partial class Mallqui : CharacterBody2D
 		{
 			AvanzarPorRuta(delta, VelocidadPersecucion);
 		}
+		else
+		{
+			Velocity = Vector2.Zero;
+		}
 	}
 
 	private void IrHaciaElInca(Vector2I celdaInca)
 	{
 		_celdaInca = celdaInca;
 		IrA(_inca.GlobalPosition);
+	}
+
+	private void ActualizarAnimacion()
+	{
+		if (Velocity == Vector2.Zero)
+		{
+			_sprite.Play("idle-" + SufijoSprite);
+			return;
+		}
+		_ultimaDireccion = DireccionExtensions.DesdeVector(Velocity);
+		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
+		_sprite.Play("walk-" + SufijoSprite);
 	}
 }
