@@ -19,6 +19,7 @@
 [ext_resource type="Script" uid="uid://cxg3kx6tiagou" path="res://laberinto/PolvoPuertas.cs" id="15_kwhve"]
 [ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
 [ext_resource type="PackedScene" uid="uid://dejbe7qosjrhr" path="res://recogibles/hoja_coca/hoja_coca.tscn" id="18_glftc"]
+[ext_resource type="PackedScene" uid="uid://diokldmgqlgb3" path="res://recogibles/disco_inti/disco_inti.tscn" id="20_m5etf"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_aislado0"]
 cull_mode = 1
@@ -347,3 +348,6 @@ EscenaNube = ExtResource("16_mmumd")
 
 [node name="Oscuridad" type="CanvasModulate" parent="." unique_id=1053698352]
 color = Color(0.050980393, 0.043137256, 0.0627451, 1)
+
+[node name="DiscoInti" parent="." unique_id=1042200363 instance=ExtResource("20_m5etf")]
+position = Vector2(80, 93)
