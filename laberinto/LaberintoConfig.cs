@@ -78,4 +78,12 @@ public static class LaberintoConfig
 			public const float PorcentajeSalas = 0.30f;
 		}
 	}
+
+	public static class Criaturas
+	{
+		public static class Mallqui
+		{
+			public const float PorcentajeSalas = 0.30f;
+		}
+	}
 }

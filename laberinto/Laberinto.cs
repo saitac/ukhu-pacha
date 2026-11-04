@@ -149,38 +149,7 @@ public partial class Laberinto : Node2D
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
 
-		// Se crean los mallquis
-		_mallquis = [];
-
-		// Colocación provisional de Mallquis (paso 8: salir de los muros).
-		int cantMallquis = 3;
-
-		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
-		List<int> indices = [.. Enumerable.Range(0, _bloques.Count)];
-		Barajar(indices);
-
-		foreach (int b in indices)
-		{
-			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
-			{
-				continue;
-			}
-
-			Vector2I celda = _bloques[b].GetCenter();
-
-			if (_mapa[celda.Y, celda.X] != Celda.Piso)
-			{
-				continue;
-			}
-
-			ColocarMallqui(celda);
-
-			cantMallquis--;
-			if (cantMallquis == 0)
-			{
-				break;
-			}
-		}
+		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
 
 		// Alerta - no debe existir cuartos sin acceso
 		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
@@ -1269,6 +1238,40 @@ public partial class Laberinto : Node2D
 		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_mallquis.Add(mallqui);
 		return mallqui;
+	}
+
+	private void ColocarMallquis(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	{
+		_mallquis = [];
+
+		int cantMallquis = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Criaturas.Mallqui.PorcentajeSalas));
+
+		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
+		List<int> indices = [.. Enumerable.Range(0, _bloques.Count)];
+		Barajar(indices);
+
+		foreach (int b in indices)
+		{
+			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
+			{
+				continue;
+			}
+
+			Vector2I celda = _bloques[b].GetCenter();
+
+			if (_mapa[celda.Y, celda.X] != Celda.Piso)
+			{
+				continue;
+			}
+
+			ColocarMallqui(celda);
+
+			cantMallquis--;
+			if (cantMallquis == 0)
+			{
+				break;
+			}
+		}
 	}
 
 	private void CrearNavegacion()
