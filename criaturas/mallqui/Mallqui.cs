@@ -285,15 +285,22 @@ public partial class Mallqui : CharacterBody2D
 		IrA(_inca.GlobalPosition);
 	}
 
+	private void MirarHacia(Vector2 vector)
+	{
+		_ultimaDireccion = DireccionExtensions.DesdeVector(vector);
+		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
+	}
+
 	private void ActualizarAnimacion()
 	{
 		if (Velocity == Vector2.Zero)
 		{
-			_sprite.Play("idle-" + SufijoSprite);
+			string prefijo = _estado == Estado.Ataque ? "ataque-" : "idle-";
+			_sprite.Play(prefijo + SufijoSprite);
 			return;
 		}
-		_ultimaDireccion = DireccionExtensions.DesdeVector(Velocity);
-		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
+
+		MirarHacia(Velocity);
 		_sprite.Play("walk-" + SufijoSprite);
 	}
 
@@ -316,6 +323,7 @@ public partial class Mallqui : CharacterBody2D
 	private void IniciarAtaque()
 	{
 		Velocity = Vector2.Zero;
+		MirarHacia(GlobalPosition.DirectionTo(_inca.GlobalPosition));
 		_inca.RecibirGolpe(DanoGolpe);
 	}
 }
