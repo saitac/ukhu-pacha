@@ -5,7 +5,8 @@ public partial class Mallqui : CharacterBody2D
 	private enum Estado
 	{
 		Patrulla,
-		Persecucion
+		Persecucion,
+		Ataque
 	}
 
 	private const uint CapaMundo = 1;
@@ -37,6 +38,9 @@ public partial class Mallqui : CharacterBody2D
 	[Export]
 	public float DanoGolpe = 0.1f;
 
+	[Export]
+	public float RecuperacionGolpe = 1.0f;
+
 	private Laberinto _laberinto;
 	private Inca _inca;
 	private Vector2[] _ruta = [];
@@ -51,6 +55,7 @@ public partial class Mallqui : CharacterBody2D
 	private Area2D _zonaAlcance;
 	private bool _incaAMiAlcance = false;
 	private Label _etiquetaDepuracion;
+	private double _tiempoRecuperacion;
 
 	// true si no quedan puntos por recorrer
 	private bool RutaTerminada => _indicePunto >= _ruta.Length;
@@ -93,10 +98,30 @@ public partial class Mallqui : CharacterBody2D
 				{
 					CambiarEstado(Estado.Patrulla);
 				}
+				else if (_incaAMiAlcance)
+				{
+					CambiarEstado(Estado.Ataque);
+				}
 				else
 				{
 					Perseguir(delta);
 				}
+				break;
+			case Estado.Ataque:
+				_tiempoRecuperacion -= delta;
+
+				if (_tiempoRecuperacion <= 0)
+				{
+					if (PuedeVerAlInca())
+					{
+						CambiarEstado(Estado.Persecucion);
+					}
+					else
+					{
+						CambiarEstado(Estado.Patrulla);
+					}
+				}
+
 				break;
 		}
 
@@ -228,6 +253,11 @@ public partial class Mallqui : CharacterBody2D
 		{
 			IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
 		}
+		else if (_estado == Estado.Ataque)
+		{
+			IniciarAtaque();
+			_tiempoRecuperacion = RecuperacionGolpe;
+		}
 	}
 
 	private void Perseguir(double delta)
@@ -242,10 +272,6 @@ public partial class Mallqui : CharacterBody2D
 		if (!RutaTerminada)
 		{
 			AvanzarPorRuta(delta, VelocidadPersecucion);
-		}
-		else if (_incaAMiAlcance)
-		{
-			Velocity = Vector2.Zero;
 		}
 		else if (MoverHacia(_inca.GlobalPosition, delta, VelocidadPersecucion))
 		{
@@ -285,5 +311,11 @@ public partial class Mallqui : CharacterBody2D
 		{
 			_incaAMiAlcance = false;
 		}
+	}
+
+	private void IniciarAtaque()
+	{
+		Velocity = Vector2.Zero;
+		_inca.RecibirGolpe(DanoGolpe);
 	}
 }
