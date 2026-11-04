@@ -95,7 +95,8 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - **Valores actuales:** 20% de las salas; el primer tótem entre 2 y 3 salas del Inca; separación mínima de 3 salas entre tótems.
   - La luz del brasero es **tenue**: marca el tótem como un faro, pero no ilumina toda la sala.
 - **Visibilidad:** la oscuridad casi total y las **sombras** de las luces (los muros bloquean la luz) deciden qué se ve del mapa; no hay una capa aparte de niebla de guerra. Solo se ve a lo lejos lo que tiene luz propia (braseros, hojas de coca).
-  - *Pendiente (Fase 5):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
+  - *Pendiente (pospuesto en Fase 5, revisar en Fase 9 o cuando haya más fuentes de luz):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
+    - En pruebas (Fase 5) el caso existe, pero la luz tenue del brasero lo disimula: el Mallqui recién se distingue cuando la antorcha lo alumbra, y para entonces ya está persiguiendo al Inca. Por ahora no molesta; se revisará al sumar luces (Amuleto de Inti, más braseros, etc.).
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
 
 ### 3.4 Objetivo: Los 3 Discos de Inti
@@ -255,7 +256,7 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
 - [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
 - [x] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
-- [ ] **Fase 5:** Primer enemigo funcional: el **Mallqui** (IA básica de persecución/patrulla; incluye su visibilidad por línea de visión, ver 3.3)
+- [x] **Fase 5:** Primer enemigo funcional: el **Mallqui** (patrulla, detección por línea de visión, persecución y golpe que baja el vigor). Pospuesto: su visibilidad solo con línea de visión del Inca (ver 3.3) y su entrada saliendo de un muro (Fase 9, pulido); sujetar al Inca (parálisis, ver 4) llega con el Supay (Fase 6)
 - [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye a Supay como guardián de cada disco y reponer las hojas de coca al colocar cada disco, ver 3.4 y 3.7)
 - [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo) + enfrentamiento final con el Amaru
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
