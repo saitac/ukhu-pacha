@@ -53,7 +53,7 @@ public static class LaberintoConfig
 		public const float CalmaMinSeg = 40.0f;
 		public const float CalmaMaxSeg = 70.0f;
 		public const float PorcentajeCambio = 0.10f;
-		public const int MargenPuertaInca = 1;
+		public const int MargenPuertaOcupada = 1;
 		public const int MargenRedibujado = 1; // Recalcula los vecinos del tramo, cuyos tiles apuntan a celdas que cambiaron; con 0 quedan conexiones viejas (mantener siempre en 1)
 		public const float DuracionAviso = 5.0f;
 	}
@@ -75,6 +75,14 @@ public static class LaberintoConfig
 		{
 			public const float CuracionMinima = 0.1f;
 			public const float CuracionMaxima = 1.0f;
+			public const float PorcentajeSalas = 0.30f;
+		}
+	}
+
+	public static class Criaturas
+	{
+		public static class Mallqui
+		{
 			public const float PorcentajeSalas = 0.30f;
 		}
 	}

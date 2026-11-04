@@ -9,6 +9,8 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaHojaCoca { get; set; }
 
+	[Export] public PackedScene EscenaMallqui { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -31,6 +33,7 @@ public partial class Laberinto : Node2D
 	List<PuertaPosible> _puertasPosibles;
 	private Dictionary<int, int> _puertasAbiertas;
 	private List<HojaCoca> _hojasCoca;
+	private List<Mallqui> _mallquis;
 
 	private enum PuertaOrientacion
 	{
@@ -54,6 +57,14 @@ public partial class Laberinto : Node2D
 
 	private EstadoCiclo _estadoCiclo;
 
+	private AStarGrid2D _navegacion;
+
+	private readonly HashSet<Vector2I> _celdasObstaculo = [];
+
+	// Desplazamientos usados para buscar una celda transitable cercana.
+	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
+	private static readonly Vector2I[] _desplazamientos = [Vector2I.Zero, Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right];
+
 	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
 	[Signal]
 	public delegate void AvisoIniciadoEventHandler(float duracion);
@@ -64,6 +75,9 @@ public partial class Laberinto : Node2D
 
 	[Signal]
 	public delegate void PuertasCambiadasEventHandler(Godot.Collections.Array<Rect2> areasPuertas);
+
+	[Signal]
+	public delegate void NavegacionActualizadaEventHandler();
 
 	public override void _Ready()
 	{
@@ -120,6 +134,10 @@ public partial class Laberinto : Node2D
 		// Se colocan los tótems Wiracocha en los bloques seleccionados.
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
+		// Se crea y actualiza la navegación AStarGrid2D
+		CrearNavegacion();
+		ActualizarNavegacion();
+
 		// Se crean las hojas de coca
 		_hojasCoca = [];
 		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
@@ -130,6 +148,8 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
 
 		// Alerta - no debe existir cuartos sin acceso
 		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
@@ -291,7 +311,7 @@ public partial class Laberinto : Node2D
 		return region;
 	}
 
-	private Vector2I PosicionMundoAIndiceMapa(Vector2 posicionMundo)
+	public Vector2I PosicionMundoAIndiceMapa(Vector2 posicionMundo)
 	{
 		float tileX = posicionMundo.X / (_Piso.TileSet.TileSize.X * _Piso.Scale.X);
 		float tileY = posicionMundo.Y / (_Piso.TileSet.TileSize.Y * _Piso.Scale.Y);
@@ -787,6 +807,7 @@ public partial class Laberinto : Node2D
 			Dictionary<int, int> puertasCambiadas = abiertas.Concat(cerradas).ToDictionary();
 
 			RedibujarPuertas(puertasCambiadas.Keys);
+			ActualizarNavegacion();
 
 			// Quito de la lista las hojas de coca que ya fueron consumidas y reubico las que quedan pendientes
 			_hojasCoca.RemoveAll(h => !IsInstanceValid(h));
@@ -878,7 +899,12 @@ public partial class Laberinto : Node2D
 		Dictionary<int, int> abiertasEnCiclo = [];
 		Dictionary<int, int> cerradasEnCiclo = [];
 
-		Vector2I celdaInca = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+		List<Rect2I> areasOcupadas = [];
+		areasOcupadas.Add(AreaMundoAAreaMapa(_Inca.AreaGlobal()));
+		foreach (Mallqui mallqui in _mallquis)
+		{
+			areasOcupadas.Add(AreaMundoAAreaMapa(mallqui.AreaGlobal()));
+		}
 
 		int intercambios = Mathf.Max(1, Mathf.RoundToInt(_puertasAbiertas.Count * LaberintoConfig.Mutacion.PorcentajeCambio));
 
@@ -898,7 +924,7 @@ public partial class Laberinto : Node2D
 			int indiceAbrir = puertasCerradas[_rng.RandiRange(0, puertasCerradas.Count - 1)];
 			abiertasEnCiclo[indiceAbrir] = AbrirPuerta(indiceAbrir);
 
-			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde este el inca)
+			// Busco puertas abiertas (excluyendo aquellas que hayan sido abiertas en el ciclo de mutación o donde haya una criatura)
 			// candidatas a cerrar.
 			List<int> candidatasCerrar = [];
 			foreach (int key in _puertasAbiertas.Keys)
@@ -908,7 +934,7 @@ public partial class Laberinto : Node2D
 					continue;
 				}
 
-				if (IncaEnPuerta(key, celdaInca))
+				if (PuertaOcupada(key, areasOcupadas))
 				{
 					continue;
 				}
@@ -939,13 +965,23 @@ public partial class Laberinto : Node2D
 		return (abiertasEnCiclo, cerradasEnCiclo);
 	}
 
-	private bool IncaEnPuerta(int indicePuerta, Vector2I celdaInca)
+	private bool PuertaOcupada(int indicePuerta, List<Rect2I> areasOcupadas)
 	{
 		PuertaPosible puerta = _puertasPosibles[indicePuerta];
 		int inicio = _puertasAbiertas[indicePuerta];
 		Rect2I areaPuerta = AreaEnTramo(puerta, inicio, LaberintoConfig.Bloque.AnchoPuerta);
 
-		return areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaInca).HasPoint(celdaInca);
+		Rect2I areaSegura = areaPuerta.Grow(LaberintoConfig.Mutacion.MargenPuertaOcupada);
+
+		foreach (Rect2I area in areasOcupadas)
+		{
+			if (areaSegura.Intersects(area))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void RedibujarPuertas(IEnumerable<int> puertas)
@@ -1020,6 +1056,7 @@ public partial class Laberinto : Node2D
 		Node2D totem = escenaTotem.Instantiate<Node2D>();
 		AddChild(totem);
 		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_celdasObstaculo.Add(celda);
 	}
 
 	private int[] DistanciasDesde(int bloqueOrigen)
@@ -1156,12 +1193,7 @@ public partial class Laberinto : Node2D
 		// Me aseguro que cantidad nunca sea mayor que la cantidad de salas existentes
 		int cantidadReal = Mathf.Min(cantidad, indices.Length);
 
-		// Algoritmo Fisher-Yates
-		for (int i = 0; i < cantidadReal; i++)
-		{
-			int j = _rng.RandiRange(i, indices.Length - 1);
-			(indices[j], indices[i]) = (indices[i], indices[j]);
-		}
+		Barajar(indices);
 
 		return [.. indices[..cantidadReal]];
 	}
@@ -1195,6 +1227,210 @@ public partial class Laberinto : Node2D
 		for (int i = 0; i < _hojasCoca.Count; i++)
 		{
 			_hojasCoca[i].GlobalPosition = ElegirEsquinaBloqueHojaCoca(bloques[i]);
+		}
+	}
+
+	private Mallqui ColocarMallqui(Vector2I celda)
+	{
+		Mallqui mallqui = EscenaMallqui.Instantiate<Mallqui>();
+		mallqui.Inicializar(this, _Inca);
+		AddChild(mallqui);
+		mallqui.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_mallquis.Add(mallqui);
+		return mallqui;
+	}
+
+	private void ColocarMallquis(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	{
+		_mallquis = [];
+
+		int cantMallquis = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Criaturas.Mallqui.PorcentajeSalas));
+
+		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
+		List<int> indices = [.. Enumerable.Range(0, _bloques.Count)];
+		Barajar(indices);
+
+		foreach (int b in indices)
+		{
+			if (b == bloqueInca || bloquesTotemWiracocha.Contains(b))
+			{
+				continue;
+			}
+
+			Vector2I celda = _bloques[b].GetCenter();
+
+			if (_mapa[celda.Y, celda.X] != Celda.Piso)
+			{
+				continue;
+			}
+
+			ColocarMallqui(celda);
+
+			cantMallquis--;
+			if (cantMallquis == 0)
+			{
+				break;
+			}
+		}
+	}
+
+	private void CrearNavegacion()
+	{
+		_navegacion = new AStarGrid2D();
+		_navegacion.Region = new Rect2I(0, 0, _mapa.GetLength(1), _mapa.GetLength(0));
+		_navegacion.DiagonalMode = AStarGrid2D.DiagonalModeEnum.Never;
+		_navegacion.Update();
+	}
+
+	private void ActualizarNavegacion()
+	{
+		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
+		{
+			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
+			{
+				Vector2I celda = new(columna, fila);
+				bool esObstaculo = _mapa[fila, columna] == Celda.Muro || _celdasObstaculo.Contains(celda);
+				_navegacion.SetPointSolid(celda, esObstaculo);
+			}
+		}
+		EmitSignal(SignalName.NavegacionActualizada);
+	}
+
+	/// <summary>
+	/// Calcula la ruta más corta entre dos posiciones del mundo usando la grilla de navegación,
+	/// evitando muros, pilares y tótems.
+	/// </summary>
+	/// <param name="desde">Posición de origen, en coordenadas del mundo.</param>
+	/// <param name="hasta">Posición de destino, en coordenadas del mundo.</param>
+	/// <returns>
+	/// Los centros de cada celda de la ruta, en coordenadas del mundo, empezando por la celda de origen.
+	/// Si el origen o el destino caen en una celda no transitable (por ejemplo, un cuerpo pegado a un muro
+	/// o sobre una puerta que se cerró), se usa en su lugar la vecina transitable más cercana.
+	/// Devuelve un arreglo vacío si no hay ninguna celda transitable cerca del origen o del destino,
+	/// o si no existe camino entre ellos.
+	/// </returns>
+	public Vector2[] CalcularRuta(Vector2 desde, Vector2 hasta)
+	{
+		Vector2I origen = PosicionMundoAIndiceMapa(desde);
+		Vector2I destino = PosicionMundoAIndiceMapa(hasta);
+
+		if (CeldaTransitableCercana(origen) is not Vector2I origenValido)
+		{
+			return [];
+		}
+
+		if (CeldaTransitableCercana(destino) is not Vector2I destinoValido)
+		{
+			return [];
+		}
+
+		Godot.Collections.Array<Vector2I> celdas = _navegacion.GetIdPath(origenValido, destinoValido);
+
+		Vector2[] ruta = new Vector2[celdas.Count];
+
+		for (int i = 0; i < celdas.Count; i++)
+		{
+			ruta[i] = IndiceMapaAPosicionMundo(celdas[i]);
+		}
+
+		return ruta;
+	}
+
+	private Vector2I? CeldaTransitableCercana(Vector2I celda)
+	{
+		foreach (Vector2I desplazamiento in _desplazamientos)
+		{
+			Vector2I candidata = celda + desplazamiento;
+			if (EsTransitable(candidata))
+			{
+				return candidata;
+			}
+		}
+
+		return null;
+	}
+
+	private bool EsTransitable(Vector2I celda) => _navegacion.IsInBounds(celda.X, celda.Y) && !_navegacion.IsPointSolid(celda);
+
+	private Rect2I AreaMundoAAreaMapa(Rect2 areaMundo)
+	{
+		Vector2I inicio = PosicionMundoAIndiceMapa(areaMundo.Position);
+		Vector2I fin = PosicionMundoAIndiceMapa(areaMundo.End);
+		return new Rect2I(inicio, fin - inicio + Vector2I.One);
+	}
+
+	public Vector2 ElegirDestinoPatrulla(Vector2 desde, int distanciaMin, int distanciaMax)
+	{
+		int bloqueOrigen = IndiceBloqueDe(PosicionMundoAIndiceMapa(desde));
+
+		if (bloqueOrigen == -1)
+		{
+			return desde;
+		}
+
+		int[] distancias = DistanciasDesde(bloqueOrigen);
+
+		List<int> candidatos = [];
+		List<int> candidatosAlternativos = [];
+
+		for (int i = 0; i < distancias.Length; i++)
+		{
+			if (distancias[i] >= distanciaMin && distancias[i] <= distanciaMax)
+			{
+				// i corresponde al índice de un bloque en _bloques
+				candidatos.Add(i);
+			}
+
+			if (distancias[i] != -1 && i != bloqueOrigen)
+			{
+				candidatosAlternativos.Add(i);
+			}
+		}
+
+		if (candidatos.Count == 0 && candidatosAlternativos.Count == 0)
+		{
+			return desde;
+		}
+
+		if (candidatos.Count == 0)
+		{
+			candidatos = candidatosAlternativos;
+		}
+
+		int indiceBloque = candidatos[_rng.RandiRange(0, candidatos.Count - 1)];
+		Rect2I bloque = _bloques[indiceBloque];
+		Rect2I bloqueInterior = bloque.Grow(-LaberintoConfig.Muro.GrosorBorde);
+
+		List<Vector2I> transitables = [];
+		for (int y = bloqueInterior.Position.Y; y < bloqueInterior.End.Y; y++)
+		{
+			for (int x = bloqueInterior.Position.X; x < bloqueInterior.End.X; x++)
+			{
+				Vector2I celda = new(x, y);
+				if (EsTransitable(celda))
+				{
+					transitables.Add(celda);
+				}
+			}
+		}
+
+		if (transitables.Count == 0)
+		{
+			return desde;
+		}
+
+		Vector2I destino = transitables[_rng.RandiRange(0, transitables.Count - 1)];
+
+		return IndiceMapaAPosicionMundo(destino);
+	}
+
+	private void Barajar<T>(IList<T> elementos)
+	{
+		// Algoritmo Fisher-Yates
+		for (int i = 0; i < elementos.Count; i++)
+		{
+			int j = _rng.RandiRange(i, elementos.Count - 1);
+			(elementos[j], elementos[i]) = (elementos[i], elementos[j]);
 		}
 	}
 }

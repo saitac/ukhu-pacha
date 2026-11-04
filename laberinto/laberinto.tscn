@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://d3m7udno27md0" path="res://laberinto/Laberinto.cs" id="1_8w83w"]
 [ext_resource type="Texture2D" uid="uid://b8qycr1xr4pi7" path="res://laberinto/sprites/muro-aislado.png" id="2_j7smx"]
 [ext_resource type="PackedScene" uid="uid://k838h6abax1d" path="res://sagrados/wiracocha/totem_wiracocha.tscn" id="2_yhjxc"]
+[ext_resource type="PackedScene" uid="uid://cygaa47yq4ped" path="res://criaturas/mallqui/mallqui.tscn" id="4_7fdqi"]
 [ext_resource type="Texture2D" uid="uid://ce81q3onfo5wc" path="res://laberinto/sprites/piso-1.png" id="4_72xox"]
 [ext_resource type="PackedScene" uid="uid://dduce4cwts817" path="res://player/inca.tscn" id="4_f4ou2"]
 [ext_resource type="Texture2D" uid="uid://frfsi26myyj8" path="res://laberinto/sprites/muro-t.png" id="4_wsvcv"]
@@ -295,6 +296,7 @@ y_sort_enabled = true
 script = ExtResource("1_8w83w")
 EscenaTotemWiracocha = ExtResource("2_yhjxc")
 EscenaHojaCoca = ExtResource("18_glftc")
+EscenaMallqui = ExtResource("4_7fdqi")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
 scale = Vector2(3, 3)

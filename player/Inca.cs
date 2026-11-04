@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class Inca : CharacterBody2D
 {
@@ -14,6 +13,7 @@ public partial class Inca : CharacterBody2D
 	private const float EnergiaDestello = 2.5f;
 
 	private static readonly Color ColorCura = new(0.61f, 0.82f, 0.42f);
+	private static readonly Color ColorGolpe = new(0.85f, 0.15f, 0.12f);
 
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
@@ -22,10 +22,12 @@ public partial class Inca : CharacterBody2D
 	private PointLight2D _destello;
 	private Direccion _incaUltimaDireccion = Direccion.Abajo;
 	private Tween _tweenDestello;
+	private CollisionShape2D _formaColision;
 
 	public override void _Ready()
 	{
 		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
+		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_antorcha = GetNode<Antorcha>("antorcha");
 		_vigor = GetNode<Vigor>("Vigor");
 		_destello = GetNode<PointLight2D>("Destello");
@@ -63,13 +65,7 @@ public partial class Inca : CharacterBody2D
 			return;
 		}
 
-		if(Math.Abs(direccion.X) > Math.Abs(direccion.Y)) // se mueve en el eje X
-		{
-			_incaUltimaDireccion = direccion.X > 0 ? Direccion.Derecha : Direccion.Izquierda;
-		} else
-		{
-			_incaUltimaDireccion = direccion.Y > 0 ? Direccion.Abajo : Direccion.Arriba;
-		}
+		_incaUltimaDireccion = DireccionExtensions.DesdeVector(direccion);
 
 		_incaSprite.Play("walk-" + _incaUltimaDireccion.Sufijo() + "-inca");
 		_antorcha.Orientar(_incaUltimaDireccion);
@@ -112,6 +108,23 @@ public partial class Inca : CharacterBody2D
 		_vigor.Modificar(_vigor.Maximo * curacion);
 		Destellar(ColorCura);
 		return true;
+	}
+
+	public void RecibirGolpe(float dano)
+	{
+		if (_vigor.EstaAgotado)
+		{
+			return;
+		}
+		_vigor.Modificar(_vigor.Maximo * -dano);
+		Destellar(ColorGolpe);
+	}
+
+	public Rect2 AreaGlobal()
+	{
+		Rect2 local = _formaColision.Shape.GetRect();
+		Rect2 global = new(local.Position + _formaColision.GlobalPosition, local.Size);
+		return global;
 	}
 
 	private void Destellar(Color color)

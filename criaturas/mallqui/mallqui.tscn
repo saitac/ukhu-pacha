@@ -1,0 +1,165 @@
+[gd_scene format=3 uid="uid://cygaa47yq4ped"]
+
+[ext_resource type="Texture2D" uid="uid://s1kmasxx0yqp" path="res://criaturas/mallqui/sprites/ataque-down-mallqui-01.png" id="1_8te4i"]
+[ext_resource type="Script" uid="uid://dolu7xgo33l6a" path="res://criaturas/mallqui/Mallqui.cs" id="1_8yyr6"]
+[ext_resource type="Texture2D" uid="uid://1xbx4bj336to" path="res://criaturas/mallqui/sprites/ataque-down-mallqui-02.png" id="2_8yyr6"]
+[ext_resource type="Texture2D" uid="uid://c7mn0dgh3thup" path="res://criaturas/mallqui/sprites/walk-down-mallqui-01-apoyo.png" id="3_sbsc3"]
+[ext_resource type="Texture2D" uid="uid://ccvtfb6g4o4q4" path="res://criaturas/mallqui/sprites/walk-down-mallqui-02-derecha.png" id="4_gli1f"]
+[ext_resource type="Texture2D" uid="uid://c47vmj5xeyj3m" path="res://criaturas/mallqui/sprites/ataque-right-mallqui-01.png" id="4_m7i0u"]
+[ext_resource type="Texture2D" uid="uid://cvyt478e5haf6" path="res://criaturas/mallqui/sprites/ataque-right-mallqui-02.png" id="5_57wph"]
+[ext_resource type="Texture2D" uid="uid://bc7g53io0tbax" path="res://criaturas/mallqui/sprites/walk-down-mallqui-03-apoyo.png" id="5_dj68m"]
+[ext_resource type="Texture2D" uid="uid://btc3tvcko4jcv" path="res://criaturas/mallqui/sprites/walk-down-mallqui-04-izquierda.png" id="6_f8ra6"]
+[ext_resource type="Texture2D" uid="uid://d3y1vpybfcbsp" path="res://criaturas/mallqui/sprites/ataque-up-mallqui-01.png" id="6_iep11"]
+[ext_resource type="Texture2D" uid="uid://cw1v2kybek6v1" path="res://criaturas/mallqui/sprites/ataque-up-mallqui-02.png" id="7_531an"]
+[ext_resource type="Texture2D" uid="uid://8dco0blurhjp" path="res://criaturas/mallqui/sprites/walk-right-mallqui-01-apoyo.png" id="8_0ypmw"]
+[ext_resource type="Texture2D" uid="uid://bvn1w5nipl1hs" path="res://criaturas/mallqui/sprites/walk-up-mallqui-01-apoyo.png" id="8_f8ra6"]
+[ext_resource type="Texture2D" uid="uid://bcdagid4snqgj" path="res://criaturas/mallqui/sprites/walk-right-mallqui-02-derecha.png" id="9_u1y6s"]
+[ext_resource type="Texture2D" uid="uid://di8clsj6lrwdn" path="res://criaturas/mallqui/sprites/walk-up-mallqui-02-derecha.png" id="9_yckhu"]
+[ext_resource type="Texture2D" uid="uid://d7enjrul1ela" path="res://criaturas/mallqui/sprites/walk-up-mallqui-03-apoyo.png" id="10_hb35p"]
+[ext_resource type="Texture2D" uid="uid://l3kjh7ieqn7w" path="res://criaturas/mallqui/sprites/walk-right-mallqui-03-apoyo.png" id="10_t1a0m"]
+[ext_resource type="Texture2D" uid="uid://b0m523nwwv8ia" path="res://criaturas/mallqui/sprites/walk-right-mallqui-04-izquierda.png" id="11_ha60m"]
+[ext_resource type="Texture2D" uid="uid://ctun28086xesr" path="res://criaturas/mallqui/sprites/walk-up-mallqui-04-izquierda.png" id="11_p2m3v"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_p5262"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_8te4i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_8yyr6")
+}],
+"loop": 0,
+"name": &"ataque-down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_m7i0u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_57wph")
+}],
+"loop": 0,
+"name": &"ataque-right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_iep11")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_531an")
+}],
+"loop": 0,
+"name": &"ataque-up",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_sbsc3")
+}],
+"loop": 1,
+"name": &"idle-down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_0ypmw")
+}],
+"loop": 1,
+"name": &"idle-right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_f8ra6")
+}],
+"loop": 1,
+"name": &"idle-up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_sbsc3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gli1f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_dj68m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_f8ra6")
+}],
+"loop": 1,
+"name": &"walk-down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_0ypmw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_u1y6s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_t1a0m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ha60m")
+}],
+"loop": 1,
+"name": &"walk-right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_f8ra6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_yckhu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_hb35p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_p2m3v")
+}],
+"loop": 1,
+"name": &"walk-up",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
+size = Vector2(62, 79)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7fdqi"]
+radius = 55.0
+
+[node name="Mallqui" type="CharacterBody2D" unique_id=631054532]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_8yyr6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1071424909]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_p5262")
+animation = &"walk-down"
+autoplay = "walk-down"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1499898629]
+position = Vector2(0, 9)
+shape = SubResource("RectangleShape2D_hfs8p")
+
+[node name="ZonaAlcance" type="Area2D" parent="." unique_id=1111710664]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaAlcance" unique_id=1128323055]
+position = Vector2(0, 9)
+shape = SubResource("CircleShape2D_7fdqi")
+
+[node name="EtiquetaDepuracion" type="Label" parent="." unique_id=265378276]
+offset_right = 40.0
+offset_bottom = 23.0

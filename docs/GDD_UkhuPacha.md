@@ -95,7 +95,8 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - **Valores actuales:** 20% de las salas; el primer tótem entre 2 y 3 salas del Inca; separación mínima de 3 salas entre tótems.
   - La luz del brasero es **tenue**: marca el tótem como un faro, pero no ilumina toda la sala.
 - **Visibilidad:** la oscuridad casi total y las **sombras** de las luces (los muros bloquean la luz) deciden qué se ve del mapa; no hay una capa aparte de niebla de guerra. Solo se ve a lo lejos lo que tiene luz propia (braseros, hojas de coca).
-  - *Pendiente (Fase 5):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
+  - *Pendiente (pospuesto en Fase 5, revisar en Fase 9 o cuando haya más fuentes de luz):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
+    - En pruebas (Fase 5) el caso existe, pero la luz tenue del brasero lo disimula: el Mallqui recién se distingue cuando la antorcha lo alumbra, y para entonces ya está persiguiendo al Inca. Por ahora no molesta; se revisará al sumar luces (Amuleto de Inti, más braseros, etc.).
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
 
 ### 3.4 Objetivo: Los 3 Discos de Inti
@@ -109,7 +110,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - Aparece **al tomar** un disco (no antes) y persigue al Inca mientras lo lleva a la puerta final. No se le puede vencer ni aturdir de forma definitiva: **solo se le escapa**.
   - Al colocar el disco en la puerta, Supay **se desvanece y se hunde en el Ukhu Pacha** (no muere; ver 3.5).
   - **Es siempre el mismo Supay**, que regresa con cada disco: nunca hay más de uno. Cada vez vuelve más peligroso (más rápido, más fuerte), en línea con la mutación que se acelera.
-  - Cada acto alterna calma y tensión: explorar (solo Muquis) → tomar el disco → huir de Supay → colocarlo → temblor.
+  - Cada acto alterna calma y tensión: explorar (solo Mallquis) → tomar el disco → huir de Supay → colocarlo → temblor.
 - **Explorar tiene recompensa:** quien prestó atención a la ubicación de la puerta final mientras buscaba el disco regresa con más facilidad; quien no, debe buscarla cargando el disco.
 - Al colocar el **tercer** disco, la puerta se abre (ver Final en 2. Narrativa); no hay cambio de salas.
 - Cargar un disco probablemente limita otras acciones (uso de armas, sigilo, etc. — a definir).
@@ -176,7 +177,7 @@ Todas las causas terminan igual: el **vigor del Inca llega a 0** (ver 3.7). Algu
 1. **Daño directo:** ataques enemigos o trampas físicas bajan el vigor.
 2. **Aplastamiento ("El Abrazo de Urka"):** quedar atrapado cuando el laberinto cierra un pasillo o puerta. Deja el vigor en 0 de inmediato.
 3. **Oscuridad total:** la antorcha se apaga y la oscuridad consume el vigor hasta 0 antes de que el Inca logre recargar (ver 3.3).
-4. **Parálisis:** ser inmovilizado por un enemigo (ej. Muqui) mientras otro (ej. Supay) se acerca para el golpe final.
+4. **Parálisis:** ser inmovilizado por un enemigo (ej. Mallqui, que lo sujeta con las manos) mientras otro (ej. Supay) se acerca para el golpe final.
 
 ---
 
@@ -186,7 +187,7 @@ Las criaturas forman una **jerarquía**: de la más común a la más poderosa.
 
 | Rango | Criatura | Rol de diseño | Comportamiento |
 |---|---|---|---|
-| Bajo | **Muqui** | Enemigo común de la cueva | Duende pequeño, dueño y guardián de las minas. Hay **varios** recorriendo la cueva. **Patrulla** salas y pasillos y **persigue** al Inca cuando lo ve. Entra en escena **saliendo de un muro** (vive dentro de la roca), siempre con aviso previo (polvo y crujido) para que sea justo. Sin sabotaje y sin relación con la coca. Primer enemigo (Fase 5). |
+| Bajo | **Mallqui** | Enemigo común de la cueva | Momia de un ancestro inca, venerada como un ser con vida y poder. Hay **varios** recorriendo la cueva: **30 % de las salas** (mínimo 1, a ajustar en pruebas; con 3 fijos la cueva se sentía vacía), cantidad **fija toda la partida** porque no mueren, solo se aturden. Al inicio aparecen en salas al azar, excepto la del Inca y las de los tótems (para no ocupar el tótem ni acampar en la primera recarga); sin distancia mínima al Inca: acosan desde el comienzo. *Idea (Fase 6, según pruebas):* subir su velocidad con cada disco de Inti colocado. Es **lento pero numeroso** (a diferencia del Supay, que es único e imparable). **Patrulla** salas y pasillos y **persigue** al Inca cuando lo ve. Al detectarlo no cambia de aspecto: el aviso de "¡te vio!" es **sonoro**, un sonido de terror (gemido o crujido de huesos) al pasar a persecución (Fase 9). Ataca **golpeando con las manos**. Entra en escena **saliendo de un muro**, como si despertara de un nicho funerario en la roca, siempre con aviso previo (polvo y crujido de huesos) para que sea justo. Sin sabotaje y sin relación con la coca. Primer enemigo (Fase 5). |
 | Medio | **Supay** | Guardián de los discos de Inti | Aparece al tomar un disco y persigue al Inca hasta la puerta final; presencia lenta e inevitable, tipo "stalker". No se puede vencer, solo escapar. Es siempre el mismo, y vuelve más peligroso con cada disco (ver 3.4). |
 | Final | **Amaru** | Último guardián | Serpiente colosal de dos cabezas que cierra el paso a la Ciudad Perdida tras colocar el tercer disco. Se le vence aturdiéndolo con la macana (ver 3.5). |
 | Entorno | **Dios Urka** | Acelerador de caos | No es una criatura que camine: rige los temblores y mutaciones violentas del laberinto. |
@@ -214,7 +215,7 @@ Las criaturas forman una **jerarquía**: de la más común a la más poderosa.
 - `TileMap` → renderizado del laberinto.
 - `CharacterBody2D` → jugador (con `Sprite2D`/`AnimatedSprite2D` y `CollisionShape2D`).
 - `PointLight2D` → antorcha.
-- Clase base `Enemigo` → herencia para `Muqui`, `Supay`, `Amaru`, etc. (`class Supay : Enemigo`).
+- Clase base `Enemigo` → herencia para `Mallqui`, `Supay`, `Amaru`, etc. (`class Supay : Enemigo`).
 - `Timer` (nodo Godot) → ciclos de mutación del laberinto y temporizador de antorcha.
 
 ### Snippet de referencia (antorcha)
@@ -255,7 +256,7 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 2:** Estructura de datos del laberinto (matriz) + renderizado con TileMap
 - [x] **Fase 3:** Sistema de mutación del laberinto (ciclos + reglas de seguridad)
 - [x] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
-- [ ] **Fase 5:** Primer enemigo funcional: el **Muqui** (IA básica de persecución/patrulla; incluye su visibilidad por línea de visión, ver 3.3)
+- [x] **Fase 5:** Primer enemigo funcional: el **Mallqui** (patrulla, detección por línea de visión, persecución, golpe que baja el vigor y cantidad según las salas). Pospuesto: su visibilidad solo con línea de visión del Inca (ver 3.3) y su entrada saliendo de un muro (Fase 9, pulido); sujetar al Inca (parálisis, ver 4) llega con el Supay (Fase 6)
 - [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye a Supay como guardián de cada disco y reponer las hojas de coca al colocar cada disco, ver 3.4 y 3.7)
 - [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo) + enfrentamiento final con el Amaru
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
