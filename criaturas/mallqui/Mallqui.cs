@@ -34,6 +34,9 @@ public partial class Mallqui : CharacterBody2D
 	[Export]
 	public float RadioVision = 300f;
 
+	[Export]
+	public float DanoGolpe = 0.1f;
+
 	private Laberinto _laberinto;
 	private Inca _inca;
 	private Vector2[] _ruta = [];

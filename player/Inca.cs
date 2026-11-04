@@ -13,6 +13,7 @@ public partial class Inca : CharacterBody2D
 	private const float EnergiaDestello = 2.5f;
 
 	private static readonly Color ColorCura = new(0.61f, 0.82f, 0.42f);
+	private static readonly Color ColorGolpe = new(0.85f, 0.15f, 0.12f);
 
 	private float _speed = 300;
 	private AnimatedSprite2D _incaSprite;
@@ -107,6 +108,16 @@ public partial class Inca : CharacterBody2D
 		_vigor.Modificar(_vigor.Maximo * curacion);
 		Destellar(ColorCura);
 		return true;
+	}
+
+	public void RecibirGolpe(float dano)
+	{
+		if (_vigor.EstaAgotado)
+		{
+			return;
+		}
+		_vigor.Modificar(_vigor.Maximo * -dano);
+		Destellar(ColorGolpe);
 	}
 
 	public Rect2 AreaGlobal()
