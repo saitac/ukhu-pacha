@@ -298,6 +298,7 @@ script = ExtResource("1_8w83w")
 EscenaTotemWiracocha = ExtResource("2_yhjxc")
 EscenaHojaCoca = ExtResource("18_glftc")
 EscenaMallqui = ExtResource("4_7fdqi")
+EscenaDiscoInti = ExtResource("20_m5etf")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
 scale = Vector2(3, 3)
@@ -348,6 +349,3 @@ EscenaNube = ExtResource("16_mmumd")
 
 [node name="Oscuridad" type="CanvasModulate" parent="." unique_id=1053698352]
 color = Color(0.050980393, 0.043137256, 0.0627451, 1)
-
-[node name="DiscoInti" parent="." unique_id=1042200363 instance=ExtResource("20_m5etf")]
-position = Vector2(80, 93)

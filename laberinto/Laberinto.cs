@@ -11,6 +11,8 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaMallqui { get; set; }
 
+	[Export] public PackedScene EscenaDiscoInti { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -19,6 +21,7 @@ public partial class Laberinto : Node2D
 	CamaraInca _CamaraInca;
 	PolvoTecho _PolvoTecho;
 	PolvoPuertas _PolvoPuertas;
+	DiscoInti _discoInti;
 
 	private enum Celda
 	{
@@ -148,6 +151,11 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		// TEMPORAL (6a): el disco aparece en la sala del Inca para probar.
+		// Luego: sala del tercio más lejano por BFS.
+		CrearDiscoInti();
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueInca));
 
 		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
 
@@ -1198,7 +1206,7 @@ public partial class Laberinto : Node2D
 		return [.. indices[..cantidadReal]];
 	}
 
-	private Vector2 ElegirEsquinaBloqueHojaCoca(int indiceBloque)
+	private Vector2I ElegirEsquinaBloque(int indiceBloque)
 	{
 		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
 		Vector2I[] esquinas = [
@@ -1207,7 +1215,12 @@ public partial class Laberinto : Node2D
 			new Vector2I(piso.Position.X, piso.End.Y - 1),
 			piso.End - Vector2I.One
 		];
-		return IndiceMapaAPosicionMundo(esquinas[_rng.RandiRange(0, esquinas.Length - 1)]);
+		return esquinas[_rng.RandiRange(0, esquinas.Length - 1)];
+	}
+
+	private Vector2 ElegirEsquinaBloqueHojaCoca(int indiceBloque)
+	{
+		return IndiceMapaAPosicionMundo(ElegirEsquinaBloque(indiceBloque));
 	}
 
 	private void CrearHojasDeCoca(int cantidad)
@@ -1282,6 +1295,14 @@ public partial class Laberinto : Node2D
 		_navegacion.Update();
 	}
 
+	private bool EsCeldaLibre(Vector2I celda)
+	{
+		bool filaValida = celda.Y >= 0 && celda.Y < _mapa.GetLength(0);
+		bool columnaValida = celda.X >= 0 && celda.X < _mapa.GetLength(1);
+
+		return filaValida && columnaValida && _mapa[celda.Y, celda.X] != Celda.Muro && !_celdasObstaculo.Contains(celda);
+	}
+
 	private void ActualizarNavegacion()
 	{
 		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
@@ -1289,7 +1310,7 @@ public partial class Laberinto : Node2D
 			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
 				Vector2I celda = new(columna, fila);
-				bool esObstaculo = _mapa[fila, columna] == Celda.Muro || _celdasObstaculo.Contains(celda);
+				bool esObstaculo = !EsCeldaLibre(celda);
 				_navegacion.SetPointSolid(celda, esObstaculo);
 			}
 		}
@@ -1351,6 +1372,8 @@ public partial class Laberinto : Node2D
 	}
 
 	private bool EsTransitable(Vector2I celda) => _navegacion.IsInBounds(celda.X, celda.Y) && !_navegacion.IsPointSolid(celda);
+
+	public bool EsPosicionTransitable(Vector2 posicionMundo) => EsTransitable(PosicionMundoAIndiceMapa(posicionMundo));
 
 	private Rect2I AreaMundoAAreaMapa(Rect2 areaMundo)
 	{
@@ -1432,5 +1455,17 @@ public partial class Laberinto : Node2D
 			int j = _rng.RandiRange(i, elementos.Count - 1);
 			(elementos[j], elementos[i]) = (elementos[i], elementos[j]);
 		}
+	}
+
+	private void CrearDiscoInti()
+	{
+		_discoInti = EscenaDiscoInti.Instantiate<DiscoInti>();
+		_discoInti.Inicializar(this);
+		AddChild(_discoInti);
+	}
+
+	private void UbicarDiscoInti(Vector2I celda)
+	{
+		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 	}
 }

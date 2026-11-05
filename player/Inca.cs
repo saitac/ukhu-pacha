@@ -24,6 +24,9 @@ public partial class Inca : CharacterBody2D
 	private Tween _tweenDestello;
 	private CollisionShape2D _formaColision;
 
+	public Vector2 CentroCuerpo => _formaColision.GlobalPosition;
+	public Direccion UltimaDireccion => _incaUltimaDireccion;
+
 	public override void _Ready()
 	{
 		_incaSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
