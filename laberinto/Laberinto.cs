@@ -141,8 +141,11 @@ public partial class Laberinto : Node2D
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
 		CrearDiscoInti();
+
 		CrearPuertaFinal();
-		UbicarPuertaFinal(bloqueInca);
+		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
+		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
+		UbicarPuertaFinal(bloquePuertaFinal);
 
 		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
@@ -1123,7 +1126,7 @@ public partial class Laberinto : Node2D
 	private HashSet<int> ElegirBloquesTotemWiracocha(int bloqueInca)
 	{
 		// Obtengo el número de totems que voy a colocar - mínimo 1
-		int cantidadDeTotems = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Totems.Wiracocha.PorcentajeSalas));
+		int cantidadDeTotems = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Sagrados.Wiracocha.PorcentajeSalas));
 
 		// Diccionario que contendrá el indice del bloque con sus distancias
 		Dictionary<int, int[]> distanciasPorTotem = [];
@@ -1135,7 +1138,7 @@ public partial class Laberinto : Node2D
 		// Filtro por el primer criterio: distanciasInca >= Min, los que cumplen el criterio los almaceno en la lista bloquesCandidatosBase
 		for (int di = 0; di < distanciasInca.Length; di++)
 		{
-			if (distanciasInca[di] >= LaberintoConfig.Totems.Wiracocha.DistanciaMinima)
+			if (distanciasInca[di] >= LaberintoConfig.Sagrados.Wiracocha.DistanciaMinima)
 			{
 				bloquesCandidatosBase.Add(di);
 			}
@@ -1149,7 +1152,7 @@ public partial class Laberinto : Node2D
 			foreach (int bcb in bloquesCandidatosBase)
 			{
 				// Si es el primer totem a colocar y el bloque candidato base (bcb) supera la distancia máxima permitida, se descarta.
-				if (distanciasPorTotem.Count == 0 && distanciasInca[bcb] > LaberintoConfig.Totems.Wiracocha.DistanciaMaxima)
+				if (distanciasPorTotem.Count == 0 && distanciasInca[bcb] > LaberintoConfig.Sagrados.Wiracocha.DistanciaMaxima)
 				{
 					continue;
 				}
@@ -1158,7 +1161,7 @@ public partial class Laberinto : Node2D
 				// Si ya hay, al menos, un totem colocado, se excluyen aquellos bloques candidatos base que se encuentren a una distancia menor a Separación.
 				foreach (int[] distanciasTotem in distanciasPorTotem.Values)
 				{
-					if (distanciasTotem[bcb] < LaberintoConfig.Totems.Wiracocha.SeparacionMinima)
+					if (distanciasTotem[bcb] < LaberintoConfig.Sagrados.Wiracocha.SeparacionMinima)
 					{
 						muyCerca = true;
 						break;
@@ -1482,12 +1485,84 @@ public partial class Laberinto : Node2D
 		_puertaFinal.Inicializar(_discoInti);
 	}
 
+	private List<int> ColumnasLibresPuertaFinal(int indiceBloque)
+	{
+		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
+		HashSet<int> columnasProhibidas = [];
+		List<int> columnasLibres = [];
+
+		foreach (PuertaPosible pp in _puertasPosibles)
+		{
+			if (pp.Orientacion == PuertaOrientacion.Vertical && pp.IndiceBloqueB == indiceBloque)
+			{
+				for (int colValida = pp.PrimeraValida; colValida <= pp.UltimaValida; colValida++)
+				{
+					columnasProhibidas.Add(colValida);
+				}
+			}
+		}
+
+		for (int colBloque = piso.Position.X; colBloque <= piso.End.X - 1; colBloque++)
+		{
+			if (!columnasProhibidas.Contains(colBloque))
+			{
+				columnasLibres.Add(colBloque);
+			}
+		}
+
+		return columnasLibres;
+	}
+
+	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	{
+		int[] distancias = DistanciasDesde(bloqueInca);
+		int distanciaMaxima = distancias.Max();
+		int umbral = Mathf.CeilToInt(distanciaMaxima * LaberintoConfig.Sagrados.PuertaFinal.FraccionLejana);
+
+		List<int> bloquesCandidatos = [];
+		List<int> bloquesAlternativos = [];
+
+		for (int i = 0; i < distancias.Length; i++)
+		{
+			if (i == bloqueInca || distancias[i] == -1 || bloquesTotemWiracocha.Contains(i) || ColumnasLibresPuertaFinal(i).Count == 0)
+			{
+				continue;
+			}
+
+			if (distancias[i] >= umbral)
+			{
+				bloquesCandidatos.Add(i);
+			}
+			else
+			{
+				bloquesAlternativos.Add(i);
+			}
+		}
+
+		if (bloquesCandidatos.Count == 0 && bloquesAlternativos.Count == 0)
+		{
+			// No hay bloque que cumpla las condiciones.
+			GD.PushWarning("No existe bloque que cumpla las condiciones para colocar la puerta final");
+			return bloqueInca;
+		}
+
+		if (bloquesCandidatos.Count == 0)
+		{
+			bloquesCandidatos = bloquesAlternativos;
+		}
+
+		int bloqueElegido = bloquesCandidatos[_rng.RandiRange(0, bloquesCandidatos.Count - 1)];
+
+		return bloqueElegido;
+	}
+
 	private Vector2I ElegirCeldaPuertaFinal(int indiceBloque)
 	{
 		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
-		int columnaCentro = piso.GetCenter().X;
+		List<int> columnasLibres = ColumnasLibresPuertaFinal(indiceBloque);
+		int columnaElegida = columnasLibres[_rng.RandiRange(0, columnasLibres.Count - 1)];
 		int primeraFila = piso.Position.Y;
-		return new Vector2I(columnaCentro, primeraFila);
+		return new Vector2I(columnaElegida, primeraFila);
 	}
 
 	private void UbicarPuertaFinal(int indiceBloque)

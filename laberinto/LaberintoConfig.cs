@@ -58,7 +58,7 @@ public static class LaberintoConfig
 		public const float DuracionAviso = 5.0f;
 	}
 
-	public static class Totems
+	public static class Sagrados
 	{
 		public static class Wiracocha
 		{
@@ -66,6 +66,11 @@ public static class LaberintoConfig
 			public const int DistanciaMinima = 2;
 			public const int DistanciaMaxima = 3;
 			public const int SeparacionMinima = 3;
+		}
+
+		public static class PuertaFinal
+		{
+			public const float FraccionLejana = 2f / 3f;
 		}
 	}
 
