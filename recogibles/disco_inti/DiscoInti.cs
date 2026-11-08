@@ -2,6 +2,9 @@ using Godot;
 
 public partial class DiscoInti : Node2D
 {
+	[Signal]
+	public delegate void TomadoEventHandler(Inca portador);
+
 	[Export]
 	public Vector2 OffsetCargado = new(0, -125);
 
@@ -57,6 +60,7 @@ public partial class DiscoInti : Node2D
 			_portador = inca;
 			_area.SetDeferred(Area2D.PropertyName.Monitoring, false);
 			_rayos.Visible = false;
+			EmitSignal(SignalName.Tomado, _portador);
 		}
 	}
 
@@ -82,15 +86,27 @@ public partial class DiscoInti : Node2D
 
 			if (_laberinto.EsPosicionTransitable(posicionDestino))
 			{
-				GlobalPosition = posicionDestino;
 				_portador = null;
-				_area.SetDeferred(Area2D.PropertyName.Monitoring, true);
-				_rayos.Visible = true;
+				Reaparecer(posicionDestino);
 				return; // si alguna sirve, salgo aquí
 			}
 		}
 
 		// Ninguna posición libre: el Inca sigue cargando el disco.
 		GD.PushWarning($"DiscoInti.Soltar: ninguna posición libre alrededor del Inca en {centroCuerpo}, mirando {_portador.UltimaDireccion}. El Inca sigue cargando el disco.");
+	}
+
+	public void Entregar()
+	{
+		_portador = null;
+		Visible = false;
+	}
+
+	public void Reaparecer(Vector2 posicion)
+	{
+		GlobalPosition = posicion;
+		_area.SetDeferred(Area2D.PropertyName.Monitoring, true);
+		_rayos.Visible = true;
+		Visible = true;
 	}
 }

@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://dqs5640tgtxhf"]
+
+[ext_resource type="Script" uid="uid://dubycl4cln8x0" path="res://sagrados/puerta_final/PuertaFinal.cs" id="1_dyaux"]
+[ext_resource type="Texture2D" uid="uid://chfi20pfy0f4c" path="res://sagrados/puerta_final/sprites/puerta-final.png" id="1_vxygq"]
+[ext_resource type="Texture2D" uid="uid://d2amnyq6rd5eb" path="res://sagrados/puerta_final/sprites/losa-puerta-final.png" id="2_v6p1e"]
+[ext_resource type="Texture2D" uid="uid://rc5ye6cgipmg" path="res://sagrados/puerta_final/sprites/disco-puerta.png" id="2_wxlg2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
+size = Vector2(96, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k5r3v"]
+size = Vector2(96, 100)
+
+[node name="PuertaFinal" type="StaticBody2D" unique_id=1737571032]
+collision_mask = 0
+script = ExtResource("1_dyaux")
+
+[node name="Marco" type="Sprite2D" parent="." unique_id=304066657]
+light_mask = 2
+scale = Vector2(3, 3)
+texture = ExtResource("1_vxygq")
+offset = Vector2(0, -16)
+
+[node name="Losa" type="Sprite2D" parent="." unique_id=738906337]
+light_mask = 2
+scale = Vector2(3, 3)
+texture = ExtResource("2_v6p1e")
+offset = Vector2(0, -16)
+
+[node name="Discos" type="Node2D" parent="." unique_id=1050953274]
+
+[node name="Disco1" type="Sprite2D" parent="Discos" unique_id=887688921]
+visible = false
+light_mask = 2
+position = Vector2(0, -66)
+scale = Vector2(3, 3)
+texture = ExtResource("2_wxlg2")
+
+[node name="Disco2" type="Sprite2D" parent="Discos" unique_id=1756349864]
+visible = false
+light_mask = 2
+position = Vector2(0, -30)
+scale = Vector2(3, 3)
+texture = ExtResource("2_wxlg2")
+
+[node name="Disco3" type="Sprite2D" parent="Discos" unique_id=1453324403]
+visible = false
+light_mask = 2
+position = Vector2(0, 6)
+scale = Vector2(3, 3)
+texture = ExtResource("2_wxlg2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1534475028]
+shape = SubResource("RectangleShape2D_hfs8p")
+
+[node name="ZonaColocacion" type="Area2D" parent="." unique_id=2097959510]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaColocacion" unique_id=32930302]
+position = Vector2(0, 50)
+shape = SubResource("RectangleShape2D_k5r3v")

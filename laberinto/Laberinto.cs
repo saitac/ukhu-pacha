@@ -13,6 +13,8 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaDiscoInti { get; set; }
 
+	[Export] public PackedScene EscenaPuertaFinal { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -22,6 +24,7 @@ public partial class Laberinto : Node2D
 	PolvoTecho _PolvoTecho;
 	PolvoPuertas _PolvoPuertas;
 	DiscoInti _discoInti;
+	PuertaFinal _puertaFinal;
 
 	private enum Celda
 	{
@@ -137,6 +140,10 @@ public partial class Laberinto : Node2D
 		// Se colocan los tótems Wiracocha en los bloques seleccionados.
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
+		CrearDiscoInti();
+		CrearPuertaFinal();
+		UbicarPuertaFinal(bloqueInca);
+
 		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
 		ActualizarNavegacion();
@@ -154,7 +161,6 @@ public partial class Laberinto : Node2D
 
 		// TEMPORAL (6a): el disco aparece en la sala del Inca para probar.
 		// Luego: sala del tercio más lejano por BFS.
-		CrearDiscoInti();
 		UbicarDiscoInti(ElegirEsquinaBloque(bloqueInca));
 
 		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
@@ -1467,5 +1473,27 @@ public partial class Laberinto : Node2D
 	private void UbicarDiscoInti(Vector2I celda)
 	{
 		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+	}
+
+	private void CrearPuertaFinal()
+	{
+		_puertaFinal = EscenaPuertaFinal.Instantiate<PuertaFinal>();
+		AddChild(_puertaFinal);
+		_puertaFinal.Inicializar(_discoInti);
+	}
+
+	private Vector2I ElegirCeldaPuertaFinal(int indiceBloque)
+	{
+		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
+		int columnaCentro = piso.GetCenter().X;
+		int primeraFila = piso.Position.Y;
+		return new Vector2I(columnaCentro, primeraFila);
+	}
+
+	private void UbicarPuertaFinal(int indiceBloque)
+	{
+		Vector2I celda = ElegirCeldaPuertaFinal(indiceBloque);
+		_puertaFinal.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_celdasObstaculo.Add(celda);
 	}
 }
