@@ -1513,9 +1513,9 @@ public partial class Laberinto : Node2D
 		return columnasLibres;
 	}
 
-	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	private int ElegirBloqueLejano(int bloqueOrigen, HashSet<int> excluidos)
 	{
-		int[] distancias = DistanciasDesde(bloqueInca);
+		int[] distancias = DistanciasDesde(bloqueOrigen);
 		int distanciaMaxima = distancias.Max();
 		int umbral = Mathf.CeilToInt(distanciaMaxima * LaberintoConfig.Sagrados.PuertaFinal.FraccionLejana);
 
@@ -1524,7 +1524,7 @@ public partial class Laberinto : Node2D
 
 		for (int i = 0; i < distancias.Length; i++)
 		{
-			if (i == bloqueInca || distancias[i] == -1 || bloquesTotemWiracocha.Contains(i) || ColumnasLibresPuertaFinal(i).Count == 0)
+			if (distancias[i] == -1 || excluidos.Contains(i))
 			{
 				continue;
 			}
@@ -1542,8 +1542,8 @@ public partial class Laberinto : Node2D
 		if (bloquesCandidatos.Count == 0 && bloquesAlternativos.Count == 0)
 		{
 			// No hay bloque que cumpla las condiciones.
-			GD.PushWarning("No existe bloque que cumpla las condiciones para colocar la puerta final");
-			return bloqueInca;
+			GD.PushWarning("No existe bloque lejano que cumpla las condiciones");
+			return bloqueOrigen;
 		}
 
 		if (bloquesCandidatos.Count == 0)
@@ -1570,5 +1570,21 @@ public partial class Laberinto : Node2D
 		Vector2I celda = ElegirCeldaPuertaFinal(indiceBloque);
 		_puertaFinal.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_celdasObstaculo.Add(celda);
+	}
+
+	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	{
+		HashSet<int> sinColumnasLibres = [];
+		for (int i = 0; i < _bloques.Count; i++)
+		{
+			if (ColumnasLibresPuertaFinal(i).Count == 0)
+			{
+				sinColumnasLibres.Add(i);
+			}
+		}
+
+		HashSet<int> excluidos = [bloqueInca, ..bloquesTotemWiracocha, ..sinColumnasLibres];
+
+		return ElegirBloqueLejano(bloqueInca, excluidos);
 	}
 }
