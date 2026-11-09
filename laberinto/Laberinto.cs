@@ -162,9 +162,9 @@ public partial class Laberinto : Node2D
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
 
-		// TEMPORAL (6a): el disco aparece en la sala del Inca para probar.
-		// Luego: sala del tercio más lejano por BFS.
-		UbicarDiscoInti(ElegirEsquinaBloque(bloqueInca));
+		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
+		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
 
 		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
 
@@ -1586,5 +1586,11 @@ public partial class Laberinto : Node2D
 		HashSet<int> excluidos = [bloqueInca, ..bloquesTotemWiracocha, ..sinColumnasLibres];
 
 		return ElegirBloqueLejano(bloqueInca, excluidos);
+	}
+
+	private int ElegirBloqueDiscoInti(int bloqueInca, int bloquePuertaFinal)
+	{
+		HashSet<int> excluidos = [bloqueInca, bloquePuertaFinal];
+		return ElegirBloqueLejano(bloquePuertaFinal, excluidos);
 	}
 }
