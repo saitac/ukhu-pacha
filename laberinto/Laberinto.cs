@@ -38,8 +38,6 @@ public partial class Laberinto : Node2D
 	List<Rect2I> _bloques;
 	List<PuertaPosible> _puertasPosibles;
 	private Dictionary<int, int> _puertasAbiertas;
-	private List<HojaCoca> _hojasCoca;
-	private List<Mallqui> _mallquis;
 
 	private enum PuertaOrientacion
 	{
@@ -62,9 +60,11 @@ public partial class Laberinto : Node2D
 	}
 
 	private EstadoCiclo _estadoCiclo;
-
 	private AStarGrid2D _navegacion;
 
+	private readonly List<HojaCoca> _hojasCoca = [];
+	private readonly List<Mallqui> _mallquis = [];
+	private readonly List<Node2D> _totems = [];
 	private readonly HashSet<Vector2I> _celdasObstaculo = [];
 	private readonly HashSet<Vector2I> _celdasOcupadas = [];
 
@@ -102,7 +102,8 @@ public partial class Laberinto : Node2D
 		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
 		_PolvoTecho = GetNode<PolvoTecho>("Inca/CamaraInca/PolvoTecho");
 		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
-		_puertasAbiertas = [];
+		_TimerMutacion = GetNode<Timer>("TimerMutacion");
+		_TimerMutacion.Timeout += OnCicloPuertas;
 
 		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
 		MutacionOcurrida += _CamaraInca.OnMutacionOcurrida;
@@ -114,73 +115,33 @@ public partial class Laberinto : Node2D
 
 		_Inca.Murio += OnIncaMurio;
 
-		PintarMuroPerimetral();
 		DibujarPiso();
-
-		_bloques = [];
-		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), _bloques);
-
-		foreach (var bloque in _bloques)
-		{
-			CerrarBloque(bloque);
-		}
-
-		_puertasPosibles = BuscarPuertas(_bloques);
-
-		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-
-		ConectarSalas(bloqueInca);
-
-		AbrirPuertasExtra();
-
-		// Calcula en que bloques se colocarán los tótems de Wiracocha
-		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
-
-		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
-
-		// Se colocan los tótems Wiracocha en los bloques seleccionados.
-		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
 		CrearDiscoInti();
 
 		CrearPuertaFinal();
-		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
-		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
-		UbicarPuertaFinal(bloquePuertaFinal);
 
-		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
-		ActualizarNavegacion();
 
-		// Se crean las hojas de coca
-		_hojasCoca = [];
-		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
-		UbicarHojasDeCoca();
+		GenerarCueva();
 
-		// Centro del bloque del inca
+		// Se coloca al inca en el Centro del bloque
+		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
 		Vector2I centro = _bloques[bloqueInca].GetCenter();
-
-		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+	}
 
-		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
-		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
-		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
-
-		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
-
-		// Alerta - no debe existir cuartos sin acceso
-		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
-		if (cantidadRegiones != 1)
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (!OS.IsDebugBuild())
 		{
-			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");
+			return;
 		}
 
-		DibujarMurosInterior();
-
-		_TimerMutacion = GetNode<Timer>("TimerMutacion");
-		_TimerMutacion.Timeout += OnCicloPuertas;
-		ProgramarSiguienteCiclo();
+		if (@event.IsActionPressed("debug_regenerar"))
+		{
+			GenerarCueva();
+		}
 	}
 
 	private void PintarMuroPerimetral()
@@ -1073,6 +1034,7 @@ public partial class Laberinto : Node2D
 	{
 		Node2D totem = escenaTotem.Instantiate<Node2D>();
 		AddChild(totem);
+		_totems.Add(totem);
 		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_celdasObstaculo.Add(celda);
 	}
@@ -1270,8 +1232,6 @@ public partial class Laberinto : Node2D
 
 	private void ColocarMallquis(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
 	{
-		_mallquis = [];
-
 		int cantMallquis = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Criaturas.Mallqui.PorcentajeSalas));
 
 		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
@@ -1600,5 +1560,88 @@ public partial class Laberinto : Node2D
 	{
 		HashSet<int> excluidos = [bloqueInca, bloquePuertaFinal];
 		return ElegirBloqueLejano(bloquePuertaFinal, excluidos);
+	}
+
+	private void LiberarNodos<T>(List<T> nodos) where T : Node
+	{
+		foreach (T nodo in nodos)
+		{
+			if (GodotObject.IsInstanceValid(nodo))
+			{
+				nodo.QueueFree();
+			}
+		}
+
+		nodos.Clear();
+	}
+
+	private void LimpiarCueva()
+	{
+		LiberarNodos(_mallquis);
+		LiberarNodos(_totems);
+		LiberarNodos(_hojasCoca);
+		_celdasObstaculo.Clear();
+		_celdasOcupadas.Clear();
+		_Muros.Clear();
+	}
+
+	private void GenerarCueva()
+	{
+		LimpiarCueva();
+
+		_puertasAbiertas = [];
+		PintarMuroPerimetral();
+
+		_bloques = [];
+		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), _bloques);
+
+		foreach (var bloque in _bloques)
+		{
+			CerrarBloque(bloque);
+		}
+
+		_puertasPosibles = BuscarPuertas(_bloques);
+
+		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+
+		ConectarSalas(bloqueInca);
+
+		AbrirPuertasExtra();
+
+		// Calcula en que bloques se colocarán los tótems de Wiracocha
+		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
+
+		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
+
+		// Se colocan los tótems Wiracocha en los bloques seleccionados.
+		ColocarTotemsWiracocha(bloquesTotemWiracocha);
+
+		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
+		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
+		UbicarPuertaFinal(bloquePuertaFinal);
+
+		// Se actualiza la navegación AStarGrid2D
+		ActualizarNavegacion();
+
+		// Se crean las hojas de coca
+		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
+		UbicarHojasDeCoca();
+
+		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
+		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
+
+		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
+
+		// Alerta - no debe existir cuartos sin acceso
+		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
+		if (cantidadRegiones != 1)
+		{
+			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");
+		}
+
+		DibujarMurosInterior();
+
+		ProgramarSiguienteCiclo();
 	}
 }

@@ -71,6 +71,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - **Mutación también dentro de la luz:** el ciclo de puertas no depende de la antorcha; una puerta puede cambiar a la vista del jugador. Verla cerrarse (con temblor y polvo) refuerza que la cueva está viva y reacciona frente a él. Se descartó mutar solo fuera de la luz (decisión Fase 4).
   - *Pendiente:* aceleración del ciclo por disco (Fase 6).
 - **Ancla en un cambio de salas:** la sala donde está el Inca en ese momento **no se modifica** (evita que el jugador quede dentro de un muro). La puerta final sí se va de esa sala.
+- **Mallquis en un cambio de salas:** se reinician todos (desaparecen y se vuelven a repartir por la cueva nueva, nunca en la sala del Inca). La colocación del disco funciona como un respiro breve antes del siguiente acto. *(Decisión Fase 6.)*
 - **Semillas aleatorias (seeds):** cada partida genera un mapa distinto; las semillas se pueden compartir entre jugadores.
 - **La puerta final se mueve solo en los cambios de salas** (la cueva protege la Ciudad Perdida y la esconde, ver 2. Narrativa). Entre un disco y el siguiente queda quieta; lo que cambia son las rutas hacia ella (ciclos de puertas).
 
