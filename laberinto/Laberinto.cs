@@ -66,6 +66,7 @@ public partial class Laberinto : Node2D
 	private AStarGrid2D _navegacion;
 
 	private readonly HashSet<Vector2I> _celdasObstaculo = [];
+	private readonly HashSet<Vector2I> _celdasOcupadas = [];
 
 	// Desplazamientos usados para buscar una celda transitable cercana.
 	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
@@ -1224,12 +1225,15 @@ public partial class Laberinto : Node2D
 			new Vector2I(piso.Position.X, piso.End.Y - 1),
 			piso.End - Vector2I.One
 		];
-		return esquinas[_rng.RandiRange(0, esquinas.Length - 1)];
-	}
 
-	private Vector2 ElegirEsquinaBloqueHojaCoca(int indiceBloque)
-	{
-		return IndiceMapaAPosicionMundo(ElegirEsquinaBloque(indiceBloque));
+		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_celdasOcupadas.Contains(esquina))];
+		if (elegibles.Length == 0)
+		{
+			GD.PushWarning($"Bloque {indiceBloque}: las 4 esquinas están ocupadas; se encimará con otro objeto.");
+			elegibles = esquinas;
+		}
+
+		return elegibles[_rng.RandiRange(0, elegibles.Length - 1)];
 	}
 
 	private void CrearHojasDeCoca(int cantidad)
@@ -1248,7 +1252,9 @@ public partial class Laberinto : Node2D
 		List<int> bloques = ElegirBloquesHojasCoca(_hojasCoca.Count);
 		for (int i = 0; i < _hojasCoca.Count; i++)
 		{
-			_hojasCoca[i].GlobalPosition = ElegirEsquinaBloqueHojaCoca(bloques[i]);
+			Vector2I celda = ElegirEsquinaBloque(bloques[i]);
+			_celdasOcupadas.Add(celda);
+			_hojasCoca[i].GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		}
 	}
 
@@ -1475,6 +1481,7 @@ public partial class Laberinto : Node2D
 
 	private void UbicarDiscoInti(Vector2I celda)
 	{
+		_celdasOcupadas.Add(celda);
 		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 	}
 
@@ -1570,6 +1577,7 @@ public partial class Laberinto : Node2D
 		Vector2I celda = ElegirCeldaPuertaFinal(indiceBloque);
 		_puertaFinal.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_celdasObstaculo.Add(celda);
+		_celdasOcupadas.Add(celda);
 	}
 
 	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
