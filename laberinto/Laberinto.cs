@@ -11,6 +11,10 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaMallqui { get; set; }
 
+	[Export] public PackedScene EscenaDiscoInti { get; set; }
+
+	[Export] public PackedScene EscenaPuertaFinal { get; set; }
+
 	RandomNumberGenerator _rng;
 	TileMapLayer _Piso;
 	TileMapLayer _Muros;
@@ -19,6 +23,8 @@ public partial class Laberinto : Node2D
 	CamaraInca _CamaraInca;
 	PolvoTecho _PolvoTecho;
 	PolvoPuertas _PolvoPuertas;
+	DiscoInti _discoInti;
+	PuertaFinal _puertaFinal;
 
 	private enum Celda
 	{
@@ -60,6 +66,7 @@ public partial class Laberinto : Node2D
 	private AStarGrid2D _navegacion;
 
 	private readonly HashSet<Vector2I> _celdasObstaculo = [];
+	private readonly HashSet<Vector2I> _celdasOcupadas = [];
 
 	// Desplazamientos usados para buscar una celda transitable cercana.
 	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
@@ -134,6 +141,13 @@ public partial class Laberinto : Node2D
 		// Se colocan los tótems Wiracocha en los bloques seleccionados.
 		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
+		CrearDiscoInti();
+
+		CrearPuertaFinal();
+		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
+		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
+		UbicarPuertaFinal(bloquePuertaFinal);
+
 		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
 		ActualizarNavegacion();
@@ -148,6 +162,10 @@ public partial class Laberinto : Node2D
 
 		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+
+		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
+		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
 
 		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
 
@@ -1109,7 +1127,7 @@ public partial class Laberinto : Node2D
 	private HashSet<int> ElegirBloquesTotemWiracocha(int bloqueInca)
 	{
 		// Obtengo el número de totems que voy a colocar - mínimo 1
-		int cantidadDeTotems = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Totems.Wiracocha.PorcentajeSalas));
+		int cantidadDeTotems = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Sagrados.Wiracocha.PorcentajeSalas));
 
 		// Diccionario que contendrá el indice del bloque con sus distancias
 		Dictionary<int, int[]> distanciasPorTotem = [];
@@ -1121,7 +1139,7 @@ public partial class Laberinto : Node2D
 		// Filtro por el primer criterio: distanciasInca >= Min, los que cumplen el criterio los almaceno en la lista bloquesCandidatosBase
 		for (int di = 0; di < distanciasInca.Length; di++)
 		{
-			if (distanciasInca[di] >= LaberintoConfig.Totems.Wiracocha.DistanciaMinima)
+			if (distanciasInca[di] >= LaberintoConfig.Sagrados.Wiracocha.DistanciaMinima)
 			{
 				bloquesCandidatosBase.Add(di);
 			}
@@ -1135,7 +1153,7 @@ public partial class Laberinto : Node2D
 			foreach (int bcb in bloquesCandidatosBase)
 			{
 				// Si es el primer totem a colocar y el bloque candidato base (bcb) supera la distancia máxima permitida, se descarta.
-				if (distanciasPorTotem.Count == 0 && distanciasInca[bcb] > LaberintoConfig.Totems.Wiracocha.DistanciaMaxima)
+				if (distanciasPorTotem.Count == 0 && distanciasInca[bcb] > LaberintoConfig.Sagrados.Wiracocha.DistanciaMaxima)
 				{
 					continue;
 				}
@@ -1144,7 +1162,7 @@ public partial class Laberinto : Node2D
 				// Si ya hay, al menos, un totem colocado, se excluyen aquellos bloques candidatos base que se encuentren a una distancia menor a Separación.
 				foreach (int[] distanciasTotem in distanciasPorTotem.Values)
 				{
-					if (distanciasTotem[bcb] < LaberintoConfig.Totems.Wiracocha.SeparacionMinima)
+					if (distanciasTotem[bcb] < LaberintoConfig.Sagrados.Wiracocha.SeparacionMinima)
 					{
 						muyCerca = true;
 						break;
@@ -1198,7 +1216,7 @@ public partial class Laberinto : Node2D
 		return [.. indices[..cantidadReal]];
 	}
 
-	private Vector2 ElegirEsquinaBloqueHojaCoca(int indiceBloque)
+	private Vector2I ElegirEsquinaBloque(int indiceBloque)
 	{
 		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
 		Vector2I[] esquinas = [
@@ -1207,7 +1225,15 @@ public partial class Laberinto : Node2D
 			new Vector2I(piso.Position.X, piso.End.Y - 1),
 			piso.End - Vector2I.One
 		];
-		return IndiceMapaAPosicionMundo(esquinas[_rng.RandiRange(0, esquinas.Length - 1)]);
+
+		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_celdasOcupadas.Contains(esquina))];
+		if (elegibles.Length == 0)
+		{
+			GD.PushWarning($"Bloque {indiceBloque}: las 4 esquinas están ocupadas; se encimará con otro objeto.");
+			elegibles = esquinas;
+		}
+
+		return elegibles[_rng.RandiRange(0, elegibles.Length - 1)];
 	}
 
 	private void CrearHojasDeCoca(int cantidad)
@@ -1226,7 +1252,9 @@ public partial class Laberinto : Node2D
 		List<int> bloques = ElegirBloquesHojasCoca(_hojasCoca.Count);
 		for (int i = 0; i < _hojasCoca.Count; i++)
 		{
-			_hojasCoca[i].GlobalPosition = ElegirEsquinaBloqueHojaCoca(bloques[i]);
+			Vector2I celda = ElegirEsquinaBloque(bloques[i]);
+			_celdasOcupadas.Add(celda);
+			_hojasCoca[i].GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		}
 	}
 
@@ -1282,6 +1310,14 @@ public partial class Laberinto : Node2D
 		_navegacion.Update();
 	}
 
+	private bool EsCeldaLibre(Vector2I celda)
+	{
+		bool filaValida = celda.Y >= 0 && celda.Y < _mapa.GetLength(0);
+		bool columnaValida = celda.X >= 0 && celda.X < _mapa.GetLength(1);
+
+		return filaValida && columnaValida && _mapa[celda.Y, celda.X] != Celda.Muro && !_celdasObstaculo.Contains(celda);
+	}
+
 	private void ActualizarNavegacion()
 	{
 		for (int fila = 0; fila < _mapa.GetLength(0); fila++)
@@ -1289,7 +1325,7 @@ public partial class Laberinto : Node2D
 			for (int columna = 0; columna < _mapa.GetLength(1); columna++)
 			{
 				Vector2I celda = new(columna, fila);
-				bool esObstaculo = _mapa[fila, columna] == Celda.Muro || _celdasObstaculo.Contains(celda);
+				bool esObstaculo = !EsCeldaLibre(celda);
 				_navegacion.SetPointSolid(celda, esObstaculo);
 			}
 		}
@@ -1351,6 +1387,8 @@ public partial class Laberinto : Node2D
 	}
 
 	private bool EsTransitable(Vector2I celda) => _navegacion.IsInBounds(celda.X, celda.Y) && !_navegacion.IsPointSolid(celda);
+
+	public bool EsPosicionTransitable(Vector2 posicionMundo) => EsTransitable(PosicionMundoAIndiceMapa(posicionMundo));
 
 	private Rect2I AreaMundoAAreaMapa(Rect2 areaMundo)
 	{
@@ -1432,5 +1470,135 @@ public partial class Laberinto : Node2D
 			int j = _rng.RandiRange(i, elementos.Count - 1);
 			(elementos[j], elementos[i]) = (elementos[i], elementos[j]);
 		}
+	}
+
+	private void CrearDiscoInti()
+	{
+		_discoInti = EscenaDiscoInti.Instantiate<DiscoInti>();
+		_discoInti.Inicializar(this);
+		AddChild(_discoInti);
+	}
+
+	private void UbicarDiscoInti(Vector2I celda)
+	{
+		_celdasOcupadas.Add(celda);
+		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+	}
+
+	private void CrearPuertaFinal()
+	{
+		_puertaFinal = EscenaPuertaFinal.Instantiate<PuertaFinal>();
+		AddChild(_puertaFinal);
+		_puertaFinal.Inicializar(_discoInti);
+	}
+
+	private List<int> ColumnasLibresPuertaFinal(int indiceBloque)
+	{
+		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
+		HashSet<int> columnasProhibidas = [];
+		List<int> columnasLibres = [];
+
+		foreach (PuertaPosible pp in _puertasPosibles)
+		{
+			if (pp.Orientacion == PuertaOrientacion.Vertical && pp.IndiceBloqueB == indiceBloque)
+			{
+				for (int colValida = pp.PrimeraValida; colValida <= pp.UltimaValida; colValida++)
+				{
+					columnasProhibidas.Add(colValida);
+				}
+			}
+		}
+
+		for (int colBloque = piso.Position.X; colBloque <= piso.End.X - 1; colBloque++)
+		{
+			if (!columnasProhibidas.Contains(colBloque))
+			{
+				columnasLibres.Add(colBloque);
+			}
+		}
+
+		return columnasLibres;
+	}
+
+	private int ElegirBloqueLejano(int bloqueOrigen, HashSet<int> excluidos)
+	{
+		int[] distancias = DistanciasDesde(bloqueOrigen);
+		int distanciaMaxima = distancias.Max();
+		int umbral = Mathf.CeilToInt(distanciaMaxima * LaberintoConfig.Sagrados.PuertaFinal.FraccionLejana);
+
+		List<int> bloquesCandidatos = [];
+		List<int> bloquesAlternativos = [];
+
+		for (int i = 0; i < distancias.Length; i++)
+		{
+			if (distancias[i] == -1 || excluidos.Contains(i))
+			{
+				continue;
+			}
+
+			if (distancias[i] >= umbral)
+			{
+				bloquesCandidatos.Add(i);
+			}
+			else
+			{
+				bloquesAlternativos.Add(i);
+			}
+		}
+
+		if (bloquesCandidatos.Count == 0 && bloquesAlternativos.Count == 0)
+		{
+			// No hay bloque que cumpla las condiciones.
+			GD.PushWarning("No existe bloque lejano que cumpla las condiciones");
+			return bloqueOrigen;
+		}
+
+		if (bloquesCandidatos.Count == 0)
+		{
+			bloquesCandidatos = bloquesAlternativos;
+		}
+
+		int bloqueElegido = bloquesCandidatos[_rng.RandiRange(0, bloquesCandidatos.Count - 1)];
+
+		return bloqueElegido;
+	}
+
+	private Vector2I ElegirCeldaPuertaFinal(int indiceBloque)
+	{
+		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
+		List<int> columnasLibres = ColumnasLibresPuertaFinal(indiceBloque);
+		int columnaElegida = columnasLibres[_rng.RandiRange(0, columnasLibres.Count - 1)];
+		int primeraFila = piso.Position.Y;
+		return new Vector2I(columnaElegida, primeraFila);
+	}
+
+	private void UbicarPuertaFinal(int indiceBloque)
+	{
+		Vector2I celda = ElegirCeldaPuertaFinal(indiceBloque);
+		_puertaFinal.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_celdasObstaculo.Add(celda);
+		_celdasOcupadas.Add(celda);
+	}
+
+	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
+	{
+		HashSet<int> sinColumnasLibres = [];
+		for (int i = 0; i < _bloques.Count; i++)
+		{
+			if (ColumnasLibresPuertaFinal(i).Count == 0)
+			{
+				sinColumnasLibres.Add(i);
+			}
+		}
+
+		HashSet<int> excluidos = [bloqueInca, ..bloquesTotemWiracocha, ..sinColumnasLibres];
+
+		return ElegirBloqueLejano(bloqueInca, excluidos);
+	}
+
+	private int ElegirBloqueDiscoInti(int bloqueInca, int bloquePuertaFinal)
+	{
+		HashSet<int> excluidos = [bloqueInca, bloquePuertaFinal];
+		return ElegirBloqueLejano(bloquePuertaFinal, excluidos);
 	}
 }

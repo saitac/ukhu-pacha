@@ -94,7 +94,7 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - La distancia se mide al momento de colocarlos; luego las puertas mutan y deja de ser exacta (coherente con que el rango no es una garantía).
   - **Valores actuales:** 20% de las salas; el primer tótem entre 2 y 3 salas del Inca; separación mínima de 3 salas entre tótems.
   - La luz del brasero es **tenue**: marca el tótem como un faro, pero no ilumina toda la sala.
-- **Visibilidad:** la oscuridad casi total y las **sombras** de las luces (los muros bloquean la luz) deciden qué se ve del mapa; no hay una capa aparte de niebla de guerra. Solo se ve a lo lejos lo que tiene luz propia (braseros, hojas de coca).
+- **Visibilidad:** la oscuridad casi total y las **sombras** de las luces (los muros bloquean la luz) deciden qué se ve del mapa; no hay una capa aparte de niebla de guerra (**descartada** en la Fase 6: las sombras ya cumplen ese papel). Solo se ve a lo lejos lo que tiene luz propia (braseros, hojas de coca). Los discos de Inti **no** tienen luz propia (ver 3.4).
   - *Pendiente (pospuesto en Fase 5, revisar en Fase 9 o cuando haya más fuentes de luz):* en vista cenital la cámara ve todo lo iluminado aunque haya un muro de por medio. Los **enemigos** solo serán visibles si el Inca tiene **línea de visión** hacia ellos, para que no se los vea a través de los muros junto a un brasero.
     - En pruebas (Fase 5) el caso existe, pero la luz tenue del brasero lo disimula: el Mallqui recién se distingue cuando la antorcha lo alumbra, y para entonces ya está persiguiendo al Inca. Por ahora no molesta; se revisará al sumar luces (Amuleto de Inti, más braseros, etc.).
 - Dilema estratégico: arriesgarse a explorar más lejos vs. volver a recargar (sabiendo que el camino de vuelta puede haber cambiado).
@@ -113,8 +113,22 @@ Un príncipe inca huye de la conquista española y se refugia en una cueva ances
   - Cada acto alterna calma y tensión: explorar (solo Mallquis) → tomar el disco → huir de Supay → colocarlo → temblor.
 - **Explorar tiene recompensa:** quien prestó atención a la ubicación de la puerta final mientras buscaba el disco regresa con más facilidad; quien no, debe buscarla cargando el disco.
 - Al colocar el **tercer** disco, la puerta se abre (ver Final en 2. Narrativa); no hay cambio de salas.
-- Cargar un disco probablemente limita otras acciones (uso de armas, sigilo, etc. — a definir).
+- **El disco no brilla por sí solo** (decisión Fase 6), a diferencia de las hojas de coca: en la oscuridad es invisible y hay que buscarlo con la antorcha. **Solo bajo la luz de la antorcha** el oro del Inti emite un destello, que lo distingue del suelo y premia el haber explorado iluminando.
+  - El disco y la puerta final son **escenas propias** (como el tótem de Wiracocha), no celdas del TileMap.
+- **Usar un arma suelta el disco** (decisión Fase 6): el Inca necesita las manos para la macana, la honda o el humo (ver 3.5). Cargar el disco no limita el movimiento; pelear es posible, pero tiene un costo.
+  - Al usar un arma, el disco **cae desplazado** a un costado del Inca (no a sus pies) y queda en el suelo.
+  - **Recogerlo es automático** al pasar por encima, como las hojas de coca. Caer desplazado evita que el Inca lo vuelva a recoger en el mismo instante en que lo suelta.
+  - **Mientras el disco está en el suelo, Supay sigue persiguiendo al Inca:** su presa es el portador, y el Inca todavía puede retomarlo.
+  - **Si llega un ciclo de puertas con el disco en el suelo, la cueva lo recoloca** en una **sala al azar no muy lejana** (a **1–3 saltos** en el grafo de salas desde donde cayó), igual que hace con las hojas de coca (ver 3.2 y 3.7). Si el Inca lo carga, no se recoloca.
+  - **Al recolocarse el disco, Supay se desvanece y se hunde en el Ukhu Pacha**, y **vuelve a aparecer cuando el Inca toma el disco otra vez** (la misma regla del inicio de cada acto). Perder el disco tiene un costo (buscarlo de nuevo y perder camino) y un respiro (Supay se va un rato); no se castiga dos veces.
+  - Soltar el disco a propósito para librarse de Supay es una apuesta, no un truco: solo funciona si llega un ciclo de puertas (sin reloj visible), y además se pierde el disco.
+  - *Implementación:* en la Fase 6 el disco ya puede estar en el suelo o cargado; se prueba con una tecla de debug "soltar disco". En la Fase 7 las armas llaman al mismo método.
 - Cada disco colocado en la puerta **acelera la mutación** de la cueva (más tensión progresiva).
+- **La dificultad escala solo por discos colocados**, no por el tiempo de partida: cada disco sube los parámetros (ciclo de puertas más corto, Supay más rápido y fuerte, quizá Mallquis más rápidos). Es predecible y refuerza la estructura en actos. *(Decisión Fase 6.)*
+- **Ubicación de la puerta final y del disco (decisión Fase 6):** se calcula la distancia en **saltos sobre el grafo de salas** (BFS, la misma conectividad de la Fase 3).
+  - La puerta final va en una sala del **tercio más lejano** a la sala del Inca.
+  - El disco siguiente va en una sala del **tercio más lejano** a la puerta final (y nunca en la sala del Inca).
+  - Así cada acto obliga a recorrer la cueva: ir lejos por el disco y volver lejos con Supay detrás.
 
 ### 3.5 Combate — "Impotencia táctica"
 El jugador **no puede matar** a las criaturas mitológicas; solo aturdir, cegar o escapar.
@@ -138,6 +152,8 @@ Cada recurso se recarga con un mecanismo distinto, para que el mapa no se llene 
 | Cóndor | Altares (en un lugar) |
 | Puma | Tiempo (cooldown), sin tótem ni altar |
 | Vigor | Hojas de coca flotantes y limitadas: se recolocan con cada ciclo de puertas y se reponen al colocar un disco de Inti (ver 3.7) |
+
+- **Cóndor y Puma se implementan en la Fase 7**, junto con el combate (decisión Fase 6).
 
 - **Cóndor:** invocable en altares específicos → vista cenital temporal para "espiar" el laberinto. Los altares **se recolocan junto con los tótems** cada vez que cambian las salas. Es especialmente valioso justo después de un cambio de salas, para reorientarse en la cueva nueva.
 - **Puma:** empuje/aturdimiento de emergencia con cooldown largo, para escapar de un acorralamiento.
@@ -258,7 +274,7 @@ public partial class Inca : CharacterBody2D
 - [x] **Fase 4:** Sistema de antorcha (luz dinámica + recarga en tótems)
 - [x] **Fase 5:** Primer enemigo funcional: el **Mallqui** (patrulla, detección por línea de visión, persecución, golpe que baja el vigor y cantidad según las salas). Pospuesto: su visibilidad solo con línea de visión del Inca (ver 3.3) y su entrada saliendo de un muro (Fase 9, pulido); sujetar al Inca (parálisis, ver 4) llega con el Supay (Fase 6)
 - [ ] **Fase 6:** Sistema de recolección de los 3 discos de Inti + puerta final (incluye a Supay como guardián de cada disco y reponer las hojas de coca al colocar cada disco, ver 3.4 y 3.7)
-- [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo) + enfrentamiento final con el Amaru
+- [ ] **Fase 7:** Combate de aturdimiento (macana, honda, humo; usar un arma suelta el disco de Inti, ver 3.4) + aliados Cóndor (altares) y Puma (cooldown) + enfrentamiento final con el Amaru
 - [ ] **Fase 8:** Arte pixel definitivo + animaciones
 - [ ] **Fase 9:** Pulido, sonido, música, menú y pantalla de derrota/victoria
 - [ ] **Fase 10:** Exportación y evaluación de plataformas (Steam / Itch.io / móvil)
@@ -281,10 +297,7 @@ public partial class Inca : CharacterBody2D
 
 ## 10. Preguntas abiertas / por definir
 
-- ¿Qué ocurre exactamente al cargar un disco de Inti? (¿limita combate, movimiento, ambas?)
-- ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.)
-- ¿La dificultad/velocidad de mutación escala solo por discos recogidos, o también por tiempo total de partida? (¿Cada disco acelera el ciclo de puertas?)
-- ¿Reglas para reubicar la puerta final y los discos? (¿distancia mínima caminando desde el Inca? ¿el siguiente disco lejos de la nueva puerta?) — se definirán al implementar la Fase 3/6.
+- ¿Cuántos altares de Cóndor habrá por partida? (Puma ya no usa altares: se recarga por cooldown.) — se define en la Fase 7.
 - ¿Habrá progresión entre partidas (desbloqueables) o cada run es 100% independiente (roguelike puro)?
 - Definir tamaño exacto del grid y ritmo de cámara/zoom.
 - ¿La respiración del Inca (ver 3.7) va acompañada de un latido que se acelera, o basta con la respiración?

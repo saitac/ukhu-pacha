@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://frfsi26myyj8" path="res://laberinto/sprites/muro-t.png" id="4_wsvcv"]
 [ext_resource type="Texture2D" uid="uid://cvi4xx0v2fruf" path="res://laberinto/sprites/piso-2.png" id="5_2yttv"]
 [ext_resource type="Texture2D" uid="uid://c3qa47xfxr30s" path="res://laberinto/sprites/piso-3.png" id="6_l26wg"]
+[ext_resource type="PackedScene" uid="uid://dqs5640tgtxhf" path="res://sagrados/puerta_final/puerta_final.tscn" id="6_rgymm"]
 [ext_resource type="Texture2D" uid="uid://bnlcvql5it0tb" path="res://laberinto/sprites/piso-4.png" id="7_rgeaq"]
 [ext_resource type="Texture2D" uid="uid://bupqg4mnmt7ov" path="res://laberinto/sprites/muro-cruz.png" id="9_kwhve"]
 [ext_resource type="Texture2D" uid="uid://iu3x4ksf455r" path="res://laberinto/sprites/muro-esquina.png" id="10_mmumd"]
@@ -19,6 +20,7 @@
 [ext_resource type="Script" uid="uid://cxg3kx6tiagou" path="res://laberinto/PolvoPuertas.cs" id="15_kwhve"]
 [ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
 [ext_resource type="PackedScene" uid="uid://dejbe7qosjrhr" path="res://recogibles/hoja_coca/hoja_coca.tscn" id="18_glftc"]
+[ext_resource type="PackedScene" uid="uid://diokldmgqlgb3" path="res://recogibles/disco_inti/disco_inti.tscn" id="20_m5etf"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_aislado0"]
 cull_mode = 1
@@ -297,6 +299,8 @@ script = ExtResource("1_8w83w")
 EscenaTotemWiracocha = ExtResource("2_yhjxc")
 EscenaHojaCoca = ExtResource("18_glftc")
 EscenaMallqui = ExtResource("4_7fdqi")
+EscenaDiscoInti = ExtResource("20_m5etf")
+EscenaPuertaFinal = ExtResource("6_rgymm")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
 scale = Vector2(3, 3)
