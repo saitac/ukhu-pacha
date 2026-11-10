@@ -127,7 +127,12 @@ public partial class Laberinto : Node2D
 
 		// Se coloca al inca en el Centro del bloque
 		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-		Vector2I centro = _bloques[bloqueInca].GetCenter();
+		CentrarIncaEnSala(bloqueInca);
+	}
+
+	private void CentrarIncaEnSala(int bloque)
+	{
+		Vector2I centro = _bloques[bloque].GetCenter();
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
 	}
 
@@ -311,20 +316,50 @@ public partial class Laberinto : Node2D
 		return _Piso.ToGlobal(posicionLocal);
 	}
 
-	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
+	private List<int> CortesValidos(Rect2I bloque, Rect2I? ancla, Vector2I.Axis eje)
 	{
-		// obtengo el tamaño mínimo y máximo que puede tener un bloque en el mapa y
-		// el factor de proporción que define si un bloque es muy ancho o muy alto
-
+		List<int> cortes = [];
 		int min = LaberintoConfig.Bloque.TamanoMinimo;
-		int max = LaberintoConfig.Bloque.TamanoMaximo;
+
+		if (ancla is Rect2I a && bloque.Encloses(a))
+		{
+			int bordeInicio = a.Position[(int)eje] - bloque.Position[(int)eje];
+			int bordeFin = a.End[(int)eje] - bloque.Position[(int)eje];
+
+			if (bordeInicio >= min && bordeInicio <= bloque.Size[(int)eje] - min)
+			{
+				cortes.Add(bordeInicio);
+			}
+
+			if (bordeFin >= min && bordeFin <= bloque.Size[(int)eje] - min)
+			{
+				cortes.Add(bordeFin);
+			}
+		}
+		else
+		{
+			for (int pos = min; pos <= bloque.Size[(int)eje] - min; pos++)
+			{
+				cortes.Add(pos);
+			}
+		}
+
+		return cortes;
+	}
+
+	private void Particionar(Rect2I bloque, Rect2I? ancla, List<Rect2I> resultado)
+	{
+
+		// el factor de proporción que define si un bloque es muy ancho o muy alto
 		float factorProporcion = LaberintoConfig.Bloque.FactorProporcion;
 
-		bool puedeCortarHorizontal = bloque.Size.Y >= max; // alto - válido solo porque TamanoMaximo = 2 * TamanoMinimo
-		bool puedeCortarVertical = bloque.Size.X >= max; // ancho - válido solo porque TamanoMaximo = 2 * TamanoMinimo
+		List<int> cortesHorizontales = CortesValidos(bloque, ancla, Vector2I.Axis.Y);
+		List<int> cortesVerticales = CortesValidos(bloque, ancla, Vector2I.Axis.X);
 
+		bool puedeCortarHorizontal = cortesHorizontales.Count > 0;
+		bool puedeCortarVertical = cortesVerticales.Count > 0;
 
-		// Ya no se puede cortar por que sería menor que el tamaño mínimo
+		// Sin cortes válidos en ningún eje (por tamaño mínimo o por la ancla): el bloque queda como sala
 		if (!puedeCortarHorizontal && !puedeCortarVertical)
 		{
 			resultado.Add(bloque);
@@ -362,7 +397,7 @@ public partial class Laberinto : Node2D
 		Rect2I bloqueB;
 		if (cortarVertical) // parto el ancho (Size.X)
 		{
-			puntoDeCorte = _rng.RandiRange(min, bloque.Size.X - min);
+			puntoDeCorte = cortesVerticales[_rng.RandiRange(0, cortesVerticales.Count - 1)];
 
 			bloqueA = new Rect2I(
 				bloque.Position, new Vector2I(puntoDeCorte, bloque.Size.Y)
@@ -373,7 +408,7 @@ public partial class Laberinto : Node2D
 		}
 		else // corte horizontal, parto el alto
 		{
-			puntoDeCorte = _rng.RandiRange(min, bloque.Size.Y - min);
+			puntoDeCorte = cortesHorizontales[_rng.RandiRange(0, cortesHorizontales.Count - 1)];
 
 			bloqueA = new Rect2I(
 				bloque.Position, new Vector2I(bloque.Size.X, puntoDeCorte)
@@ -383,9 +418,9 @@ public partial class Laberinto : Node2D
 			bloque.Position.Y + puntoDeCorte), new Vector2I(bloque.Size.X, bloque.Size.Y - puntoDeCorte));
 		}
 
-		// Recursivo, cada mitad se vuelve a partir mientras mida al menos el doble del mínimo
-		Particionar(bloqueA, resultado);
-		Particionar(bloqueB, resultado);
+		// Recursivo: cada mitad se vuelve a partir mientras tenga cortes válidos
+		Particionar(bloqueA, ancla, resultado);
+		Particionar(bloqueB, ancla, resultado);
 	}
 
 	private void CerrarBloque(Rect2I bloque)
@@ -1592,8 +1627,24 @@ public partial class Laberinto : Node2D
 		_puertasAbiertas = [];
 		PintarMuroPerimetral();
 
+		Rect2I? ancla = null;
+
+		if (_bloques is { Count: > 0 })
+		{
+			int bloqueIncaAnterior = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+
+			if (bloqueIncaAnterior >= 0)
+			{
+				ancla = _bloques[bloqueIncaAnterior];
+			}
+			else
+			{
+				GD.PushWarning($"GenerarCueva: el Inca en {_Inca.GlobalPosition} no está en ningún bloque; se regenera sin ancla.");
+			}
+		}
+
 		_bloques = [];
-		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), _bloques);
+		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), ancla, _bloques);
 
 		foreach (var bloque in _bloques)
 		{
@@ -1607,6 +1658,13 @@ public partial class Laberinto : Node2D
 		ConectarSalas(bloqueInca);
 
 		AbrirPuertasExtra();
+
+		Vector2I posIncaMapa = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+		if (_mapa[posIncaMapa.Y, posIncaMapa.X] == Celda.Muro)
+		{
+			CentrarIncaEnSala(bloqueInca);
+			GD.PushWarning($"GenerarCueva: el Inca quedó dentro de un muro en la celda {posIncaMapa}; se mueve al centro de su sala.");
+		}
 
 		// Calcula en que bloques se colocarán los tótems de Wiracocha
 		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
