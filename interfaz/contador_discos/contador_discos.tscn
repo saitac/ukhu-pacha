@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://lnt5auq648j2"]
+
+[ext_resource type="Texture2D" uid="uid://dfkjs2r8oiv6w" path="res://recogibles/disco_inti/sprites/cuerpo-inti-01.png" id="1_ab3gm"]
+[ext_resource type="Script" uid="uid://oisjekmwuuog" path="res://interfaz/contador_discos/ContadorDiscos.cs" id="1_pjfdp"]
+
+[node name="ContadorDiscos" type="CanvasLayer" unique_id=1452587014]
+script = ExtResource("1_pjfdp")
+
+[node name="Intis" type="HBoxContainer" parent="." unique_id=1424517537]
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Inti1" type="TextureRect" parent="Intis" unique_id=974503468]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("1_ab3gm")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Inti2" type="TextureRect" parent="Intis" unique_id=1370410268]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("1_ab3gm")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Inti3" type="TextureRect" parent="Intis" unique_id=561085156]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("1_ab3gm")
+expand_mode = 1
+stretch_mode = 5

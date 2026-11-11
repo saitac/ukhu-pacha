@@ -25,6 +25,8 @@ public partial class Laberinto : Node2D
 	PolvoPuertas _PolvoPuertas;
 	DiscoInti _discoInti;
 	PuertaFinal _puertaFinal;
+	ContadorDiscos _contadorDiscos;
+	CanvasModulate _oscuridad;
 
 	private enum Celda
 	{
@@ -38,8 +40,6 @@ public partial class Laberinto : Node2D
 	List<Rect2I> _bloques;
 	List<PuertaPosible> _puertasPosibles;
 	private Dictionary<int, int> _puertasAbiertas;
-	private List<HojaCoca> _hojasCoca;
-	private List<Mallqui> _mallquis;
 
 	private enum PuertaOrientacion
 	{
@@ -62,9 +62,11 @@ public partial class Laberinto : Node2D
 	}
 
 	private EstadoCiclo _estadoCiclo;
-
 	private AStarGrid2D _navegacion;
 
+	private readonly List<HojaCoca> _hojasCoca = [];
+	private readonly List<Mallqui> _mallquis = [];
+	private readonly List<Node2D> _totems = [];
 	private readonly HashSet<Vector2I> _celdasObstaculo = [];
 	private readonly HashSet<Vector2I> _celdasOcupadas = [];
 
@@ -102,7 +104,11 @@ public partial class Laberinto : Node2D
 		_CamaraInca = GetNode<CamaraInca>("Inca/CamaraInca");
 		_PolvoTecho = GetNode<PolvoTecho>("Inca/CamaraInca/PolvoTecho");
 		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
-		_puertasAbiertas = [];
+		_TimerMutacion = GetNode<Timer>("TimerMutacion");
+		_contadorDiscos = GetNode<ContadorDiscos>("ContadorDiscos");
+		_oscuridad = GetNode<CanvasModulate>("Oscuridad");
+
+		_TimerMutacion.Timeout += OnCicloPuertas;
 
 		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
 		MutacionOcurrida += _CamaraInca.OnMutacionOcurrida;
@@ -114,73 +120,43 @@ public partial class Laberinto : Node2D
 
 		_Inca.Murio += OnIncaMurio;
 
-		PintarMuroPerimetral();
 		DibujarPiso();
-
-		_bloques = [];
-		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), _bloques);
-
-		foreach (var bloque in _bloques)
-		{
-			CerrarBloque(bloque);
-		}
-
-		_puertasPosibles = BuscarPuertas(_bloques);
-
-		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
-
-		ConectarSalas(bloqueInca);
-
-		AbrirPuertasExtra();
-
-		// Calcula en que bloques se colocarán los tótems de Wiracocha
-		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
-
-		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
-
-		// Se colocan los tótems Wiracocha en los bloques seleccionados.
-		ColocarTotemsWiracocha(bloquesTotemWiracocha);
 
 		CrearDiscoInti();
 
 		CrearPuertaFinal();
-		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
-		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
-		UbicarPuertaFinal(bloquePuertaFinal);
 
-		// Se crea y actualiza la navegación AStarGrid2D
 		CrearNavegacion();
-		ActualizarNavegacion();
 
-		// Se crean las hojas de coca
-		_hojasCoca = [];
-		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
-		UbicarHojasDeCoca();
+		GenerarCueva();
 
-		// Centro del bloque del inca
-		Vector2I centro = _bloques[bloqueInca].GetCenter();
+		// Se coloca al inca en el Centro del bloque
+		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+		CentrarIncaEnSala(bloqueInca);
+	}
 
-		// Se le asigna al inca la posición en el centro del bloque en el que se encuentra.
+	private void CentrarIncaEnSala(int bloque)
+	{
+		Vector2I centro = _bloques[bloque].GetCenter();
 		_Inca.GlobalPosition = IndiceMapaAPosicionMundo(centro);
+	}
 
-		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
-		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
-		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
-
-		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
-
-		// Alerta - no debe existir cuartos sin acceso
-		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
-		if (cantidadRegiones != 1)
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (!OS.IsDebugBuild())
 		{
-			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");
+			return;
 		}
 
-		DibujarMurosInterior();
+		if (@event.IsActionPressed("debug_regenerar"))
+		{
+			GenerarCueva();
+		}
 
-		_TimerMutacion = GetNode<Timer>("TimerMutacion");
-		_TimerMutacion.Timeout += OnCicloPuertas;
-		ProgramarSiguienteCiclo();
+		if (@event.IsActionPressed("debug_oscuridad"))
+		{
+			_oscuridad.Visible = !_oscuridad.Visible;
+		}
 	}
 
 	private void PintarMuroPerimetral()
@@ -350,20 +326,50 @@ public partial class Laberinto : Node2D
 		return _Piso.ToGlobal(posicionLocal);
 	}
 
-	private void Particionar(Rect2I bloque, List<Rect2I> resultado)
+	private List<int> CortesValidos(Rect2I bloque, Rect2I? ancla, Vector2I.Axis eje)
 	{
-		// obtengo el tamaño mínimo y máximo que puede tener un bloque en el mapa y
-		// el factor de proporción que define si un bloque es muy ancho o muy alto
-
+		List<int> cortes = [];
 		int min = LaberintoConfig.Bloque.TamanoMinimo;
-		int max = LaberintoConfig.Bloque.TamanoMaximo;
+
+		if (ancla is Rect2I a && bloque.Encloses(a))
+		{
+			int bordeInicio = a.Position[(int)eje] - bloque.Position[(int)eje];
+			int bordeFin = a.End[(int)eje] - bloque.Position[(int)eje];
+
+			if (bordeInicio >= min && bordeInicio <= bloque.Size[(int)eje] - min)
+			{
+				cortes.Add(bordeInicio);
+			}
+
+			if (bordeFin >= min && bordeFin <= bloque.Size[(int)eje] - min)
+			{
+				cortes.Add(bordeFin);
+			}
+		}
+		else
+		{
+			for (int pos = min; pos <= bloque.Size[(int)eje] - min; pos++)
+			{
+				cortes.Add(pos);
+			}
+		}
+
+		return cortes;
+	}
+
+	private void Particionar(Rect2I bloque, Rect2I? ancla, List<Rect2I> resultado)
+	{
+
+		// el factor de proporción que define si un bloque es muy ancho o muy alto
 		float factorProporcion = LaberintoConfig.Bloque.FactorProporcion;
 
-		bool puedeCortarHorizontal = bloque.Size.Y >= max; // alto - válido solo porque TamanoMaximo = 2 * TamanoMinimo
-		bool puedeCortarVertical = bloque.Size.X >= max; // ancho - válido solo porque TamanoMaximo = 2 * TamanoMinimo
+		List<int> cortesHorizontales = CortesValidos(bloque, ancla, Vector2I.Axis.Y);
+		List<int> cortesVerticales = CortesValidos(bloque, ancla, Vector2I.Axis.X);
 
+		bool puedeCortarHorizontal = cortesHorizontales.Count > 0;
+		bool puedeCortarVertical = cortesVerticales.Count > 0;
 
-		// Ya no se puede cortar por que sería menor que el tamaño mínimo
+		// Sin cortes válidos en ningún eje (por tamaño mínimo o por la ancla): el bloque queda como sala
 		if (!puedeCortarHorizontal && !puedeCortarVertical)
 		{
 			resultado.Add(bloque);
@@ -401,7 +407,7 @@ public partial class Laberinto : Node2D
 		Rect2I bloqueB;
 		if (cortarVertical) // parto el ancho (Size.X)
 		{
-			puntoDeCorte = _rng.RandiRange(min, bloque.Size.X - min);
+			puntoDeCorte = cortesVerticales[_rng.RandiRange(0, cortesVerticales.Count - 1)];
 
 			bloqueA = new Rect2I(
 				bloque.Position, new Vector2I(puntoDeCorte, bloque.Size.Y)
@@ -412,7 +418,7 @@ public partial class Laberinto : Node2D
 		}
 		else // corte horizontal, parto el alto
 		{
-			puntoDeCorte = _rng.RandiRange(min, bloque.Size.Y - min);
+			puntoDeCorte = cortesHorizontales[_rng.RandiRange(0, cortesHorizontales.Count - 1)];
 
 			bloqueA = new Rect2I(
 				bloque.Position, new Vector2I(bloque.Size.X, puntoDeCorte)
@@ -422,9 +428,9 @@ public partial class Laberinto : Node2D
 			bloque.Position.Y + puntoDeCorte), new Vector2I(bloque.Size.X, bloque.Size.Y - puntoDeCorte));
 		}
 
-		// Recursivo, cada mitad se vuelve a partir mientras mida al menos el doble del mínimo
-		Particionar(bloqueA, resultado);
-		Particionar(bloqueB, resultado);
+		// Recursivo: cada mitad se vuelve a partir mientras tenga cortes válidos
+		Particionar(bloqueA, ancla, resultado);
+		Particionar(bloqueB, ancla, resultado);
 	}
 
 	private void CerrarBloque(Rect2I bloque)
@@ -1073,6 +1079,7 @@ public partial class Laberinto : Node2D
 	{
 		Node2D totem = escenaTotem.Instantiate<Node2D>();
 		AddChild(totem);
+		_totems.Add(totem);
 		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		_celdasObstaculo.Add(celda);
 	}
@@ -1270,8 +1277,6 @@ public partial class Laberinto : Node2D
 
 	private void ColocarMallquis(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
 	{
-		_mallquis = [];
-
 		int cantMallquis = Mathf.Max(1, Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Criaturas.Mallqui.PorcentajeSalas));
 
 		// Recorro los bloques en orden aleatorio para repartir los Mallquis por todo el mapa
@@ -1482,7 +1487,18 @@ public partial class Laberinto : Node2D
 	private void UbicarDiscoInti(Vector2I celda)
 	{
 		_celdasOcupadas.Add(celda);
-		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_discoInti.Reaparecer(IndiceMapaAPosicionMundo(celda));
+	}
+
+	private void OnDiscoColocado(int colocados)
+	{
+		CallDeferred(MethodName.GenerarCueva);
+		_contadorDiscos.Actualizar(colocados);
+	}
+
+	private void OnPuertaAbierta()
+	{
+		_contadorDiscos.Actualizar(_puertaFinal.TotalDiscos);
 	}
 
 	private void CrearPuertaFinal()
@@ -1490,6 +1506,8 @@ public partial class Laberinto : Node2D
 		_puertaFinal = EscenaPuertaFinal.Instantiate<PuertaFinal>();
 		AddChild(_puertaFinal);
 		_puertaFinal.Inicializar(_discoInti);
+		_puertaFinal.DiscoColocado += OnDiscoColocado;
+		_puertaFinal.Abierta += OnPuertaAbierta;
 	}
 
 	private List<int> ColumnasLibresPuertaFinal(int indiceBloque)
@@ -1600,5 +1618,111 @@ public partial class Laberinto : Node2D
 	{
 		HashSet<int> excluidos = [bloqueInca, bloquePuertaFinal];
 		return ElegirBloqueLejano(bloquePuertaFinal, excluidos);
+	}
+
+	private void LiberarNodos<T>(List<T> nodos) where T : Node
+	{
+		foreach (T nodo in nodos)
+		{
+			if (GodotObject.IsInstanceValid(nodo))
+			{
+				nodo.QueueFree();
+			}
+		}
+
+		nodos.Clear();
+	}
+
+	private void LimpiarCueva()
+	{
+		LiberarNodos(_mallquis);
+		LiberarNodos(_totems);
+		LiberarNodos(_hojasCoca);
+		_celdasObstaculo.Clear();
+		_celdasOcupadas.Clear();
+		_Muros.Clear();
+	}
+
+	private void GenerarCueva()
+	{
+		LimpiarCueva();
+
+		_puertasAbiertas = [];
+		PintarMuroPerimetral();
+
+		Rect2I? ancla = null;
+
+		if (_bloques is { Count: > 0 })
+		{
+			int bloqueIncaAnterior = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+
+			if (bloqueIncaAnterior >= 0)
+			{
+				ancla = _bloques[bloqueIncaAnterior];
+			}
+			else
+			{
+				GD.PushWarning($"GenerarCueva: el Inca en {_Inca.GlobalPosition} no está en ningún bloque; se regenera sin ancla.");
+			}
+		}
+
+		_bloques = [];
+		Particionar(new Rect2I(new Vector2I(0, 0), new Vector2I(_mapa.GetLength(1), _mapa.GetLength(0))), ancla, _bloques);
+
+		foreach (var bloque in _bloques)
+		{
+			CerrarBloque(bloque);
+		}
+
+		_puertasPosibles = BuscarPuertas(_bloques);
+
+		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+
+		ConectarSalas(bloqueInca);
+
+		AbrirPuertasExtra();
+
+		Vector2I posIncaMapa = PosicionMundoAIndiceMapa(_Inca.GlobalPosition);
+		if (_mapa[posIncaMapa.Y, posIncaMapa.X] == Celda.Muro)
+		{
+			CentrarIncaEnSala(bloqueInca);
+			GD.PushWarning($"GenerarCueva: el Inca quedó dentro de un muro en la celda {posIncaMapa}; se mueve al centro de su sala.");
+		}
+
+		// Calcula en que bloques se colocarán los tótems de Wiracocha
+		HashSet<int> bloquesTotemWiracocha = ElegirBloquesTotemWiracocha(bloqueInca);
+
+		ColocarPilares(bloqueInca, bloquesTotemWiracocha);
+
+		// Se colocan los tótems Wiracocha en los bloques seleccionados.
+		ColocarTotemsWiracocha(bloquesTotemWiracocha);
+
+		// Se elige la sala de la puerta final (tercio más lejano del Inca) y se coloca.
+		int bloquePuertaFinal = ElegirBloquePuertaFinal(bloqueInca, bloquesTotemWiracocha);
+		UbicarPuertaFinal(bloquePuertaFinal);
+
+		// Se actualiza la navegación AStarGrid2D
+		ActualizarNavegacion();
+
+		// Se crean las hojas de coca
+		CrearHojasDeCoca(Mathf.RoundToInt(_bloques.Count * LaberintoConfig.Recogibles.HojaDeCoca.PorcentajeSalas));
+		UbicarHojasDeCoca();
+
+		// Se elige la sala del disco inti (tercio más lejano de la puerta final) y se coloca.
+		int bloqueDiscoInti = ElegirBloqueDiscoInti(bloqueInca, bloquePuertaFinal);
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDiscoInti));
+
+		ColocarMallquis(bloqueInca, bloquesTotemWiracocha);
+
+		// Alerta - no debe existir cuartos sin acceso
+		int cantidadRegiones = EncontrarRegiones(_mapa, Celda.Piso).Count;
+		if (cantidadRegiones != 1)
+		{
+			GD.PushError($"Regiones de piso: {cantidadRegiones}, se rompió la conectividad.");
+		}
+
+		DibujarMurosInterior();
+
+		ProgramarSiguienteCiclo();
 	}
 }
