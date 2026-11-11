@@ -25,6 +25,7 @@ public partial class Laberinto : Node2D
 	PolvoPuertas _PolvoPuertas;
 	DiscoInti _discoInti;
 	PuertaFinal _puertaFinal;
+	ContadorDiscos _contadorDiscos;
 
 	private enum Celda
 	{
@@ -103,6 +104,8 @@ public partial class Laberinto : Node2D
 		_PolvoTecho = GetNode<PolvoTecho>("Inca/CamaraInca/PolvoTecho");
 		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
 		_TimerMutacion = GetNode<Timer>("TimerMutacion");
+		_contadorDiscos = GetNode<ContadorDiscos>("ContadorDiscos");
+
 		_TimerMutacion.Timeout += OnCicloPuertas;
 
 		AvisoIniciado += _CamaraInca.OnAvisoIniciado;
@@ -1483,6 +1486,12 @@ public partial class Laberinto : Node2D
 	private void OnDiscoColocado(int colocados)
 	{
 		CallDeferred(MethodName.GenerarCueva);
+		_contadorDiscos.Actualizar(colocados);
+	}
+
+	private void OnPuertaAbierta()
+	{
+		_contadorDiscos.Actualizar(_puertaFinal.TotalDiscos);
 	}
 
 	private void CrearPuertaFinal()
@@ -1491,6 +1500,7 @@ public partial class Laberinto : Node2D
 		AddChild(_puertaFinal);
 		_puertaFinal.Inicializar(_discoInti);
 		_puertaFinal.DiscoColocado += OnDiscoColocado;
+		_puertaFinal.Abierta += OnPuertaAbierta;
 	}
 
 	private List<int> ColumnasLibresPuertaFinal(int indiceBloque)

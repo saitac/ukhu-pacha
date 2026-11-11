@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://cyn8pbx4u3kmg" path="res://laberinto/NubePolvo.tscn" id="16_mmumd"]
 [ext_resource type="PackedScene" uid="uid://dejbe7qosjrhr" path="res://recogibles/hoja_coca/hoja_coca.tscn" id="18_glftc"]
 [ext_resource type="PackedScene" uid="uid://diokldmgqlgb3" path="res://recogibles/disco_inti/disco_inti.tscn" id="20_m5etf"]
+[ext_resource type="PackedScene" uid="uid://lnt5auq648j2" path="res://interfaz/contador_discos/contador_discos.tscn" id="22_krqrs"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_aislado0"]
 cull_mode = 1
@@ -351,3 +352,5 @@ EscenaNube = ExtResource("16_mmumd")
 
 [node name="Oscuridad" type="CanvasModulate" parent="." unique_id=1053698352]
 color = Color(0.050980393, 0.043137256, 0.0627451, 1)
+
+[node name="ContadorDiscos" parent="." unique_id=1452587014 instance=ExtResource("22_krqrs")]
