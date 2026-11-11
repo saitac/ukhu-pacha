@@ -26,6 +26,7 @@ public partial class Laberinto : Node2D
 	DiscoInti _discoInti;
 	PuertaFinal _puertaFinal;
 	ContadorDiscos _contadorDiscos;
+	CanvasModulate _oscuridad;
 
 	private enum Celda
 	{
@@ -105,6 +106,7 @@ public partial class Laberinto : Node2D
 		_PolvoPuertas = GetNode<PolvoPuertas>("PolvoPuertas");
 		_TimerMutacion = GetNode<Timer>("TimerMutacion");
 		_contadorDiscos = GetNode<ContadorDiscos>("ContadorDiscos");
+		_oscuridad = GetNode<CanvasModulate>("Oscuridad");
 
 		_TimerMutacion.Timeout += OnCicloPuertas;
 
@@ -149,6 +151,11 @@ public partial class Laberinto : Node2D
 		if (@event.IsActionPressed("debug_regenerar"))
 		{
 			GenerarCueva();
+		}
+
+		if (@event.IsActionPressed("debug_oscuridad"))
+		{
+			_oscuridad.Visible = !_oscuridad.Visible;
 		}
 	}
 
