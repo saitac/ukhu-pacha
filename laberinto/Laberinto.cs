@@ -1477,7 +1477,12 @@ public partial class Laberinto : Node2D
 	private void UbicarDiscoInti(Vector2I celda)
 	{
 		_celdasOcupadas.Add(celda);
-		_discoInti.GlobalPosition = IndiceMapaAPosicionMundo(celda);
+		_discoInti.Reaparecer(IndiceMapaAPosicionMundo(celda));
+	}
+
+	private void OnDiscoColocado(int colocados)
+	{
+		CallDeferred(MethodName.GenerarCueva);
 	}
 
 	private void CrearPuertaFinal()
@@ -1485,6 +1490,7 @@ public partial class Laberinto : Node2D
 		_puertaFinal = EscenaPuertaFinal.Instantiate<PuertaFinal>();
 		AddChild(_puertaFinal);
 		_puertaFinal.Inicializar(_discoInti);
+		_puertaFinal.DiscoColocado += OnDiscoColocado;
 	}
 
 	private List<int> ColumnasLibresPuertaFinal(int indiceBloque)
