@@ -67,8 +67,7 @@ public partial class Laberinto : Node2D
 	private readonly List<HojaCoca> _hojasCoca = [];
 	private readonly List<Mallqui> _mallquis = [];
 	private readonly List<Node2D> _totems = [];
-	private readonly HashSet<Vector2I> _celdasObstaculo = [];
-	private readonly HashSet<Vector2I> _celdasOcupadas = [];
+	private readonly Dictionary<Vector2I, Ocupante> _ocupantes = [];
 
 	// Desplazamientos usados para buscar una celda transitable cercana.
 	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
@@ -1081,7 +1080,7 @@ public partial class Laberinto : Node2D
 		AddChild(totem);
 		_totems.Add(totem);
 		totem.GlobalPosition = IndiceMapaAPosicionMundo(celda);
-		_celdasObstaculo.Add(celda);
+		_ocupantes.Add(celda, Ocupante.Totem);
 	}
 
 	private int[] DistanciasDesde(int bloqueOrigen)
@@ -1233,7 +1232,7 @@ public partial class Laberinto : Node2D
 			piso.End - Vector2I.One
 		];
 
-		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_celdasOcupadas.Contains(esquina))];
+		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_ocupantes.ContainsKey(esquina))];
 		if (elegibles.Length == 0)
 		{
 			GD.PushWarning($"Bloque {indiceBloque}: las 4 esquinas están ocupadas; se encimará con otro objeto.");
@@ -1257,10 +1256,21 @@ public partial class Laberinto : Node2D
 	private void UbicarHojasDeCoca()
 	{
 		List<int> bloques = ElegirBloquesHojasCoca(_hojasCoca.Count);
+
+		// Limpia ocupantes de las Hojas de Coca antiguas
+		List<Vector2I> celdasViejas = [.. _ocupantes
+			.Where(kvp => kvp.Value == Ocupante.HojaCoca)
+			.Select(kvp => kvp.Key)];
+
+		foreach (Vector2I celdaVieja in celdasViejas)
+		{
+			_ocupantes.Remove(celdaVieja);
+		}
+
 		for (int i = 0; i < _hojasCoca.Count; i++)
 		{
 			Vector2I celda = ElegirEsquinaBloque(bloques[i]);
-			_celdasOcupadas.Add(celda);
+			_ocupantes.Add(celda, Ocupante.HojaCoca);
 			_hojasCoca[i].GlobalPosition = IndiceMapaAPosicionMundo(celda);
 		}
 	}
@@ -1320,7 +1330,9 @@ public partial class Laberinto : Node2D
 		bool filaValida = celda.Y >= 0 && celda.Y < _mapa.GetLength(0);
 		bool columnaValida = celda.X >= 0 && celda.X < _mapa.GetLength(1);
 
-		return filaValida && columnaValida && _mapa[celda.Y, celda.X] != Celda.Muro && !_celdasObstaculo.Contains(celda);
+		bool bloqueadaPorOcupante = _ocupantes.TryGetValue(celda, out Ocupante ocupante) && ocupante.EsObstaculo();
+
+		return filaValida && columnaValida && _mapa[celda.Y, celda.X] != Celda.Muro && !bloqueadaPorOcupante;
 	}
 
 	private void ActualizarNavegacion()
@@ -1486,7 +1498,7 @@ public partial class Laberinto : Node2D
 
 	private void UbicarDiscoInti(Vector2I celda)
 	{
-		_celdasOcupadas.Add(celda);
+		_ocupantes.Add(celda, Ocupante.DiscoInti);
 		_discoInti.Reaparecer(IndiceMapaAPosicionMundo(celda));
 	}
 
@@ -1594,8 +1606,7 @@ public partial class Laberinto : Node2D
 	{
 		Vector2I celda = ElegirCeldaPuertaFinal(indiceBloque);
 		_puertaFinal.GlobalPosition = IndiceMapaAPosicionMundo(celda);
-		_celdasObstaculo.Add(celda);
-		_celdasOcupadas.Add(celda);
+		_ocupantes.Add(celda, Ocupante.PuertaFinal);
 	}
 
 	private int ElegirBloquePuertaFinal(int bloqueInca, HashSet<int> bloquesTotemWiracocha)
@@ -1638,8 +1649,7 @@ public partial class Laberinto : Node2D
 		LiberarNodos(_mallquis);
 		LiberarNodos(_totems);
 		LiberarNodos(_hojasCoca);
-		_celdasObstaculo.Clear();
-		_celdasOcupadas.Clear();
+		_ocupantes.Clear();
 		_Muros.Clear();
 	}
 
