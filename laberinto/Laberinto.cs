@@ -73,6 +73,11 @@ public partial class Laberinto : Node2D
 	// El orden importa: primero la celda misma (Zero), después sus 4 vecinas.
 	private static readonly Vector2I[] _desplazamientos = [Vector2I.Zero, Vector2I.Up, Vector2I.Down, Vector2I.Left, Vector2I.Right];
 
+	// Índice del bloque donde está el Inca. Se recalcula en cada lectura y es relativo
+	// a la _bloques actual: leído antes o después de Particionar da índices de cuevas distintas.
+	// Si el valor debe mantenerse durante un método, guárdalo en una variable local.
+	private int BloqueInca => IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+
 	// Declaro evento que indica que quedan N (DuracionAviso) segundos antes de que mute la cueva
 	[Signal]
 	public delegate void AvisoIniciadoEventHandler(float duracion);
@@ -130,7 +135,7 @@ public partial class Laberinto : Node2D
 		GenerarCueva();
 
 		// Se coloca al inca en el Centro del bloque
-		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+		int bloqueInca = BloqueInca;
 		CentrarIncaEnSala(bloqueInca);
 	}
 
@@ -1675,7 +1680,7 @@ public partial class Laberinto : Node2D
 
 		if (_bloques is { Count: > 0 })
 		{
-			int bloqueIncaAnterior = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+			int bloqueIncaAnterior = BloqueInca;
 
 			if (bloqueIncaAnterior >= 0)
 			{
@@ -1697,7 +1702,7 @@ public partial class Laberinto : Node2D
 
 		_puertasPosibles = BuscarPuertas(_bloques);
 
-		int bloqueInca = IndiceBloqueDe(PosicionMundoAIndiceMapa(_Inca.GlobalPosition));
+		int bloqueInca = BloqueInca;
 
 		ConectarSalas(bloqueInca);
 
