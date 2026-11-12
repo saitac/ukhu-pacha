@@ -1233,10 +1233,17 @@ public partial class Laberinto : Node2D
 		];
 
 		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_ocupantes.ContainsKey(esquina))];
+
 		if (elegibles.Length == 0)
 		{
+			elegibles = [.. esquinas.Where(esquina => _ocupantes.TryGetValue(esquina, out Ocupante ocupante) && ocupante.PermiteSuperponer())];
+
+			if (elegibles.Length == 0)
+			{
+				throw new InvalidOperationException($"En el bloque {indiceBloque}, no quedan esquinas disponibles que permitan superponerse");
+			}
+
 			GD.PushWarning($"Bloque {indiceBloque}: las 4 esquinas están ocupadas; se encimará con otro objeto.");
-			elegibles = esquinas;
 		}
 
 		return elegibles[_rng.RandiRange(0, elegibles.Length - 1)];
@@ -1498,7 +1505,11 @@ public partial class Laberinto : Node2D
 
 	private void UbicarDiscoInti(Vector2I celda)
 	{
-		_ocupantes.Add(celda, Ocupante.DiscoInti);
+		// Indexador en vez de Add: aquí sí se permite sobrescribir. ElegirEsquinaBloque solo
+		// devuelve una celda ocupada si su ocupante PermiteSuperponer() (hoy, solo HojaCoca).
+		// El disco tiene prioridad porque es el objetivo del juego; la hoja sigue en la escena,
+		// solo pierde su registro en _ocupantes.
+		_ocupantes[celda] = Ocupante.DiscoInti;
 		_discoInti.Reaparecer(IndiceMapaAPosicionMundo(celda));
 	}
 
