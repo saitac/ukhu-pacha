@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class Mallqui : CharacterBody2D
+public partial class Mallqui : Enemigo
 {
 	private enum Estado
 	{
