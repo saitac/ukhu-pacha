@@ -1,7 +1,15 @@
 using Godot;
+using System;
 
 public partial class DiscoInti : Node2D
 {
+	private enum Estado
+	{
+		EnReposo,
+		Cargado,
+		Caido
+	}
+
 	[Signal]
 	public delegate void TomadoEventHandler(Inca portador);
 
@@ -15,7 +23,9 @@ public partial class DiscoInti : Node2D
 	private AnimatedSprite2D _rayos;
 	private Inca _portador = null;
 	private Laberinto _laberinto;
-	public bool EstaCargado => _portador != null;
+	private Estado _estado = Estado.EnReposo;
+	public bool EstaCargado => _estado == Estado.Cargado;
+	public bool EstaEnJuego => _estado is Estado.Cargado or Estado.Caido;
 
 	public override void _Ready()
 	{
@@ -57,7 +67,7 @@ public partial class DiscoInti : Node2D
 
 		if (body is Inca inca)
 		{
-			_portador = inca;
+			CambiarEstado(Estado.Cargado, inca);
 			_area.SetDeferred(Area2D.PropertyName.Monitoring, false);
 			_rayos.Visible = false;
 			EmitSignal(SignalName.Tomado, _portador);
@@ -86,7 +96,7 @@ public partial class DiscoInti : Node2D
 
 			if (_laberinto.EsPosicionTransitable(posicionDestino))
 			{
-				_portador = null;
+				CambiarEstado(Estado.Caido);
 				Reaparecer(posicionDestino);
 				return; // si alguna sirve, salgo aquí
 			}
@@ -98,15 +108,39 @@ public partial class DiscoInti : Node2D
 
 	public void Entregar()
 	{
-		_portador = null;
+		CambiarEstado(Estado.EnReposo);
 		Visible = false;
 	}
 
-	public void Reaparecer(Vector2 posicion)
+	private void Reaparecer(Vector2 posicion)
 	{
 		GlobalPosition = posicion;
 		_area.SetDeferred(Area2D.PropertyName.Monitoring, true);
 		_rayos.Visible = true;
 		Visible = true;
+	}
+
+	public void Ubicar(Vector2 posicion)
+	{
+		CambiarEstado(Estado.EnReposo);
+		Reaparecer(posicion);
+	}
+
+	private void CambiarEstado(Estado nuevo, Inca portador = null)
+	{
+		bool esCargado = nuevo == Estado.Cargado;
+		bool tienePortador = portador != null;
+
+		// Invariante: hay portador si y solo si el disco está Cargado.
+		if (esCargado != tienePortador)
+		{
+			string detalle = esCargado
+				? "Cargado requiere un portador"
+				: $"{nuevo} no admite portador";
+			throw new ArgumentException($"DiscoInti.CambiarEstado: {detalle}.", nameof(portador));
+		}
+
+		_estado = nuevo;
+		_portador = portador;
 	}
 }

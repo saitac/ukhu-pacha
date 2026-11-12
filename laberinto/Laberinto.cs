@@ -1515,7 +1515,7 @@ public partial class Laberinto : Node2D
 		// El disco tiene prioridad porque es el objetivo del juego; la hoja sigue en la escena,
 		// solo pierde su registro en _ocupantes.
 		_ocupantes[celda] = Ocupante.DiscoInti;
-		_discoInti.Reaparecer(IndiceMapaAPosicionMundo(celda));
+		_discoInti.Ubicar(IndiceMapaAPosicionMundo(celda));
 	}
 
 	private void OnDiscoColocado(int colocados)
