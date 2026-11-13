@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://b56gqegvpveqk"]
 
+[ext_resource type="Script" uid="uid://bx322r4bnw6wk" path="res://criaturas/supay/Supay.cs" id="1_bhh08"]
 [ext_resource type="Texture2D" uid="uid://minuyydag526" path="res://criaturas/supay/sprites/walk-down-supay-01-apoyo.png" id="1_uvm0b"]
 [ext_resource type="Texture2D" uid="uid://dx2girgn6ela5" path="res://criaturas/supay/sprites/ataque-down-supay-01.png" id="1_v7bto"]
 [ext_resource type="Texture2D" uid="uid://qklbfm6vn5nc" path="res://criaturas/supay/sprites/walk-down-supay-02-derecha.png" id="2_60pqm"]
@@ -160,6 +161,7 @@ animations = [{
 }]
 
 [node name="Supay" type="CharacterBody2D" unique_id=2123890166]
+script = ExtResource("1_bhh08")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=215842171]
 scale = Vector2(3, 3)
