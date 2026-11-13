@@ -1,0 +1,167 @@
+[gd_scene format=3 uid="uid://b56gqegvpveqk"]
+
+[ext_resource type="Texture2D" uid="uid://minuyydag526" path="res://criaturas/supay/sprites/walk-down-supay-01-apoyo.png" id="1_uvm0b"]
+[ext_resource type="Texture2D" uid="uid://dx2girgn6ela5" path="res://criaturas/supay/sprites/ataque-down-supay-01.png" id="1_v7bto"]
+[ext_resource type="Texture2D" uid="uid://qklbfm6vn5nc" path="res://criaturas/supay/sprites/walk-down-supay-02-derecha.png" id="2_60pqm"]
+[ext_resource type="Texture2D" uid="uid://dqv4dtg78y0yu" path="res://criaturas/supay/sprites/ataque-down-supay-02.png" id="2_p8hei"]
+[ext_resource type="Texture2D" uid="uid://c4b2omec3rqbe" path="res://criaturas/supay/sprites/ataque-right-supay-01.png" id="3_gv7rj"]
+[ext_resource type="Texture2D" uid="uid://bdr6lyvk4omu1" path="res://criaturas/supay/sprites/walk-down-supay-03-apoyo.png" id="3_kujip"]
+[ext_resource type="Texture2D" uid="uid://dyy02rqaduxjt" path="res://criaturas/supay/sprites/walk-down-supay-04-izquierda.png" id="4_8pf12"]
+[ext_resource type="Texture2D" uid="uid://8f7ekw67eny7" path="res://criaturas/supay/sprites/ataque-right-supay-02.png" id="4_vogq1"]
+[ext_resource type="Texture2D" uid="uid://pq07we7p11tp" path="res://criaturas/supay/sprites/ataque-up-supay-01.png" id="5_eosmp"]
+[ext_resource type="Texture2D" uid="uid://drwg80so2kgv8" path="res://criaturas/supay/sprites/walk-right-supay-01-apoyo.png" id="5_tf13c"]
+[ext_resource type="Texture2D" uid="uid://3wti5j8gmtet" path="res://criaturas/supay/sprites/ataque-up-supay-02.png" id="6_o2qsm"]
+[ext_resource type="Texture2D" uid="uid://dpd11pfjy5hmc" path="res://criaturas/supay/sprites/walk-right-supay-02-derecha.png" id="6_rgavd"]
+[ext_resource type="Texture2D" uid="uid://bcxr0nyej6h0n" path="res://criaturas/supay/sprites/walk-right-supay-03-apoyo.png" id="7_8c4th"]
+[ext_resource type="Texture2D" uid="uid://dg3k6aenlg8or" path="res://criaturas/supay/sprites/emerger-supay-01.png" id="7_vdpw5"]
+[ext_resource type="Texture2D" uid="uid://ddgjgl8joumqu" path="res://criaturas/supay/sprites/walk-right-supay-04-izquierda.png" id="8_6swd4"]
+[ext_resource type="Texture2D" uid="uid://rh26rps1slt5" path="res://criaturas/supay/sprites/emerger-supay-02.png" id="8_bhh08"]
+[ext_resource type="Texture2D" uid="uid://0lr84ihpn6um" path="res://criaturas/supay/sprites/walk-up-supay-01-apoyo.png" id="9_5ix80"]
+[ext_resource type="Texture2D" uid="uid://egjmjfk7nqgi" path="res://criaturas/supay/sprites/emerger-supay-03.png" id="9_ljxps"]
+[ext_resource type="Texture2D" uid="uid://c652dal4a1gfo" path="res://criaturas/supay/sprites/emerger-supay-04.png" id="10_1ds6b"]
+[ext_resource type="Texture2D" uid="uid://dnrmw8eoxi8dp" path="res://criaturas/supay/sprites/walk-up-supay-02-derecha.png" id="10_rgx41"]
+[ext_resource type="Texture2D" uid="uid://bvivaj4op4lp3" path="res://criaturas/supay/sprites/emerger-supay-05.png" id="11_h0s6a"]
+[ext_resource type="Texture2D" uid="uid://mrwn7d0idr54" path="res://criaturas/supay/sprites/walk-up-supay-03-apoyo.png" id="11_yoklm"]
+[ext_resource type="Texture2D" uid="uid://cs5rkv650rmc6" path="res://criaturas/supay/sprites/emerger-supay-06.png" id="12_8rl7j"]
+[ext_resource type="Texture2D" uid="uid://bwf518nv73edq" path="res://criaturas/supay/sprites/walk-up-supay-04-izquierda.png" id="12_fojlk"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hfs8p"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_v7bto")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_p8hei")
+}],
+"loop": 0,
+"name": &"ataque-down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_gv7rj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_vogq1")
+}],
+"loop": 0,
+"name": &"ataque-right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_eosmp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_o2qsm")
+}],
+"loop": 0,
+"name": &"ataque-up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_vdpw5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_bhh08")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_ljxps")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_1ds6b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_h0s6a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_8rl7j")
+}],
+"loop": 0,
+"name": &"emerger",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_uvm0b")
+}],
+"loop": 1,
+"name": &"idle-down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_tf13c")
+}],
+"loop": 1,
+"name": &"idle-right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_5ix80")
+}],
+"loop": 1,
+"name": &"idle-up",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_uvm0b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_60pqm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_kujip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_8pf12")
+}],
+"loop": 1,
+"name": &"walk-down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_tf13c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_rgavd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_8c4th")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_6swd4")
+}],
+"loop": 1,
+"name": &"walk-right",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_5ix80")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_rgx41")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_yoklm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_fojlk")
+}],
+"loop": 1,
+"name": &"walk-up",
+"speed": 8.0
+}]
+
+[node name="Supay" type="CharacterBody2D" unique_id=2123890166]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=215842171]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_hfs8p")
+animation = &"idle-down"
