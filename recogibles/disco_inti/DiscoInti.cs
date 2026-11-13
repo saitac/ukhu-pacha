@@ -11,7 +11,7 @@ public partial class DiscoInti : Node2D
 	}
 
 	[Signal]
-	public delegate void TomadoEventHandler(Inca portador);
+	public delegate void TomadoEventHandler(Inca portador, Vector2 posicionTomado);
 
 	[Export]
 	public Vector2 OffsetCargado = new(0, -125);
@@ -70,7 +70,7 @@ public partial class DiscoInti : Node2D
 			CambiarEstado(Estado.Cargado, inca);
 			_area.SetDeferred(Area2D.PropertyName.Monitoring, false);
 			_rayos.Visible = false;
-			EmitSignal(SignalName.Tomado, _portador);
+			EmitSignal(SignalName.Tomado, _portador, GlobalPosition);
 		}
 	}
 

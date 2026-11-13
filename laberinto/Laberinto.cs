@@ -1227,15 +1227,17 @@ public partial class Laberinto : Node2D
 		return [.. indices[..cantidadReal]];
 	}
 
-	private Vector2I ElegirEsquinaBloque(int indiceBloque)
+	private Vector2I ElegirEsquinaBloque(int indiceBloque, Vector2I? excluida = null)
 	{
 		Rect2I piso = _bloques[indiceBloque].Grow(-LaberintoConfig.Muro.GrosorBorde);
-		Vector2I[] esquinas = [
+		Vector2I[] esquinas = [.. new []
+		{
 			piso.Position,
 			new Vector2I(piso.End.X - 1, piso.Position.Y),
 			new Vector2I(piso.Position.X, piso.End.Y - 1),
 			piso.End - Vector2I.One
-		];
+		}
+		.Where(esquina => esquina != excluida)];
 
 		Vector2I[] elegibles = [.. esquinas.Where(esquina => !_ocupantes.ContainsKey(esquina))];
 
@@ -1248,7 +1250,7 @@ public partial class Laberinto : Node2D
 				throw new InvalidOperationException($"En el bloque {indiceBloque}, no quedan esquinas disponibles que permitan superponerse");
 			}
 
-			GD.PushWarning($"Bloque {indiceBloque}: las 4 esquinas están ocupadas; se encimará con otro objeto.");
+			GD.PushWarning($"Bloque {indiceBloque}: las {esquinas.Length} esquinas están ocupadas; se encimará con otro objeto.");
 		}
 
 		return elegibles[_rng.RandiRange(0, elegibles.Length - 1)];
@@ -1489,6 +1491,14 @@ public partial class Laberinto : Node2D
 		Vector2I destino = transitables[_rng.RandiRange(0, transitables.Count - 1)];
 
 		return IndiceMapaAPosicionMundo(destino);
+	}
+
+	public Vector2 ElegirPuntoEmergencia(Vector2 posicionTomado)
+	{
+		Vector2I celda = PosicionMundoAIndiceMapa(posicionTomado);
+		int bloque = IndiceBloqueDe(celda);
+		Vector2I esquina = ElegirEsquinaBloque(bloque, celda);
+		return IndiceMapaAPosicionMundo(esquina);
 	}
 
 	private void Barajar<T>(IList<T> elementos)

@@ -60,7 +60,7 @@ public partial class PuertaFinal : StaticBody2D
 		}
 	}
 
-	private void AlTomarDisco(Inca portador)
+	private void AlTomarDisco(Inca portador, Vector2 posicionTomado)
 	{
 		if (_zona.OverlapsBody(portador))
 		{
