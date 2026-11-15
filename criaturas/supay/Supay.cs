@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class Supay : Enemigo
 {
@@ -10,7 +9,7 @@ public partial class Supay : Enemigo
 		Persiguiendo,
 		Atacando,
 		Desapareciendo
-	};
+	}
 
 	private Laberinto _laberinto;
 	private Inca _inca;
@@ -22,6 +21,15 @@ public partial class Supay : Enemigo
 	{
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_sprite.AnimationFinished += OnAnimationFinished;
+		CambiarEstado(Estado.FueraDeEscena);
+	}
+
+	public override void _ExitTree()
+	{
+		if (_discoInti != null)
+		{
+			_discoInti.Tomado -= OnDiscoTomado;
+		}
 	}
 
 	public void Inicializar(Laberinto laberinto, Inca inca, DiscoInti discoInti)
@@ -35,6 +43,21 @@ public partial class Supay : Enemigo
 	private void CambiarEstado(Estado nuevo)
 	{
 		_estado = nuevo;
+		switch (nuevo)
+		{
+			case Estado.FueraDeEscena:
+				Visible = false;
+				SetDeferred(Node.PropertyName.ProcessMode, (int)ProcessModeEnum.Disabled);
+				break;
+			case Estado.Apareciendo:
+				Visible = true;
+				SetDeferred(Node.PropertyName.ProcessMode, (int)ProcessModeEnum.Inherit);
+				_sprite.Play("emerger");
+				break;
+			case Estado.Persiguiendo:
+				_sprite.Play("idle-down");
+				break;
+		}
 	}
 
 	private void OnDiscoTomado(Inca portador, Vector2 posicionTomado)
@@ -57,5 +80,4 @@ public partial class Supay : Enemigo
 			}
 		}
 	}
-
 }

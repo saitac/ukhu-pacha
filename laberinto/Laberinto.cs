@@ -13,6 +13,8 @@ public partial class Laberinto : Node2D
 
 	[Export] public PackedScene EscenaDiscoInti { get; set; }
 
+	[Export] public PackedScene EscenaSupay { get; set; }
+
 	[Export] public PackedScene EscenaPuertaFinal { get; set; }
 
 	RandomNumberGenerator _rng;
@@ -24,6 +26,7 @@ public partial class Laberinto : Node2D
 	PolvoTecho _PolvoTecho;
 	PolvoPuertas _PolvoPuertas;
 	DiscoInti _discoInti;
+	Supay _supay;
 	PuertaFinal _puertaFinal;
 	ContadorDiscos _contadorDiscos;
 	CanvasModulate _oscuridad;
@@ -129,6 +132,8 @@ public partial class Laberinto : Node2D
 		CrearDiscoInti();
 
 		CrearPuertaFinal();
+
+		CrearSupay();
 
 		CrearNavegacion();
 
@@ -1516,6 +1521,13 @@ public partial class Laberinto : Node2D
 		_discoInti = EscenaDiscoInti.Instantiate<DiscoInti>();
 		_discoInti.Inicializar(this);
 		AddChild(_discoInti);
+	}
+
+	private void CrearSupay()
+	{
+		_supay = EscenaSupay.Instantiate<Supay>();
+		_supay.Inicializar(this, _Inca, _discoInti);
+		AddChild(_supay);
 	}
 
 	private void UbicarDiscoInti(Vector2I celda)

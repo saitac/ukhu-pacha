@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dduce4cwts817" path="res://player/inca.tscn" id="4_f4ou2"]
 [ext_resource type="Texture2D" uid="uid://frfsi26myyj8" path="res://laberinto/sprites/muro-t.png" id="4_wsvcv"]
 [ext_resource type="Texture2D" uid="uid://cvi4xx0v2fruf" path="res://laberinto/sprites/piso-2.png" id="5_2yttv"]
+[ext_resource type="PackedScene" uid="uid://b56gqegvpveqk" path="res://criaturas/supay/supay.tscn" id="6_24ehs"]
 [ext_resource type="Texture2D" uid="uid://c3qa47xfxr30s" path="res://laberinto/sprites/piso-3.png" id="6_l26wg"]
 [ext_resource type="PackedScene" uid="uid://dqs5640tgtxhf" path="res://sagrados/puerta_final/puerta_final.tscn" id="6_rgymm"]
 [ext_resource type="Texture2D" uid="uid://bnlcvql5it0tb" path="res://laberinto/sprites/piso-4.png" id="7_rgeaq"]
@@ -301,6 +302,7 @@ EscenaTotemWiracocha = ExtResource("2_yhjxc")
 EscenaHojaCoca = ExtResource("18_glftc")
 EscenaMallqui = ExtResource("4_7fdqi")
 EscenaDiscoInti = ExtResource("20_m5etf")
+EscenaSupay = ExtResource("6_24ehs")
 EscenaPuertaFinal = ExtResource("6_rgymm")
 
 [node name="Piso" type="TileMapLayer" parent="." unique_id=489726851]
