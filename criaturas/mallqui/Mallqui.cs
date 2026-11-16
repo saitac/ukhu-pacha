@@ -41,14 +41,8 @@ public partial class Mallqui : Enemigo
 	[Export]
 	public float RecuperacionGolpe = 1.0f;
 
-	private Laberinto _laberinto;
-	private Inca _inca;
-	private Vector2[] _ruta = [];
-	private int _indicePunto;
-	private Vector2? _destino;
 	private CollisionShape2D _formaColision;
 	private double _tiempoEspera;
-	private Vector2I _celdaInca;
 	private Estado _estado = Estado.Patrulla;
 	private Direccion _ultimaDireccion = Direccion.Abajo;
 	private AnimatedSprite2D _sprite;
@@ -57,14 +51,13 @@ public partial class Mallqui : Enemigo
 	private Label _etiquetaDepuracion;
 	private double _tiempoRecuperacion;
 
-	// true si no quedan puntos por recorrer
-	private bool RutaTerminada => _indicePunto >= _ruta.Length;
-
 	// la izquierda reutiliza los sprites de la derecha con FlipH.
 	private string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
 
 	public override void _Ready()
 	{
+		base._Ready();
+
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
@@ -74,7 +67,6 @@ public partial class Mallqui : Enemigo
 		_etiquetaDepuracion = GetNode<Label>("EtiquetaDepuracion");
 		_etiquetaDepuracion.Visible = Depuracion;
 
-		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
 		_zonaAlcance.BodyEntered += OnZonaAlcanceBodyEntered;
 		_zonaAlcance.BodyExited += OnZonaAlcanceBodyExited;
 	}
@@ -104,7 +96,7 @@ public partial class Mallqui : Enemigo
 				}
 				else
 				{
-					Perseguir(delta);
+					Perseguir(delta, VelocidadPersecucion);
 				}
 				break;
 			case Estado.Ataque:
@@ -133,21 +125,10 @@ public partial class Mallqui : Enemigo
 		}
 	}
 
-	public override void _ExitTree()
-	{
-		_laberinto.NavegacionActualizada -= OnNavegacionActualizada;
-	}
-
 	public void Inicializar(Laberinto laberinto, Inca inca)
 	{
 		_laberinto = laberinto;
 		_inca = inca;
-	}
-
-	public void IrA(Vector2 destino)
-	{
-		_destino = destino;
-		RecalcularRuta();
 	}
 
 	public Rect2 AreaGlobal()
@@ -155,52 +136,6 @@ public partial class Mallqui : Enemigo
 		Rect2 local = _formaColision.Shape.GetRect();
 		Rect2 global = new(local.Position + _formaColision.GlobalPosition, local.Size);
 		return global;
-	}
-
-	private void RecalcularRuta()
-	{
-		if (_destino is not Vector2 destino)
-		{
-			return;
-		}
-		_ruta = _laberinto.CalcularRuta(GlobalPosition, destino);
-		_indicePunto = 1;
-	}
-
-	private void OnNavegacionActualizada()
-	{
-		RecalcularRuta();
-	}
-
-	private bool MoverHacia(Vector2 objetivo, double delta, float velocidad)
-	{
-		// ¿Estoy suficientemente cerca del objetivo?
-		// Calculo distancia del mallqui (GlobalPosition) al objetivo (DistanceTo)
-		// En paso calculo cuantos píxels implica un paso al mallqui => velocidad * delta
-		// Si la distancia que falta es menor o igual a un paso del mallqui, devuelvo true porque llegué al destino
-		float distancia = GlobalPosition.DistanceTo(objetivo);
-		float paso = velocidad * (float)delta;
-
-		if (distancia <= paso)
-		{
-			return true;
-		}
-
-		Velocity = GlobalPosition.DirectionTo(objetivo) * velocidad;
-		MoveAndSlide();
-
-		return false;
-	}
-
-	private void AvanzarPorRuta(double delta, float velocidad)
-	{
-		Vector2 objetivo = _ruta[_indicePunto];
-
-		// Si true, ya llegué al objetivo, entonces marco el siguiente punto de la ruta
-		if (MoverHacia(objetivo, delta, velocidad))
-		{
-			_indicePunto++;
-		}
 	}
 
 	private void Patrullar(double delta)
@@ -258,31 +193,6 @@ public partial class Mallqui : Enemigo
 			IniciarAtaque();
 			_tiempoRecuperacion = RecuperacionGolpe;
 		}
-	}
-
-	private void Perseguir(double delta)
-	{
-		Vector2I celdaIncaActual = _laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition);
-
-		if (celdaIncaActual != _celdaInca)
-		{
-			IrHaciaElInca(celdaIncaActual);
-		}
-
-		if (!RutaTerminada)
-		{
-			AvanzarPorRuta(delta, VelocidadPersecucion);
-		}
-		else if (MoverHacia(_inca.GlobalPosition, delta, VelocidadPersecucion))
-		{
-			Velocity = Vector2.Zero;
-		}
-	}
-
-	private void IrHaciaElInca(Vector2I celdaInca)
-	{
-		_celdaInca = celdaInca;
-		IrA(_inca.GlobalPosition);
 	}
 
 	private void MirarHacia(Vector2 vector)

@@ -160,10 +160,20 @@ animations = [{
 "speed": 8.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfs8p"]
+size = Vector2(60, 69)
+
 [node name="Supay" type="CharacterBody2D" unique_id=2123890166]
+collision_layer = 8
+collision_mask = 3
 script = ExtResource("1_bhh08")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=215842171]
 scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_hfs8p")
 animation = &"idle-down"
+frame_progress = 0.24397814
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1043192040]
+position = Vector2(0, 13.5)
+shape = SubResource("RectangleShape2D_hfs8p")

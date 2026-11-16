@@ -11,21 +11,37 @@ public partial class Supay : Enemigo
 		Desapareciendo
 	}
 
-	private Laberinto _laberinto;
-	private Inca _inca;
+	[Export]
+	public float VelocidadPersecucion = 200f;
+
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
 	private AnimatedSprite2D _sprite;
 
 	public override void _Ready()
 	{
+		base._Ready();
+
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_sprite.AnimationFinished += OnAnimationFinished;
 		CambiarEstado(Estado.FueraDeEscena);
 	}
 
+	public override void _PhysicsProcess(double delta)
+	{
+		switch (_estado)
+		{
+			case Estado.Persiguiendo:
+				Perseguir(delta, VelocidadPersecucion);
+				break;
+		}
+	}
+
+
 	public override void _ExitTree()
 	{
+		base._ExitTree();
+
 		if (_discoInti != null)
 		{
 			_discoInti.Tomado -= OnDiscoTomado;
@@ -56,6 +72,7 @@ public partial class Supay : Enemigo
 				break;
 			case Estado.Persiguiendo:
 				_sprite.Play("idle-down");
+				IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
 				break;
 		}
 	}
