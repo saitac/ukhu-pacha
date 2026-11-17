@@ -39,7 +39,6 @@ public partial class Mallqui : Enemigo
 	private double _tiempoEspera;
 	private Estado _estado = Estado.Patrulla;
 	private Label _etiquetaDepuracion;
-	private double _tiempoRecuperacion;
 
 	public override void _Ready()
 	{

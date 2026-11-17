@@ -40,6 +40,13 @@ public partial class Supay : Enemigo
 					ActualizarAnimacion();
 				}
 				break;
+			case Estado.Atacando:
+				_tiempoRecuperacion -= delta;
+				if (_tiempoRecuperacion <= 0)
+				{
+					CambiarEstado(Estado.Persiguiendo);
+				}
+				break;
 		}
 	}
 
@@ -81,6 +88,7 @@ public partial class Supay : Enemigo
 				break;
 			case Estado.Atacando:
 				IniciarAtaque();
+				_tiempoRecuperacion = RecuperacionGolpe;
 				break;
 		}
 	}

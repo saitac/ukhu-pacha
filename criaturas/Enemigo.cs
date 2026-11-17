@@ -18,6 +18,7 @@ public partial class Enemigo : CharacterBody2D
 	protected Direccion _ultimaDireccion = Direccion.Abajo;
 	protected bool _incaAMiAlcance = false;
 	protected Area2D _zonaAlcance;
+	protected double _tiempoRecuperacion;
 
 	// la izquierda reutiliza los sprites de la derecha con FlipH.
 	protected string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
