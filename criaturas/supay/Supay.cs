@@ -30,8 +30,15 @@ public partial class Supay : Enemigo
 		switch (_estado)
 		{
 			case Estado.Persiguiendo:
-				Perseguir(delta, VelocidadPersecucion);
-				ActualizarAnimacion();
+				if (_incaAMiAlcance)
+				{
+					CambiarEstado(Estado.Atacando);
+				}
+				else
+				{
+					Perseguir(delta, VelocidadPersecucion);
+					ActualizarAnimacion();
+				}
 				break;
 		}
 	}
@@ -72,6 +79,9 @@ public partial class Supay : Enemigo
 			case Estado.Persiguiendo:
 				IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
 				break;
+			case Estado.Atacando:
+				IniciarAtaque();
+				break;
 		}
 	}
 
@@ -106,5 +116,12 @@ public partial class Supay : Enemigo
 
 		MirarHacia(Velocity);
 		_sprite.Play("walk-" + SufijoSprite);
+	}
+
+	private void IniciarAtaque()
+	{
+		Velocity = Vector2.Zero;
+		MirarHacia(GlobalPosition.DirectionTo(_inca.GlobalPosition));
+		_sprite.Play("ataque-" + SufijoSprite);
 	}
 }
