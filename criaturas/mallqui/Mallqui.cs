@@ -35,17 +35,9 @@ public partial class Mallqui : Enemigo
 	[Export]
 	public float RadioVision = 300f;
 
-	[Export]
-	public float DanoGolpe = 0.1f;
-
-	[Export]
-	public float RecuperacionGolpe = 1.0f;
-
 	private CollisionShape2D _formaColision;
 	private double _tiempoEspera;
 	private Estado _estado = Estado.Patrulla;
-	private Area2D _zonaAlcance;
-	private bool _incaAMiAlcance = false;
 	private Label _etiquetaDepuracion;
 	private double _tiempoRecuperacion;
 
@@ -55,14 +47,10 @@ public partial class Mallqui : Enemigo
 
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
-		_zonaAlcance = GetNode<Area2D>("ZonaAlcance");
 
 		// Solo por depuración
 		_etiquetaDepuracion = GetNode<Label>("EtiquetaDepuracion");
 		_etiquetaDepuracion.Visible = Depuracion;
-
-		_zonaAlcance.BodyEntered += OnZonaAlcanceBodyEntered;
-		_zonaAlcance.BodyExited += OnZonaAlcanceBodyExited;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -200,22 +188,6 @@ public partial class Mallqui : Enemigo
 
 		MirarHacia(Velocity);
 		_sprite.Play("walk-" + SufijoSprite);
-	}
-
-	private void OnZonaAlcanceBodyEntered(Node2D body)
-	{
-		if (body is Inca)
-		{
-			_incaAMiAlcance = true;
-		}
-	}
-
-	private void OnZonaAlcanceBodyExited(Node2D body)
-	{
-		if (body is Inca)
-		{
-			_incaAMiAlcance = false;
-		}
 	}
 
 	private void IniciarAtaque()

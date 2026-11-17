@@ -2,6 +2,12 @@ using Godot;
 
 public partial class Enemigo : CharacterBody2D
 {
+	[Export]
+	public float DanoGolpe = 0.1f;
+
+	[Export]
+	public float RecuperacionGolpe = 1.0f;
+
 	protected Laberinto _laberinto;
 	protected Inca _inca;
 	protected Vector2I _celdaInca;
@@ -10,6 +16,8 @@ public partial class Enemigo : CharacterBody2D
 	protected int _indicePunto;
 	protected AnimatedSprite2D _sprite;
 	protected Direccion _ultimaDireccion = Direccion.Abajo;
+	protected bool _incaAMiAlcance = false;
+	protected Area2D _zonaAlcance;
 
 	// la izquierda reutiliza los sprites de la derecha con FlipH.
 	protected string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
@@ -20,6 +28,11 @@ public partial class Enemigo : CharacterBody2D
 	public override void _Ready()
 	{
 		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
+		_zonaAlcance = GetNode<Area2D>("ZonaAlcance");
+
+		_zonaAlcance.BodyEntered += OnZonaAlcanceBodyEntered;
+		_zonaAlcance.BodyExited += OnZonaAlcanceBodyExited;
+
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
 	}
 
@@ -109,5 +122,21 @@ public partial class Enemigo : CharacterBody2D
 	{
 		_ultimaDireccion = DireccionExtensions.DesdeVector(vector);
 		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
+	}
+
+	private void OnZonaAlcanceBodyEntered(Node2D body)
+	{
+		if (body is Inca)
+		{
+			_incaAMiAlcance = true;
+		}
+	}
+
+	private void OnZonaAlcanceBodyExited(Node2D body)
+	{
+		if (body is Inca)
+		{
+			_incaAMiAlcance = false;
+		}
 	}
 }
