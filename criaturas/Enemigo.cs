@@ -8,12 +8,18 @@ public partial class Enemigo : CharacterBody2D
 	protected Vector2? _destino;
 	protected Vector2[] _ruta = [];
 	protected int _indicePunto;
+	protected AnimatedSprite2D _sprite;
+	protected Direccion _ultimaDireccion = Direccion.Abajo;
+
+	// la izquierda reutiliza los sprites de la derecha con FlipH.
+	protected string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
 
 	// true si no quedan puntos por recorrer
 	protected bool RutaTerminada => _indicePunto >= _ruta.Length;
 
 	public override void _Ready()
 	{
+		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_laberinto.NavegacionActualizada += OnNavegacionActualizada;
 	}
 
@@ -82,7 +88,7 @@ public partial class Enemigo : CharacterBody2D
 	protected bool MoverHacia(Vector2 objetivo, double delta, float velocidad)
 	{
 		// ¿Estoy suficientemente cerca del objetivo?
-		// Calculo distancia del enemifo (GlobalPosition) al objetivo (DistanceTo)
+		// Calculo distancia del enemigo (GlobalPosition) al objetivo (DistanceTo)
 		// En paso calculo cuantos píxels implica un paso al enemigo => velocidad * delta
 		// Si la distancia que falta es menor o igual a un paso del enemigo, devuelvo true porque llegué al destino
 		float distancia = GlobalPosition.DistanceTo(objetivo);
@@ -97,5 +103,11 @@ public partial class Enemigo : CharacterBody2D
 		MoveAndSlide();
 
 		return false;
+	}
+
+	protected void MirarHacia(Vector2 vector)
+	{
+		_ultimaDireccion = DireccionExtensions.DesdeVector(vector);
+		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
 	}
 }

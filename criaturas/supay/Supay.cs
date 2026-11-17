@@ -16,13 +16,11 @@ public partial class Supay : Enemigo
 
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
-	private AnimatedSprite2D _sprite;
 
 	public override void _Ready()
 	{
 		base._Ready();
 
-		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_sprite.AnimationFinished += OnAnimationFinished;
 		CambiarEstado(Estado.FueraDeEscena);
 	}
@@ -33,10 +31,10 @@ public partial class Supay : Enemigo
 		{
 			case Estado.Persiguiendo:
 				Perseguir(delta, VelocidadPersecucion);
+				ActualizarAnimacion();
 				break;
 		}
 	}
-
 
 	public override void _ExitTree()
 	{
@@ -59,6 +57,7 @@ public partial class Supay : Enemigo
 	private void CambiarEstado(Estado nuevo)
 	{
 		_estado = nuevo;
+
 		switch (nuevo)
 		{
 			case Estado.FueraDeEscena:
@@ -71,7 +70,6 @@ public partial class Supay : Enemigo
 				_sprite.Play("emerger");
 				break;
 			case Estado.Persiguiendo:
-				_sprite.Play("idle-down");
 				IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
 				break;
 		}
@@ -96,5 +94,17 @@ public partial class Supay : Enemigo
 				CambiarEstado(Estado.Desapareciendo);
 			}
 		}
+	}
+
+	private void ActualizarAnimacion()
+	{
+		if (Velocity == Vector2.Zero)
+		{
+			_sprite.Play("idle-" + SufijoSprite);
+			return;
+		}
+
+		MirarHacia(Velocity);
+		_sprite.Play("walk-" + SufijoSprite);
 	}
 }

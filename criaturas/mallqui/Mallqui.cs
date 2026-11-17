@@ -44,21 +44,15 @@ public partial class Mallqui : Enemigo
 	private CollisionShape2D _formaColision;
 	private double _tiempoEspera;
 	private Estado _estado = Estado.Patrulla;
-	private Direccion _ultimaDireccion = Direccion.Abajo;
-	private AnimatedSprite2D _sprite;
 	private Area2D _zonaAlcance;
 	private bool _incaAMiAlcance = false;
 	private Label _etiquetaDepuracion;
 	private double _tiempoRecuperacion;
 
-	// la izquierda reutiliza los sprites de la derecha con FlipH.
-	private string SufijoSprite => _ultimaDireccion == Direccion.Izquierda ? Direccion.Derecha.Sufijo() : _ultimaDireccion.Sufijo();
-
 	public override void _Ready()
 	{
 		base._Ready();
 
-		_sprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
 		_tiempoEspera = GD.RandRange(EsperaMin, EsperaMax);
 		_formaColision = GetNode<CollisionShape2D>("CollisionShape2D");
 		_zonaAlcance = GetNode<Area2D>("ZonaAlcance");
@@ -193,12 +187,6 @@ public partial class Mallqui : Enemigo
 			IniciarAtaque();
 			_tiempoRecuperacion = RecuperacionGolpe;
 		}
-	}
-
-	private void MirarHacia(Vector2 vector)
-	{
-		_ultimaDireccion = DireccionExtensions.DesdeVector(vector);
-		_sprite.FlipH = (_ultimaDireccion == Direccion.Izquierda);
 	}
 
 	private void ActualizarAnimacion()
