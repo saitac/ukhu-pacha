@@ -103,6 +103,12 @@ public partial class Supay : Enemigo
 				_tiempoRecuperacion = RecuperacionGolpe;
 				_recuperando = false;
 				break;
+			case Estado.Desapareciendo:
+				Velocity = Vector2.Zero;
+				_chicote.Stop();
+				_chicote.Visible = false;
+				_sprite.PlayBackwards("emerger");
+				break;
 		}
 	}
 
@@ -132,6 +138,10 @@ public partial class Supay : Enemigo
 			{
 				CambiarEstado(Estado.Desapareciendo);
 			}
+		}
+		else if (_estado == Estado.Desapareciendo)
+		{
+			CambiarEstado(Estado.FueraDeEscena);
 		}
 	}
 
