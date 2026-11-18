@@ -17,6 +17,7 @@ public partial class Supay : Enemigo
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
 	private AnimatedSprite2D _chicote;
+	private bool _recuperando = false;
 
 	public override void _Ready()
 	{
@@ -47,10 +48,13 @@ public partial class Supay : Enemigo
 				}
 				break;
 			case Estado.Atacando:
-				_tiempoRecuperacion -= delta;
-				if (_tiempoRecuperacion <= 0)
+				if (_recuperando)
 				{
-					CambiarEstado(Estado.Persiguiendo);
+					_tiempoRecuperacion -= delta;
+					if (_tiempoRecuperacion <= 0)
+					{
+						CambiarEstado(Estado.Persiguiendo);
+					}
 				}
 				break;
 		}
@@ -95,6 +99,7 @@ public partial class Supay : Enemigo
 			case Estado.Atacando:
 				IniciarAtaque();
 				_tiempoRecuperacion = RecuperacionGolpe;
+				_recuperando = false;
 				break;
 		}
 	}
@@ -189,6 +194,7 @@ public partial class Supay : Enemigo
 	{
 		_chicote.Visible = false;
 		_sprite.Play("idle-" + SufijoSprite);
+		_recuperando = true;
 	}
 
 	private void OnChicoteFrameChanged()
