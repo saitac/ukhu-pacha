@@ -16,12 +16,17 @@ public partial class Supay : Enemigo
 
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
+	private AnimatedSprite2D _chicote;
 
 	public override void _Ready()
 	{
 		base._Ready();
 
+		_chicote = GetNode<AnimatedSprite2D>("Chicote");
+
+		_chicote.AnimationFinished += OnChicoteAnimationFinished;
 		_sprite.AnimationFinished += OnAnimationFinished;
+		_sprite.FrameChanged += OnFrameChanged;
 		CambiarEstado(Estado.FueraDeEscena);
 	}
 
@@ -126,10 +131,56 @@ public partial class Supay : Enemigo
 		_sprite.Play("walk-" + SufijoSprite);
 	}
 
+	private void OrientarChicote()
+	{
+		switch (_ultimaDireccion)
+		{
+			case Direccion.Abajo:
+				_chicote.Scale = new Vector2(3, 3);
+				_chicote.Position = new Vector2(-30, 35);
+				_chicote.RotationDegrees = 90.0f;
+				break;
+
+			case Direccion.Arriba:
+				_chicote.Scale = new Vector2(3, 3);
+				_chicote.Position = new Vector2(30, 35);
+				_chicote.RotationDegrees = -90.0f;
+				break;
+
+			case Direccion.Derecha:
+				_chicote.Scale = new Vector2(3, 3);
+				_chicote.Position = new Vector2(20, 30);
+				_chicote.RotationDegrees = 0.0f;
+				break;
+
+			case Direccion.Izquierda:
+				_chicote.Scale = new Vector2(-3, 3);
+				_chicote.Position = new Vector2(-20, 30);
+				_chicote.RotationDegrees = 0.0f;
+				break;
+		}
+	}
+
 	private void IniciarAtaque()
 	{
 		Velocity = Vector2.Zero;
 		MirarHacia(GlobalPosition.DirectionTo(_inca.GlobalPosition));
 		_sprite.Play("ataque-" + SufijoSprite);
+		OrientarChicote();
+	}
+
+	private void OnFrameChanged()
+	{
+		if (_estado == Estado.Atacando && _sprite.Frame == 1)
+		{
+			_chicote.Visible = true;
+			_chicote.Play("azote");
+		}
+	}
+
+	private void OnChicoteAnimationFinished()
+	{
+		_chicote.Visible = false;
+		_sprite.Play("idle-" + SufijoSprite);
 	}
 }
