@@ -13,6 +13,9 @@ public partial class DiscoInti : Node2D
 	[Signal]
 	public delegate void TomadoEventHandler(Inca portador, Vector2 posicionTomado);
 
+	[Signal]
+	public delegate void LiberadoEventHandler();
+
 	[Export]
 	public Vector2 OffsetCargado = new(0, -125);
 
@@ -142,5 +145,9 @@ public partial class DiscoInti : Node2D
 
 		_estado = nuevo;
 		_portador = portador;
+		if (nuevo == Estado.EnReposo)
+		{
+			EmitSignal(SignalName.Liberado);
+		}
 	}
 }

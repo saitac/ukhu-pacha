@@ -67,6 +67,7 @@ public partial class Supay : Enemigo
 		if (_discoInti != null)
 		{
 			_discoInti.Tomado -= OnDiscoTomado;
+			_discoInti.Liberado -= OnDiscoLiberado;
 		}
 	}
 
@@ -76,6 +77,7 @@ public partial class Supay : Enemigo
 		_inca = inca;
 		_discoInti = discoInti;
 		_discoInti.Tomado += OnDiscoTomado;
+		_discoInti.Liberado += OnDiscoLiberado;
 	}
 
 	private void CambiarEstado(Estado nuevo)
@@ -108,6 +110,14 @@ public partial class Supay : Enemigo
 	{
 		GlobalPosition = _laberinto.ElegirPuntoEmergencia(posicionTomado);
 		CambiarEstado(Estado.Apareciendo);
+	}
+
+	private void OnDiscoLiberado()
+	{
+		if (_estado is Estado.Persiguiendo or Estado.Atacando)
+		{
+			CambiarEstado(Estado.Desapareciendo);
+		}
 	}
 
 	private void OnAnimationFinished()
