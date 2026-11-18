@@ -25,6 +25,26 @@
 [ext_resource type="Texture2D" uid="uid://mrwn7d0idr54" path="res://criaturas/supay/sprites/walk-up-supay-03-apoyo.png" id="11_yoklm"]
 [ext_resource type="Texture2D" uid="uid://cs5rkv650rmc6" path="res://criaturas/supay/sprites/emerger-supay-06.png" id="12_8rl7j"]
 [ext_resource type="Texture2D" uid="uid://bwf518nv73edq" path="res://criaturas/supay/sprites/walk-up-supay-04-izquierda.png" id="12_fojlk"]
+[ext_resource type="Texture2D" uid="uid://wc8y63cjkog6" path="res://criaturas/supay/sprites/chicote-right-supay-01.png" id="26_h0s6a"]
+[ext_resource type="Texture2D" uid="uid://bfpsywty3bwrt" path="res://criaturas/supay/sprites/chicote-right-supay-02.png" id="27_8rl7j"]
+[ext_resource type="Texture2D" uid="uid://51iqm3qpu2rd" path="res://criaturas/supay/sprites/chicote-right-supay-03.png" id="28_qfjta"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_k5r3v"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("26_h0s6a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_8rl7j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_qfjta")
+}],
+"loop": 0,
+"name": &"azote",
+"speed": 16.0
+}]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_hfs8p"]
 animations = [{
@@ -171,6 +191,15 @@ collision_layer = 8
 collision_mask = 3
 script = ExtResource("1_bhh08")
 DanoGolpe = 0.25
+
+[node name="Chicote" type="AnimatedSprite2D" parent="." unique_id=1823157432]
+visible = false
+position = Vector2(20, 30)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_k5r3v")
+animation = &"azote"
+centered = false
+offset = Vector2(0, -9)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=215842171]
 scale = Vector2(3, 3)
