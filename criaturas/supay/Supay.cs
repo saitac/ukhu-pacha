@@ -25,6 +25,7 @@ public partial class Supay : Enemigo
 		_chicote = GetNode<AnimatedSprite2D>("Chicote");
 
 		_chicote.AnimationFinished += OnChicoteAnimationFinished;
+		_chicote.FrameChanged += OnChicoteFrameChanged;
 		_sprite.AnimationFinished += OnAnimationFinished;
 		_sprite.FrameChanged += OnFrameChanged;
 		CambiarEstado(Estado.FueraDeEscena);
@@ -131,42 +132,48 @@ public partial class Supay : Enemigo
 		_sprite.Play("walk-" + SufijoSprite);
 	}
 
-	private void OrientarChicote()
+	private void OrientarChicote(Vector2 direccion)
 	{
 		switch (_ultimaDireccion)
 		{
 			case Direccion.Abajo:
 				_chicote.Scale = new Vector2(3, 3);
 				_chicote.Position = new Vector2(-30, 35);
-				_chicote.RotationDegrees = 90.0f;
 				break;
 
 			case Direccion.Arriba:
 				_chicote.Scale = new Vector2(3, 3);
 				_chicote.Position = new Vector2(30, 35);
-				_chicote.RotationDegrees = -90.0f;
 				break;
 
 			case Direccion.Derecha:
 				_chicote.Scale = new Vector2(3, 3);
 				_chicote.Position = new Vector2(20, 30);
-				_chicote.RotationDegrees = 0.0f;
 				break;
 
 			case Direccion.Izquierda:
 				_chicote.Scale = new Vector2(-3, 3);
 				_chicote.Position = new Vector2(-20, 30);
-				_chicote.RotationDegrees = 0.0f;
 				break;
+		}
+
+		if (_chicote.Scale.X < 0)
+		{
+			_chicote.Rotation = (-direccion).Angle();
+		}
+		else
+		{
+			_chicote.Rotation = direccion.Angle();
 		}
 	}
 
 	private void IniciarAtaque()
 	{
 		Velocity = Vector2.Zero;
-		MirarHacia(GlobalPosition.DirectionTo(_inca.GlobalPosition));
+		Vector2 direccion = GlobalPosition.DirectionTo(_inca.GlobalPosition);
+		MirarHacia(direccion);
 		_sprite.Play("ataque-" + SufijoSprite);
-		OrientarChicote();
+		OrientarChicote(direccion);
 	}
 
 	private void OnFrameChanged()
@@ -182,5 +189,13 @@ public partial class Supay : Enemigo
 	{
 		_chicote.Visible = false;
 		_sprite.Play("idle-" + SufijoSprite);
+	}
+
+	private void OnChicoteFrameChanged()
+	{
+		if (_incaAMiAlcance && _chicote.Frame == 2)
+		{
+			_inca.RecibirGolpe(DanoGolpe);
+		}
 	}
 }
