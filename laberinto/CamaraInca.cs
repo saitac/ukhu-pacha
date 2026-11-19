@@ -9,6 +9,8 @@ public partial class CamaraInca : Camera2D
 	private bool _vistaMapa = false;
 	private float _duracionAviso = 0.0f;
 	private float _transcurridoAviso = 0.0f;
+	private float _duracionGolpe = 0.0f;
+	private float _transcurridoGolpe = 0.0f;
 
 	public override void _UnhandledInput(InputEvent @event)
 	{
@@ -27,14 +29,34 @@ public partial class CamaraInca : Camera2D
 
 	public override void _Process(double delta)
 	{
-		if (_duracionAviso <= 0.0f)
+		if (_duracionAviso <= 0.0f && _duracionGolpe <= 0.0f)
 		{
 			return;
 		}
 
-		_transcurridoAviso += (float)delta;
-		float progreso = Mathf.Min(_transcurridoAviso / _duracionAviso, 1.0f);
-		float intensidad = IntensidadMaximaTemblor * progreso;
+		float intensidadAviso = 0.0f;
+
+		if (_duracionAviso > 0.0f)
+		{
+			_transcurridoAviso += (float)delta;
+			float progreso = Mathf.Min(_transcurridoAviso / _duracionAviso, 1.0f);
+			intensidadAviso = IntensidadMaximaTemblor * progreso;
+		}
+
+		float intensidadGolpe = 0.0f;
+		if (_duracionGolpe > 0.0f)
+		{
+			_transcurridoGolpe += (float)delta;
+			float progreso = Mathf.Min(_transcurridoGolpe / _duracionGolpe, 1.0f);
+			intensidadGolpe = IntensidadMaximaTemblor * (1 - progreso);
+			if (progreso >= 1.0f)
+			{
+				_duracionGolpe = 0.0f;
+			}
+		}
+
+		float intensidad = intensidadAviso + intensidadGolpe;
+
 		Offset = new Vector2((float)GD.RandRange(-intensidad, intensidad), (float)GD.RandRange(-intensidad, intensidad));
 	}
 
@@ -48,5 +70,11 @@ public partial class CamaraInca : Camera2D
 	{
 		_duracionAviso = 0.0f;
 		Offset = Vector2.Zero;
+	}
+
+	public void OnGolpeIniciado(float duracion)
+	{
+		_duracionGolpe = duracion;
+		_transcurridoGolpe = 0.0f;
 	}
 }

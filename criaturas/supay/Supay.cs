@@ -11,8 +11,14 @@ public partial class Supay : Enemigo
 		Desapareciendo
 	}
 
+	[Signal]
+	public delegate void EmersionIniciadaEventHandler(float duracion);
+
 	[Export]
 	public float VelocidadPersecucion = 200f;
+
+	[Export]
+	public float DuracionTemblorEmersion = 0.3f;
 
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
@@ -122,6 +128,7 @@ public partial class Supay : Enemigo
 		if (_estado is Estado.FueraDeEscena)
 		{
 			GlobalPosition = _laberinto.ElegirPuntoEmergencia(posicionTomado);
+			EmitSignal(SignalName.EmersionIniciada, DuracionTemblorEmersion);
 		}
 
 		CambiarEstado(Estado.Apareciendo);
