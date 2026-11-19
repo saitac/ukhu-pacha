@@ -114,7 +114,16 @@ public partial class Supay : Enemigo
 
 	private void OnDiscoTomado(Inca portador, Vector2 posicionTomado)
 	{
-		GlobalPosition = _laberinto.ElegirPuntoEmergencia(posicionTomado);
+		if (_estado is not Estado.FueraDeEscena and not Estado.Desapareciendo)
+		{
+			return;
+		}
+
+		if (_estado is Estado.FueraDeEscena)
+		{
+			GlobalPosition = _laberinto.ElegirPuntoEmergencia(posicionTomado);
+		}
+
 		CambiarEstado(Estado.Apareciendo);
 	}
 
