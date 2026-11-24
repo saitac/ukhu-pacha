@@ -186,6 +186,17 @@ size = Vector2(60, 69)
 [sub_resource type="CircleShape2D" id="CircleShape2D_bhh08"]
 radius = 162.0
 
+[sub_resource type="Gradient" id="Gradient_h0s6a"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_h0s6a"]
+gradient = SubResource("Gradient_h0s6a")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [node name="Supay" type="CharacterBody2D" unique_id=2123890166]
 collision_layer = 8
 collision_mask = 3
@@ -217,3 +228,11 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ZonaAlcance" unique_id=549018999]
 position = Vector2(0, 13.5)
 shape = SubResource("CircleShape2D_bhh08")
+
+[node name="Resplandor" type="PointLight2D" parent="." unique_id=2068822667]
+position = Vector2(0, 48)
+color = Color(1, 0.2901961, 0.101960786, 1)
+energy = 0.7
+range_item_cull_mask = 3
+shadow_enabled = true
+texture = SubResource("GradientTexture2D_h0s6a")
