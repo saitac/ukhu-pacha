@@ -20,16 +20,28 @@ public partial class Supay : Enemigo
 	[Export]
 	public float DuracionTemblorEmersion = 0.3f;
 
+	[Export]
+	public float DuracionDestello = 1.2f;
+
+	[Export]
+	public float EnergiaDestello = 2.0f;
+
 	private DiscoInti _discoInti;
 	private Estado _estado = Estado.FueraDeEscena;
 	private AnimatedSprite2D _chicote;
 	private bool _recuperando = false;
+	private Light2D _resplandor;
+	private Tween _tweenDestello;
+	private float _energiaReposo;
 
 	public override void _Ready()
 	{
 		base._Ready();
 
 		_chicote = GetNode<AnimatedSprite2D>("Chicote");
+
+		_resplandor = GetNode<Light2D>("Resplandor");
+		_energiaReposo = _resplandor.Energy;
 
 		_chicote.AnimationFinished += OnChicoteAnimationFinished;
 		_chicote.FrameChanged += OnChicoteFrameChanged;
@@ -100,6 +112,7 @@ public partial class Supay : Enemigo
 				Visible = true;
 				SetDeferred(Node.PropertyName.ProcessMode, (int)ProcessModeEnum.Inherit);
 				_sprite.Play("emerger");
+				IniciarDestello();
 				break;
 			case Estado.Persiguiendo:
 				IrHaciaElInca(_laberinto.PosicionMundoAIndiceMapa(_inca.GlobalPosition));
@@ -239,5 +252,15 @@ public partial class Supay : Enemigo
 		{
 			_inca.RecibirGolpe(DanoGolpe);
 		}
+	}
+
+	private void IniciarDestello()
+	{
+		_tweenDestello?.Kill();
+		_resplandor.Energy = EnergiaDestello;
+		_tweenDestello = CreateTween();
+		_tweenDestello.TweenProperty(_resplandor, Light2D.PropertyName.Energy.ToString(), _energiaReposo, DuracionDestello)
+			.SetTrans(Tween.TransitionType.Cubic)
+			.SetEase(Tween.EaseType.Out);
 	}
 }
