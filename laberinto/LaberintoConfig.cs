@@ -82,6 +82,12 @@ public static class LaberintoConfig
 			public const float CuracionMaxima = 1.0f;
 			public const float PorcentajeSalas = 0.30f;
 		}
+
+		public static class DiscoInti
+		{
+			public const int SaltosMin = 1;
+			public const int SaltosMax = 3;
+		}
 	}
 
 	public static class Criaturas

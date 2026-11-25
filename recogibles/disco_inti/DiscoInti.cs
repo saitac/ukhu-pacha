@@ -29,6 +29,7 @@ public partial class DiscoInti : Node2D
 	private Estado _estado = Estado.EnReposo;
 	public bool EstaCargado => _estado == Estado.Cargado;
 	public bool EstaEnJuego => _estado is Estado.Cargado or Estado.Caido;
+	public bool EstaCaido => _estado == Estado.Caido;
 
 	public override void _Ready()
 	{

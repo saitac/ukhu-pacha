@@ -816,6 +816,58 @@ public partial class Laberinto : Node2D
 		}
 	}
 
+	private int BloqueOrigenDisco()
+	{
+		Vector2I celda = PosicionMundoAIndiceMapa(_discoInti.GlobalPosition);
+		foreach (Vector2I desplazamiento in _desplazamientos)
+		{
+			Vector2I candidata = celda + desplazamiento;
+			int bloque = IndiceBloqueDe(candidata);
+			if (bloque != -1)
+			{
+				return bloque;
+			}
+		}
+
+		return BloqueInca;
+	}
+
+	private void RecolocarDiscoSiCaido()
+	{
+		if (!_discoInti.EstaCaido)
+		{
+			return;
+		}
+
+		int bloqueOrigen = BloqueOrigenDisco();
+
+		if (bloqueOrigen == -1)
+		{
+			GD.PushWarning($"Laberinto.RecolocarDiscoSiCaido: ni el disco ({_discoInti.GlobalPosition}) ni el Inca están en una sala. El disco se queda donde está hasta el próximo ciclo.");
+			return;
+		}
+
+		int[] distancias = DistanciasDesde(bloqueOrigen);
+		List<int> candidatos = [];
+		for (int i = 0; i < distancias.Length; i++)
+		{
+			if (distancias[i] >= LaberintoConfig.Recogibles.DiscoInti.SaltosMin && distancias[i] <= LaberintoConfig.Recogibles.DiscoInti.SaltosMax)
+			{
+				candidatos.Add(i);
+			}
+		}
+
+		if (candidatos.Count == 0)
+		{
+			GD.PushWarning($"Laberinto.RecolocarDiscoSiCaido: no hay salas a {LaberintoConfig.Recogibles.DiscoInti.SaltosMin}–{LaberintoConfig.Recogibles.DiscoInti.SaltosMax} saltos desde la sala {bloqueOrigen}. El disco se queda donde está hasta el próximo ciclo.");
+			return;
+		}
+
+		int bloqueDestino = candidatos[_rng.RandiRange(0, candidatos.Count - 1)];
+
+		UbicarDiscoInti(ElegirEsquinaBloque(bloqueDestino));
+	}
+
 	private void ProgramarSiguienteCiclo()
 	{
 		_estadoCiclo = EstadoCiclo.Calma;
@@ -845,6 +897,7 @@ public partial class Laberinto : Node2D
 			// Quito de la lista las hojas de coca que ya fueron consumidas y reubico las que quedan pendientes
 			_hojasCoca.RemoveAll(h => !IsInstanceValid(h));
 			UbicarHojasDeCoca();
+			RecolocarDiscoSiCaido();
 
 			if (!SalasConectadas(-1))
 			{
@@ -1534,6 +1587,15 @@ public partial class Laberinto : Node2D
 
 	private void UbicarDiscoInti(Vector2I celda)
 	{
+		List<Vector2I> celdasViejas = [.. _ocupantes
+			.Where(kvp => kvp.Value == Ocupante.DiscoInti)
+			.Select(kvp => kvp.Key)];
+
+		foreach (Vector2I celdaVieja in celdasViejas)
+		{
+			_ocupantes.Remove(celdaVieja);
+		}
+
 		// Indexador en vez de Add: aquí sí se permite sobrescribir. ElegirEsquinaBloque solo
 		// devuelve una celda ocupada si su ocupante PermiteSuperponer() (hoy, solo HojaCoca).
 		// El disco tiene prioridad porque es el objetivo del juego; la hoja sigue en la escena,
