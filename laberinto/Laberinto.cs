@@ -1528,6 +1528,7 @@ public partial class Laberinto : Node2D
 		_supay = EscenaSupay.Instantiate<Supay>();
 		_supay.Inicializar(this, _Inca, _discoInti);
 		_supay.EmersionIniciada += _CamaraInca.OnGolpeIniciado;
+		_supay.EmersionIniciada += _Inca.OnSupayEmergio;
 		AddChild(_supay);
 	}
 
