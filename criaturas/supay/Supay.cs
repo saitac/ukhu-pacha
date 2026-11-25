@@ -33,6 +33,7 @@ public partial class Supay : Enemigo
 	private Light2D _resplandor;
 	private Tween _tweenDestello;
 	private float _energiaReposo;
+	private CpuParticles2D _humareda;
 
 	public override void _Ready()
 	{
@@ -42,6 +43,8 @@ public partial class Supay : Enemigo
 
 		_resplandor = GetNode<Light2D>("Resplandor");
 		_energiaReposo = _resplandor.Energy;
+
+		_humareda = GetNode<CpuParticles2D>("Humareda");
 
 		_chicote.AnimationFinished += OnChicoteAnimationFinished;
 		_chicote.FrameChanged += OnChicoteFrameChanged;
@@ -112,6 +115,7 @@ public partial class Supay : Enemigo
 				Visible = true;
 				SetDeferred(Node.PropertyName.ProcessMode, (int)ProcessModeEnum.Inherit);
 				_sprite.Play("emerger");
+				_humareda.Restart();
 				IniciarDestello();
 				break;
 			case Estado.Persiguiendo:
